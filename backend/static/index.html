@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OutreachBot — Automated Email Scraper & Cold Outreach Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col justify-between">
+  <!-- Nav -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-black text-xl shadow-lg shadow-orange-500/20">
+          ⚡
+        </div>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">OutreachBot</span>
+          <span class="ml-2 text-[10px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20">SaaS v2</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="openAuth('login')" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors">
+          Log in
+        </button>
+        <button onclick="openAuth('signup')" class="px-5 py-2.5 text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-lg shadow-orange-600/25 transition-all transform hover:-translate-y-0.5">
+          Get Started Free
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-semibold text-orange-400 mb-8 shadow-inner">
+      <span class="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
+      100% Free & Open-Source Stack · Multi-Tenant Architecture
+    </div>
+
+    <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
+      Extract Clean Emails.<br>
+      <span class="bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">Pitch Clients.</span> Zero Cost.
+    </h1>
+
+    <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto font-normal leading-relaxed">
+      Scrape verified prospect emails directly from websites, bypass spam filters with automated DNS MX checks, and send personalized pitches directly from your own mailbox.
+    </p>
+
+    <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+      <button onclick="openAuth('signup')" class="w-full sm:w-auto px-8 py-4 text-base font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-xl shadow-orange-600/30 transition-all transform hover:-translate-y-0.5">
+        Start Free Outreach →
+      </button>
+      <button onclick="openAuth('login')" class="w-full sm:w-auto px-8 py-4 text-base font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl transition-colors text-slate-300 hover:text-white">
+        Sign in to Workspace
+      </button>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="mt-24 grid sm:grid-cols-3 gap-6 text-left">
+      <div class="p-8 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all">
+        <div class="text-3xl mb-4">🕷️</div>
+        <h3 class="text-lg font-bold text-white mb-2">Deep Web Scraper</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          Asynchronously crawls client & prospect websites up to 4 levels deep, extracting email addresses with smart regex patterns.
+        </p>
+      </div>
+
+      <div class="p-8 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all">
+        <div class="text-3xl mb-4">🛡️</div>
+        <h3 class="text-lg font-bold text-white mb-2">7-Layer Spam Filter</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          Automatically verifies MX DNS records, filters out disposable mailboxes (Mailinator, TempMail), and drops malformed addresses.
+        </p>
+      </div>
+
+      <div class="p-8 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all">
+        <div class="text-3xl mb-4">📬</div>
+        <h3 class="text-lg font-bold text-white mb-2">Send From Your Mailbox</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          Connect your Gmail or Outlook via App Passwords. Campaigns are sent directly from your address with anti-spam pacing.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-500">
+    OutreachBot SaaS · Built with 100% Free Python & Open Source Tools
+  </footer>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 relative shadow-2xl">
+      <button onclick="closeAuth()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">✕</button>
+
+      <div class="text-center mb-6">
+        <div class="h-12 w-12 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-2xl flex items-center justify-center mx-auto mb-3">
+          ⚡
+        </div>
+        <h2 id="modalTitle" class="text-2xl font-bold text-white">Create an Account</h2>
+        <p id="modalSub" class="text-sm text-slate-400 mt-1">Start running cold outreach from your own mailbox</p>
+      </div>
+
+      <div id="authError" class="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-semibold hidden"></div>
+
+      <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+        <div id="nameField">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Full Name</label>
+          <input type="text" id="authName" placeholder="e.g. Rahul Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
+          <input type="email" id="authEmail" required placeholder="you@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
+          <input type="password" id="authPassword" required placeholder="Min. 6 characters" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+        </div>
+
+        <button type="submit" id="authSubmitBtn" class="w-full py-3.5 text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-lg shadow-orange-600/30 transition-all">
+          Continue →
+        </button>
+      </form>
+
+      <div class="mt-6 text-center text-xs text-slate-500">
+        <span id="toggleText">Already have an account?</span>
+        <button id="toggleBtn" onclick="toggleAuthMode()" class="ml-1 text-orange-400 font-bold hover:underline">
+          Sign In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let mode = 'signup';
+
+    function openAuth(targetMode) {
+      mode = targetMode;
+      document.getElementById('authModal').classList.remove('hidden');
+      document.getElementById('authModal').classList.add('flex');
+      updateModalUI();
+    }
+
+    function closeAuth() {
+      document.getElementById('authModal').classList.add('hidden');
+      document.getElementById('authModal').classList.remove('flex');
+    }
+
+    function toggleAuthMode() {
+      mode = mode === 'signup' ? 'login' : 'signup';
+      updateModalUI();
+    }
+
+    function updateModalUI() {
+      const isSignup = mode === 'signup';
+      document.getElementById('modalTitle').innerText = isSignup ? 'Create an Account' : 'Welcome Back';
+      document.getElementById('modalSub').innerText = isSignup ? 'Start running cold outreach from your mailbox' : 'Sign in to access your outreach workspace';
+      document.getElementById('nameField').style.display = isSignup ? 'block' : 'none';
+      document.getElementById('authSubmitBtn').innerText = isSignup ? 'Create Free Account' : 'Sign In';
+      document.getElementById('toggleText').innerText = isSignup ? 'Already have an account?' : "Don't have an account?";
+      document.getElementById('toggleBtn').innerText = isSignup ? 'Sign In' : 'Sign Up Free';
+      document.getElementById('authError').classList.add('hidden');
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const errBox = document.getElementById('authError');
+      errBox.classList.add('hidden');
+
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+      const name = document.getElementById('authName').value || 'User';
+
+      const endpoint = mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
+      const body = mode === 'signup' ? { name, email, password } : { email, password };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errBox.innerText = data.detail || 'Authentication failed';
+          errBox.classList.remove('hidden');
+          return;
+        }
+
+        localStorage.setItem('outreach_token', data.access_token);
+        localStorage.setItem('outreach_user', JSON.stringify(data.user));
+        window.location.href = '/static/app.html';
+      } catch (err) {
+        errBox.innerText = 'Network error connecting to backend service';
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    // Auto-redirect or handle verification
+    const urlParams = new URLSearchParams(window.location.search);
+    if (localStorage.getItem('outreach_token')) {
+      if (urlParams.get('verified') === '1') {
+        window.location.href = '/static/app.html?verified=1';
+      } else {
+        window.location.href = '/static/app.html';
+      }
+    } else if (urlParams.get('verified') === '1') {
+      openAuth('login');
+      const errBox = document.getElementById('authError');
+      errBox.className = 'p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold';
+      errBox.innerText = '✓ Mailbox verified successfully! Please log in to access your dashboard.';
+      errBox.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# Environments
+venv/
+backend/venv/
+.venv/
+env/
+ENV/
+
+# Secrets and Local Config
+.env
+backend/.env
+*.env.local
+
+# Databases & User Data
+backend/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python Bytecode & Caches
+__pycache__/
+backend/__pycache__/
+backend/*/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Logs
+*.log
+
+# Operating System
+.DS_Store
+Thumbs.db
