@@ -486,8 +486,6 @@
       try {
         if (!auth) auth = window.initFirebase();
         const provider = new firebase.auth.GoogleAuthProvider();
-        // Request Gmail Send scope so this Gmail address is automatically connected as a sending mailbox!
-        provider.addScope('https://www.googleapis.com/auth/gmail.send');
 
         const result = await auth.signInWithPopup(provider);
         const user = result.user;

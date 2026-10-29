@@ -50,10 +50,10 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
       const googleAccessToken = credential?.accessToken || null;
       const idToken = await user.getIdToken();
 
-      const res = await api.auth.firebaseLogin(idToken, user.displayName || undefined, googleAccessToken);
+      const res = await api.auth.firebaseLogin(idToken, user.displayName || undefined);
       login(res.access_token, res.user);
       onClose();
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Google Sign-In failed";
       setError(msg);
@@ -108,7 +108,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
         const res = await api.auth.firebaseLogin(idToken, fbUser.displayName || undefined);
         login(res.access_token, res.user);
         onClose();
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed";

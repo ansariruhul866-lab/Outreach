@@ -11,10 +11,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && (!token || !user)) {
+    const hasStoredToken = typeof window !== "undefined" && !!localStorage.getItem("outreach_token");
+    if (!isLoading && !token && !hasStoredToken) {
       router.push("/");
     }
-  }, [isLoading, token, user, router]);
+  }, [isLoading, token, router]);
 
   if (isLoading) {
     return (

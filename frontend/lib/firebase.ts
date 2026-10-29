@@ -15,6 +15,5 @@ export const firebaseConfig = {
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// Google Auth Provider configured with Gmail Send scope
+// Standard clean Google Auth Provider (No sensitive scope warnings)
 export const googleProvider = new GoogleAuthProvider();
-googleProvider.addScope("https://www.googleapis.com/auth/gmail.send");
