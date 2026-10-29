@@ -1,238 +1,130 @@
 <!DOCTYPE html>
-<html lang="en" class="dark scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OutreachBot — Automated Email Scraper & Cold Outreach Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
-    
-    @keyframes pulseGlow {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.05); }
-    }
-    .animate-pulse-glow { animation: pulseGlow 6s ease-in-out infinite; }
-
-    @keyframes floatSlow {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-8px); }
-    }
-    .animate-float { animation: floatSlow 4s ease-in-out infinite; }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #030712; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col justify-between selection:bg-orange-500/30 selection:text-orange-200 relative overflow-x-hidden">
-
-  <!-- Ambient Background Mesh Glow -->
-  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    <div class="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-gradient-to-b from-orange-500/15 via-amber-500/5 to-transparent blur-[120px] rounded-full animate-pulse-glow"></div>
-    <div class="absolute top-[40%] -left-[10%] w-[450px] h-[450px] bg-blue-600/5 blur-[140px] rounded-full"></div>
-    <div class="absolute top-[60%] -right-[10%] w-[500px] h-[500px] bg-orange-600/10 blur-[150px] rounded-full"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:28px_28px] opacity-25"></div>
-  </div>
-
-  <!-- Navigation -->
-  <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-50 transition-all">
-    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      <div class="flex items-center gap-3.5">
-        <div class="h-11 w-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-black text-2xl shadow-xl shadow-orange-500/25 ring-1 ring-white/20">
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col justify-between">
+  <!-- Nav -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-black text-xl shadow-lg shadow-orange-500/20">
           ⚡
         </div>
         <div>
-          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">OutreachBot</span>
-          <span class="ml-2 text-[10px] font-bold uppercase tracking-wider bg-orange-500/10 text-orange-400 px-2.5 py-0.5 rounded-full border border-orange-500/25 shadow-sm">SaaS v2.5</span>
+          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">OutreachBot</span>
+          <span class="ml-2 text-[10px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20">SaaS v2</span>
         </div>
       </div>
 
-      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-        <a href="#features" class="hover:text-white transition-colors">Features</a>
-        <a href="#demo" class="hover:text-white transition-colors">Live Pipeline</a>
-        <a href="#security" class="hover:text-white transition-colors">Anti-Spam</a>
-      </nav>
-
       <div class="flex items-center gap-3">
         <button onclick="openAuth('login')" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors">
-          Log In
+          Log in
         </button>
-        <button onclick="openAuth('signup')" class="px-5 py-2.5 text-sm font-bold bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl shadow-lg shadow-orange-600/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 ring-1 ring-white/20">
-          Get Started Free →
+        <button onclick="openAuth('signup')" class="px-5 py-2.5 text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-lg shadow-orange-600/25 transition-all transform hover:-translate-y-0.5">
+          Get Started Free
         </button>
       </div>
     </div>
   </header>
 
   <!-- Hero Section -->
-  <main class="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
-    
-    <!-- Top Pill -->
-    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-xs font-semibold text-orange-400 mb-8 shadow-inner hover:border-orange-500/40 transition-colors">
-      <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span>100% Free & Open-Source Stack · Multi-Tenant Architecture</span>
-      <span class="text-slate-600">|</span>
-      <span class="text-slate-300 font-normal">Cloudflare TLS Bypass</span>
+  <main class="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-semibold text-orange-400 mb-8 shadow-inner">
+      <span class="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
+      100% Free & Open-Source Stack · Multi-Tenant Architecture
     </div>
 
-    <!-- Main Headline -->
-    <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight text-white max-w-5xl mx-auto leading-[1.12]">
+    <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
       Extract Clean Emails.<br>
-      <span class="bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">Pitch Clients.</span>
-      Zero Cost.
+      <span class="bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">Pitch Clients.</span> Zero Cost.
     </h1>
 
     <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto font-normal leading-relaxed">
-      Bulk crawl target websites, bypass Cloudflare 403 protection with browser TLS impersonation, verify live DNS MX records, and dispatch cold campaigns with randomized anti-spam delays.
+      Scrape verified prospect emails directly from websites, bypass spam filters with automated DNS MX checks, and send personalized pitches directly from your own mailbox.
     </p>
 
-    <!-- CTAs -->
     <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-      <button onclick="openAuth('signup')" class="w-full sm:w-auto px-8 py-4 text-base font-bold bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-white rounded-2xl shadow-xl shadow-orange-600/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5">
-        <span>Launch Free Workspace</span>
-        <span>→</span>
+      <button onclick="openAuth('signup')" class="w-full sm:w-auto px-8 py-4 text-base font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-xl shadow-orange-600/30 transition-all transform hover:-translate-y-0.5">
+        Start Free Outreach →
       </button>
-      <button onclick="openAuth('login')" class="w-full sm:w-auto px-8 py-4 text-base font-semibold bg-slate-900/90 hover:bg-slate-800 border border-slate-800 rounded-2xl transition-all text-slate-300 hover:text-white shadow-inner">
-        Sign In to Dashboard
+      <button onclick="openAuth('login')" class="w-full sm:w-auto px-8 py-4 text-base font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl transition-colors text-slate-300 hover:text-white">
+        Sign in to Workspace
       </button>
-    </div>
-
-    <!-- Live Interactive Mockup Card -->
-    <div id="demo" class="mt-20 rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 text-left shadow-2xl shadow-orange-950/20 max-w-4xl mx-auto animate-float">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-5">
-        <div class="flex items-center gap-2">
-          <span class="h-3 w-3 rounded-full bg-red-500/80"></span>
-          <span class="h-3 w-3 rounded-full bg-yellow-500/80"></span>
-          <span class="h-3 w-3 rounded-full bg-green-500/80"></span>
-          <span class="text-xs font-mono text-slate-500 ml-3">outreachbot-engine: v2.5.0-live</span>
-        </div>
-        <div class="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <span>PIPELINE ACTIVE</span>
-        </div>
-      </div>
-
-      <div class="grid sm:grid-cols-3 gap-3 font-mono text-xs">
-        <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1">
-          <p class="text-[10px] uppercase font-bold text-slate-500">Target Scraped</p>
-          <p class="text-white font-semibold truncate">ycombinator.com</p>
-          <p class="text-[11px] text-emerald-400">✓ 7 clean emails extracted</p>
-        </div>
-        <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1">
-          <p class="text-[10px] uppercase font-bold text-slate-500">Cloudflare Bypass</p>
-          <p class="text-white font-semibold">Chrome 124 TLS</p>
-          <p class="text-[11px] text-amber-400">✓ 0 HTTP 403 blocks</p>
-        </div>
-        <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1">
-          <p class="text-[10px] uppercase font-bold text-slate-500">Anti-Spam Pacing</p>
-          <p class="text-white font-semibold">Base 45s + (0-120s)</p>
-          <p class="text-[11px] text-blue-400">✓ Dynamic jitter active</p>
-        </div>
-      </div>
-
-      <div class="mt-4 p-4 rounded-xl bg-slate-950/90 border border-slate-800 font-mono text-xs text-slate-300 space-y-1.5">
-        <div class="flex items-center justify-between text-slate-500 text-[11px] border-b border-slate-800/60 pb-1.5">
-          <span>CONTACT EXTRACTED</span>
-          <span>MX STATUS</span>
-          <span>OUTREACH STATE</span>
-        </div>
-        <div class="flex items-center justify-between py-1">
-          <span class="text-white font-semibold">press@ycombinator.com</span>
-          <span class="text-emerald-400 font-bold">ASPMX.L.GOOGLE.COM [OK]</span>
-          <span class="text-orange-400 font-semibold">Send Only Once [Armed]</span>
-        </div>
-        <div class="flex items-center justify-between py-1">
-          <span class="text-white font-semibold">sales@stripe.com</span>
-          <span class="text-emerald-400 font-bold">MTA.STRIPE.COM [OK]</span>
-          <span class="text-emerald-400 font-semibold">Dispatched (Delay: 64s)</span>
-        </div>
-      </div>
     </div>
 
     <!-- Feature Grid -->
-    <div id="features" class="mt-28 grid sm:grid-cols-3 gap-6 text-left">
-      <div class="group p-8 rounded-3xl bg-slate-900/40 border border-slate-800/80 hover:border-orange-500/40 hover:bg-slate-900/70 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/5">
-        <div class="h-12 w-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-          🕷️
-        </div>
-        <h3 class="text-lg font-bold text-white mb-2">Bulk Web Scraper</h3>
+    <div class="mt-24 grid sm:grid-cols-3 gap-6 text-left">
+      <div class="p-8 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all">
+        <div class="text-3xl mb-4">🕷️</div>
+        <h3 class="text-lg font-bold text-white mb-2">Deep Web Scraper</h3>
         <p class="text-sm text-slate-400 leading-relaxed">
-          Input 10–20+ target URLs at once. Crawls contact pages deep, cleans Sentry error hashes, and extracts decision-maker emails.
+          Asynchronously crawls client & prospect websites up to 4 levels deep, extracting email addresses with smart regex patterns.
         </p>
       </div>
 
-      <div class="group p-8 rounded-3xl bg-slate-900/40 border border-slate-800/80 hover:border-emerald-500/40 hover:bg-slate-900/70 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5">
-        <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-          🛡️
-        </div>
-        <h3 class="text-lg font-bold text-white mb-2">7-Layer Quality Filter</h3>
+      <div class="p-8 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all">
+        <div class="text-3xl mb-4">🛡️</div>
+        <h3 class="text-lg font-bold text-white mb-2">7-Layer Spam Filter</h3>
         <p class="text-sm text-slate-400 leading-relaxed">
-          Verifies live MX DNS records, drops disposable mailboxes (Mailinator, TempMail), and applies Send Only Once deduplication.
+          Automatically verifies MX DNS records, filters out disposable mailboxes (Mailinator, TempMail), and drops malformed addresses.
         </p>
       </div>
 
-      <div class="group p-8 rounded-3xl bg-slate-900/40 border border-slate-800/80 hover:border-amber-500/40 hover:bg-slate-900/70 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/5">
-        <div class="h-12 w-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-          📬
-        </div>
-        <h3 class="text-lg font-bold text-white mb-2">Native Mailbox Autopilot</h3>
+      <div class="p-8 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all">
+        <div class="text-3xl mb-4">📬</div>
+        <h3 class="text-lg font-bold text-white mb-2">Send From Your Mailbox</h3>
         <p class="text-sm text-slate-400 leading-relaxed">
-          Connect your Gmail or Outlook with App Passwords. Outbound pitches use randomized 0–120s delays to avoid spam algorithms.
+          Connect your Gmail or Outlook via App Passwords. Campaigns are sent directly from your address with anti-spam pacing.
         </p>
       </div>
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="relative z-10 border-t border-slate-900/80 bg-slate-950/80 py-8 text-center text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <span class="text-orange-500 font-bold">OutreachBot</span>
-        <span>· Standalone Open-Source Cold Outreach SaaS</span>
-      </div>
-      <div>
-        <span>Built with FastAPI, curl_cffi, SQLAlchemy & Tailwind CSS</span>
-      </div>
-    </div>
+  <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-500">
+    OutreachBot SaaS · Built with 100% Free Python & Open Source Tools
   </footer>
 
   <!-- Auth Modal -->
-  <div id="authModal" class="fixed inset-0 bg-black/75 backdrop-blur-md hidden items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div class="bg-slate-900/95 border border-slate-800 rounded-3xl max-w-md w-full p-8 relative shadow-2xl shadow-orange-950/30 transform transition-all">
-      <button onclick="closeAuth()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg h-8 w-8 rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors">✕</button>
+  <div id="authModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 relative shadow-2xl">
+      <button onclick="closeAuth()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">✕</button>
 
       <div class="text-center mb-6">
-        <div class="h-12 w-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white text-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-orange-500/20 font-black">
+        <div class="h-12 w-12 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-2xl flex items-center justify-center mx-auto mb-3">
           ⚡
         </div>
         <h2 id="modalTitle" class="text-2xl font-bold text-white">Create an Account</h2>
         <p id="modalSub" class="text-sm text-slate-400 mt-1">Start running cold outreach from your own mailbox</p>
       </div>
 
-      <div id="authError" class="mb-4 p-3.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-xs font-semibold hidden"></div>
+      <div id="authError" class="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-semibold hidden"></div>
 
       <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
         <div id="nameField">
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Full Name</label>
-          <input type="text" id="authName" placeholder="e.g. Rahul Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none transition-colors">
+          <input type="text" id="authName" placeholder="e.g. Rahul Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
         </div>
 
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
-          <input type="email" id="authEmail" required placeholder="you@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none transition-colors">
+          <input type="email" id="authEmail" required placeholder="you@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
         </div>
 
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
-          <input type="password" id="authPassword" required placeholder="Min. 6 characters" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none transition-colors">
+          <input type="password" id="authPassword" required placeholder="Min. 6 characters" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
         </div>
 
-        <button type="submit" id="authSubmitBtn" class="w-full py-3.5 text-sm font-bold bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl shadow-lg shadow-orange-600/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+        <button type="submit" id="authSubmitBtn" class="w-full py-3.5 text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-lg shadow-orange-600/30 transition-all">
           Continue →
         </button>
       </form>
@@ -251,16 +143,14 @@
 
     function openAuth(targetMode) {
       mode = targetMode;
-      const modal = document.getElementById('authModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('authModal').classList.remove('hidden');
+      document.getElementById('authModal').classList.add('flex');
       updateModalUI();
     }
 
     function closeAuth() {
-      const modal = document.getElementById('authModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      document.getElementById('authModal').classList.add('hidden');
+      document.getElementById('authModal').classList.remove('flex');
     }
 
     function toggleAuthMode() {
@@ -270,10 +160,10 @@
 
     function updateModalUI() {
       const isSignup = mode === 'signup';
-      document.getElementById('modalTitle').innerText = isSignup ? 'Create Free Account' : 'Welcome Back';
+      document.getElementById('modalTitle').innerText = isSignup ? 'Create an Account' : 'Welcome Back';
       document.getElementById('modalSub').innerText = isSignup ? 'Start running cold outreach from your mailbox' : 'Sign in to access your outreach workspace';
       document.getElementById('nameField').style.display = isSignup ? 'block' : 'none';
-      document.getElementById('authSubmitBtn').innerText = isSignup ? 'Create Account →' : 'Sign In →';
+      document.getElementById('authSubmitBtn').innerText = isSignup ? 'Create Free Account' : 'Sign In';
       document.getElementById('toggleText').innerText = isSignup ? 'Already have an account?' : "Don't have an account?";
       document.getElementById('toggleBtn').innerText = isSignup ? 'Sign In' : 'Sign Up Free';
       document.getElementById('authError').classList.add('hidden');
@@ -288,12 +178,11 @@
       const password = document.getElementById('authPassword').value;
       const name = document.getElementById('authName').value || 'User';
 
-      const endpoint = mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
+      const API_BASE = window.location.hostname.includes('vercel.app')
+        ? 'https://outreach-359l.onrender.com'
+        : '';
+      const endpoint = `${API_BASE}${mode === 'signup' ? '/api/auth/signup' : '/api/auth/login'}`;
       const body = mode === 'signup' ? { name, email, password } : { email, password };
-
-      const submitBtn = document.getElementById('authSubmitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Connecting...';
 
       try {
         const res = await fetch(endpoint, {
@@ -312,11 +201,8 @@
         localStorage.setItem('outreach_user', JSON.stringify(data.user));
         window.location.href = '/static/app.html';
       } catch (err) {
-        errBox.innerText = 'Network error connecting to backend service';
+        errBox.innerText = `Network error connecting to backend service (${err.message || 'Check server status'})`;
         errBox.classList.remove('hidden');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = mode === 'signup' ? 'Create Account →' : 'Sign In →';
       }
     }
 
@@ -331,7 +217,7 @@
     } else if (urlParams.get('verified') === '1') {
       openAuth('login');
       const errBox = document.getElementById('authError');
-      errBox.className = 'p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold';
+      errBox.className = 'p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold';
       errBox.innerText = '✓ Mailbox verified successfully! Please log in to access your dashboard.';
       errBox.classList.remove('hidden');
     }

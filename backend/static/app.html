@@ -1,123 +1,54 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OutreachBot Workspace — Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
-
-    /* Smooth Tab Animation */
     .tab-content { display: none; }
-    .tab-content.active {
-      display: block;
-      animation: tabEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    @keyframes tabEnter {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Modal Animation */
-    @keyframes modalEnter {
-      from { opacity: 0; transform: scale(0.96) translateY(-4px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .animate-modal { animation: modalEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #030712; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    .tab-content.active { display: block; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-orange-500/30 selection:text-orange-200 relative overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased">
 
-  <!-- Ambient Glow in Background -->
-  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    <div class="absolute -top-[20%] left-1/3 w-[700px] h-[400px] bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] rounded-full"></div>
-    <div class="absolute bottom-0 right-0 w-[500px] h-[350px] bg-blue-600/5 blur-[150px] rounded-full"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:32px_32px] opacity-20"></div>
-  </div>
-
-  <!-- Toast Notification Stack Container -->
-  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
-
-  <!-- Mobile Top Navigation Bar -->
-  <header class="md:hidden border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-4 py-3.5 flex items-center justify-between sticky top-0 z-40">
-    <div class="flex items-center gap-2.5">
-      <div class="h-8 w-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-black text-base shadow-lg shadow-orange-500/20">
-        ⚡
-      </div>
-      <span class="font-bold text-white text-base">OutreachBot</span>
-    </div>
-    <button onclick="toggleMobileNav()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </button>
-  </header>
-
-  <!-- Mobile Navigation Drawer Overlay -->
-  <div id="mobileDrawer" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden md:hidden flex justify-end" onclick="toggleMobileNav()">
-    <div class="bg-slate-900 border-l border-slate-800 w-72 h-full p-6 flex flex-col justify-between" onclick="event.stopPropagation()">
-      <div>
-        <div class="flex items-center justify-between mb-6">
-          <span class="font-bold text-white text-base">Menu</span>
-          <button onclick="toggleMobileNav()" class="text-slate-400 hover:text-white text-lg">✕</button>
-        </div>
-        <nav class="space-y-1.5" id="mobileNavLinks">
-          <!-- Populated by JS -->
-        </nav>
-      </div>
-      <div class="border-t border-slate-800 pt-4">
-        <button onclick="logout()" class="w-full py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2">
-          <span>🚪</span> Log Out
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Desktop Sidebar -->
-  <aside class="w-64 border-r border-slate-800/80 bg-slate-950/80 backdrop-blur-xl p-6 flex-col justify-between hidden md:flex shrink-0 z-30 sticky top-0 h-screen">
+  <!-- Sidebar -->
+  <aside class="w-64 border-r border-slate-800 bg-slate-900/70 p-6 flex flex-col justify-between hidden md:flex">
     <div>
-      <div class="flex items-center gap-3.5 mb-8">
-        <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-black text-xl shadow-xl shadow-orange-500/25 ring-1 ring-white/20">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-black text-lg shadow-lg shadow-orange-500/20">
           ⚡
         </div>
         <div>
-          <h1 class="font-extrabold text-base tracking-tight text-white">OutreachBot</h1>
-          <p class="text-[10px] text-orange-400 font-bold tracking-wider uppercase">SaaS Platform</p>
+          <h1 class="font-bold text-base text-white">OutreachBot</h1>
+          <p class="text-[11px] text-orange-400 font-semibold tracking-wider uppercase">Client Edition</p>
         </div>
       </div>
 
-      <nav class="space-y-1.5" id="desktopNav">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 bg-orange-500/10 text-orange-400 border border-orange-500/20">
+      <nav class="space-y-1.5">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-orange-500/10 text-orange-400 border border-orange-500/20">
           <span>📊</span> Dashboard
         </button>
-        <button onclick="switchTab('senders')" id="nav-senders" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:bg-slate-900 hover:text-white">
+        <button onclick="switchTab('senders')" id="nav-senders" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
           <span>📧</span> Sender Mailboxes
         </button>
-        <button onclick="switchTab('scraper')" id="nav-scraper" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:bg-slate-900 hover:text-white">
-          <span>🕷️</span> Bulk Scraper
+        <button onclick="switchTab('scraper')" id="nav-scraper" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
+          <span>🕷️</span> Web Scraper
         </button>
-        <button onclick="switchTab('leads')" id="nav-leads" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:bg-slate-900 hover:text-white">
+        <button onclick="switchTab('leads')" id="nav-leads" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
           <span>👥</span> Cold Leads
         </button>
-        <button onclick="switchTab('campaigns')" id="nav-campaigns" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:bg-slate-900 hover:text-white">
-          <span>🚀</span> Campaigns
+        <button onclick="switchTab('campaigns')" id="nav-campaigns" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
+          <span>🚀</span> Outreach Campaigns
         </button>
       </nav>
     </div>
 
-    <!-- User Profile & Logout -->
-    <div class="border-t border-slate-800/80 pt-4">
-      <div class="flex items-center gap-3 mb-3 p-2 rounded-xl bg-slate-900/60 border border-slate-800/60">
-        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow-sm" id="userAvatar">
+    <div class="border-t border-slate-800 pt-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="h-8 w-8 rounded-full bg-slate-800 text-orange-400 flex items-center justify-center font-bold text-xs uppercase" id="userAvatar">
           U
         </div>
         <div class="overflow-hidden">
@@ -125,319 +56,344 @@
           <p class="text-[10px] text-slate-500 truncate" id="userEmail">user@domain.com</p>
         </div>
       </div>
-      <button onclick="logout()" class="w-full py-2 text-xs font-semibold text-slate-400 hover:text-red-400 transition-colors text-left flex items-center gap-2 px-2">
-        <span>🚪</span> Log out of workspace
+      <button onclick="logout()" class="w-full py-2 text-xs font-semibold text-slate-400 hover:text-red-400 transition-colors text-left flex items-center gap-2">
+        <span>🚪</span> Log out
       </button>
     </div>
   </aside>
 
   <!-- Main Content Area -->
-  <main class="flex-1 p-5 sm:p-8 lg:p-10 overflow-y-auto max-w-7xl relative z-10">
+  <main class="flex-1 p-6 sm:p-10 overflow-y-auto max-w-7xl">
 
-    <!-- ============================================== -->
     <!-- TAB 1: DASHBOARD -->
-    <!-- ============================================== -->
     <section id="tab-dashboard" class="tab-content active space-y-8">
       <div>
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-semibold text-orange-400 mb-2">
-          <span>⚡ Live Workspace Overview</span>
-        </div>
-        <h2 class="text-3xl font-extrabold text-white tracking-tight">Outreach Analytics</h2>
-        <p class="text-sm text-slate-400 mt-1">Real-time metrics on scraped prospects, sender deliverability, and campaign engagement.</p>
+        <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Overview</p>
+        <h2 class="text-3xl font-extrabold text-white mt-1">Outreach Analytics</h2>
+        <p class="text-sm text-slate-400 mt-1">Monitor your leads, active senders, and real-time email engagement metrics.</p>
       </div>
 
       <!-- Stats Grid -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div class="group p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 hover:border-orange-500/30 transition-all duration-300 relative overflow-hidden">
-          <div class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-orange-500 to-amber-500 opacity-60"></div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
           <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Extracted Leads</p>
-          <p class="text-3xl sm:text-4xl font-extrabold text-white mt-2 group-hover:scale-105 transition-transform" id="statLeads">0</p>
-          <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5">
-            <span class="text-emerald-400 font-bold">✓ 100%</span> MX verified
-          </p>
+          <p class="text-3xl font-extrabold text-white mt-2" id="statLeads">0</p>
+          <p class="text-[11px] text-slate-500 mt-1">clean & filtered</p>
         </div>
-
-        <div class="group p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 hover:border-orange-500/30 transition-all duration-300 relative overflow-hidden">
-          <div class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-orange-500 to-amber-500 opacity-60"></div>
+        <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
           <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Emails Sent</p>
-          <p class="text-3xl sm:text-4xl font-extrabold text-orange-400 mt-2 group-hover:scale-105 transition-transform" id="statSent">0</p>
-          <p class="text-[11px] text-slate-500 mt-1">via verified mailboxes</p>
+          <p class="text-3xl font-extrabold text-orange-400 mt-2" id="statSent">0</p>
+          <p class="text-[11px] text-slate-500 mt-1">via your accounts</p>
         </div>
-
-        <div class="group p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 hover:border-emerald-500/30 transition-all duration-300 relative overflow-hidden">
-          <div class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-60"></div>
+        <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
           <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Open Rate</p>
-          <p class="text-3xl sm:text-4xl font-extrabold text-emerald-400 mt-2 group-hover:scale-105 transition-transform" id="statOpenRate">0%</p>
+          <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="statOpenRate">0%</p>
           <p class="text-[11px] text-slate-500 mt-1" id="statOpened">0 opens tracked</p>
         </div>
-
-        <div class="group p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 hover:border-amber-500/30 transition-all duration-300 relative overflow-hidden">
-          <div class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber-500 to-yellow-500 opacity-60"></div>
+        <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
           <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Mailboxes</p>
-          <p class="text-3xl sm:text-4xl font-extrabold text-amber-400 mt-2 group-hover:scale-105 transition-transform" id="statSenders">0</p>
-          <p class="text-[11px] text-slate-500 mt-1">authorized to dispatch</p>
+          <p class="text-3xl font-extrabold text-amber-400 mt-2" id="statSenders">0</p>
+          <p class="text-[11px] text-slate-500 mt-1">ready to send</p>
         </div>
       </div>
 
-      <!-- Quick Action Shortcuts -->
-      <div class="p-6 rounded-3xl bg-slate-900/50 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h3 class="text-base font-bold text-white">Ready to run your next campaign?</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Scrape new target websites or create cold pitches from your verified accounts.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2.5">
-          <button onclick="switchTab('scraper')" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 font-bold text-xs text-white shadow-lg shadow-orange-500/20 transition-all transform hover:-translate-y-0.5">
-            🕷️ Scrape Websites
+      <!-- Quick Action Buttons -->
+      <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
+        <h3 class="text-base font-bold text-white mb-3">Quick Navigation</h3>
+        <div class="flex flex-wrap gap-3">
+          <button onclick="switchTab('scraper')" class="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs text-white shadow-lg shadow-orange-500/20 transition-all">
+            🕷️ Scrape New Site
           </button>
-          <button onclick="switchTab('campaigns')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-200 transition-all">
+          <button onclick="switchTab('senders')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-200 transition-all">
+            📧 Connect Sender Mailbox
+          </button>
+          <button onclick="switchTab('campaigns')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-200 transition-all">
             🚀 Launch Campaign
           </button>
-          <button onclick="switchTab('leads')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-200 transition-all">
+          <button onclick="switchTab('leads')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-200 transition-all">
             👥 View All Leads
           </button>
         </div>
       </div>
     </section>
 
-    <!-- ============================================== -->
     <!-- TAB 2: SENDER MAILBOXES -->
-    <!-- ============================================== -->
     <section id="tab-senders" class="tab-content space-y-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Authentication & SMTP</p>
-          <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Sender Mailboxes</h2>
-          <p class="text-sm text-slate-400 mt-1">Connect your Gmail, Outlook, or Custom SMTP account to pitch leads directly from your own domain.</p>
+          <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Authentication</p>
+          <h2 class="text-3xl font-extrabold text-white mt-1">Sender Mailboxes</h2>
+          <p class="text-sm text-slate-400 mt-1">Connect your Gmail, Outlook, or SMTP account to send cold pitches from your own address.</p>
         </div>
-        <button onclick="toggleSenderForm()" class="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs text-white transition-all shadow-lg shadow-orange-500/20 flex items-center gap-2">
-          <span>+</span> Add Mailbox
+        <button onclick="toggleSenderForm()" class="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs text-white transition-all">
+          + Add Mailbox
         </button>
       </div>
 
-      <div id="senderNotice" class="hidden p-4 rounded-2xl text-xs font-semibold"></div>
+      <div id="senderNotice" class="hidden p-4 rounded-xl text-xs font-semibold"></div>
 
-      <!-- Add/Connect Sender Form -->
-      <div id="senderFormCard" class="hidden p-6 rounded-3xl bg-slate-900 border border-slate-800 max-w-2xl animate-modal">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-base font-bold text-white">Connect Your Mailbox</h3>
-          <button type="button" onclick="toggleSenderForm()" class="text-slate-400 hover:text-white text-xs font-bold">✕ Close</button>
-        </div>
+      <!-- Sender Form -->
+      <div id="senderFormCard" class="hidden p-6 rounded-2xl bg-slate-900 border border-slate-800">
+        <h3 class="text-base font-bold text-white mb-2">Connect Your Mailbox</h3>
         
-        <div class="mb-4 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-slate-300 leading-relaxed">
+        <div class="mb-4 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-xs text-slate-300 leading-relaxed">
           <strong class="text-orange-400">Gmail Setup Guide:</strong> Generate a 16-character <strong>Google App Password</strong> at
           <a href="https://myaccount.google.com/apppasswords" target="_blank" class="underline font-bold text-orange-400">myaccount.google.com/apppasswords</a>.
-          Paste that password below to authorize outbound mail.
+          (Requires 2-Step Verification). Paste that password below so OutreachBot can authenticate your outgoing mail.
         </div>
 
         <form id="connectSenderForm" onsubmit="handleConnectSender(event)" class="space-y-4">
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Sender Email Address *</label>
-              <input type="email" id="sEmail" required placeholder="you@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+              <input type="email" id="sEmail" required placeholder="you@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Display Name *</label>
-              <input type="text" id="sName" required placeholder="e.g. Rahul Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+              <input type="text" id="sName" required placeholder="e.g. Rahul Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
             </div>
           </div>
 
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Provider</label>
-              <select id="sProvider" onchange="handleProviderChange(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+              <select id="sProvider" onchange="handleProviderChange(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
                 <option value="GMAIL">Gmail / Google Workspace</option>
                 <option value="OUTLOOK">Outlook / Office 365</option>
-                <option value="CUSTOM">Custom SMTP Server</option>
+                <option value="CUSTOM">Custom SMTP</option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">App Password / Secret *</label>
-              <input type="password" id="sPassword" required placeholder="16-character Google App Password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+              <input type="password" id="sPassword" required placeholder="16-character Google App Password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
             </div>
           </div>
 
           <div id="customSmtpFields" class="hidden grid sm:grid-cols-3 gap-4">
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">SMTP Host</label>
-              <input type="text" id="sHost" placeholder="smtp.domain.com" value="smtp.gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+              <input type="text" id="sHost" placeholder="smtp.domain.com" value="smtp.gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">SMTP Port</label>
-              <input type="number" id="sPort" value="587" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+              <input type="number" id="sPort" value="587" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
             </div>
           </div>
 
           <div class="flex items-center gap-3 pt-2">
-            <button type="submit" id="sSubmitBtn" class="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs text-white transition-all shadow-lg shadow-orange-500/20">
+            <button type="submit" id="sSubmitBtn" class="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs text-white transition-all">
               Test & Connect Mailbox
             </button>
-            <button type="button" onclick="toggleSenderForm()" class="px-4 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+            <button type="button" onclick="toggleSenderForm()" class="px-4 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-400 hover:text-white">
               Cancel
             </button>
           </div>
         </form>
       </div>
 
-      <!-- Senders List -->
-      <div class="rounded-3xl border border-slate-800/80 bg-slate-900/60 overflow-hidden divide-y divide-slate-800/60" id="sendersList">
-        <div class="p-8 text-center text-slate-500">Loading connected mailboxes...</div>
+      <!-- Senders Table -->
+      <div class="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden">
+        <div id="sendersList" class="divide-y divide-slate-800 text-sm">
+          <div class="p-8 text-center text-slate-500">Loading mailboxes...</div>
+        </div>
       </div>
     </section>
 
-    <!-- ============================================== -->
     <!-- TAB 3: WEB SCRAPER -->
-    <!-- ============================================== -->
     <section id="tab-scraper" class="tab-content space-y-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Prospect Discovery</p>
-          <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Bulk Web Scraper</h2>
-          <p class="text-sm text-slate-400 mt-1">Crawl 10–20+ client or competitor websites in parallel. Cloudflare TLS bypass automatically active.</p>
+          <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Lead Generation Engine</p>
+          <h2 class="text-3xl font-extrabold text-white mt-1">Website Email Scraper</h2>
+          <p class="text-sm text-slate-400 mt-1">Crawl 10–50 prospect websites at once, extract contact emails, and run 7-layer DNS MX validation.</p>
         </div>
-        
-        <!-- Scraper Mode Toggle -->
-        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 p-1 rounded-xl self-start sm:self-auto">
+
+        <!-- Mode Toggle -->
+        <div class="inline-flex p-1 bg-slate-900 border border-slate-800 rounded-xl">
           <button id="btnModeBulk" onclick="setScraperMode('bulk')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-orange-500 text-white shadow-md">
-            🌐 Bulk Multi-Site (10-20)
+            ⚡ Bulk Websites (10-50)
           </button>
           <button id="btnModeSingle" onclick="setScraperMode('single')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
-            🔍 Single Domain
+            Single Site
           </button>
         </div>
       </div>
 
-      <!-- BULK SCRAPER CARD -->
-      <div id="bulkScrapeCard" class="p-6 sm:p-8 rounded-3xl bg-slate-900/70 border border-slate-800/80 max-w-4xl space-y-5">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-            Target Websites (One URL per line — up to 30 sites simultaneously)
-          </label>
-          <textarea id="bulkUrlsInput" rows="6" placeholder="https://example1.com&#10;https://example2.com&#10;stripe.com&#10;ycombinator.com" class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs font-mono text-slate-200 placeholder-slate-600 focus:border-orange-500 focus:outline-none transition-colors"></textarea>
-          <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
-            <span>💡 Tip: Paste raw domains or full URLs. Contact pages are automatically detected.</span>
-            <button type="button" onclick="loadSampleDomains()" class="text-orange-400 hover:underline font-semibold">Load Sample Batch</button>
-          </div>
-        </div>
-
-        <div class="grid sm:grid-cols-2 gap-4">
+      <!-- BULK SCRAPE FORM -->
+      <div id="bulkScrapeCard" class="p-6 rounded-2xl bg-slate-900 border border-slate-800 max-w-3xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2 border-b border-slate-800/80">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Max Pages Per Domain</label>
-            <input type="number" id="bulkMaxPages" value="15" min="5" max="40" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Simultaneous Crawl Concurrency</label>
-            <input type="number" id="bulkConcurrency" value="5" min="1" max="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
-          </div>
-        </div>
-
-        <button onclick="handleStartBulkScrape()" id="bulkScrapeBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 font-bold text-sm text-white shadow-xl shadow-orange-600/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
-          🚀 Run Bulk Scrape & MX Verification
-        </button>
-      </div>
-
-      <!-- SINGLE SCRAPER CARD -->
-      <div id="singleScrapeCard" class="hidden p-6 sm:p-8 rounded-3xl bg-slate-900/70 border border-slate-800/80 max-w-2xl space-y-4">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Website Domain or URL</label>
-          <input type="text" id="targetUrl" placeholder="https://example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-orange-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Crawl Depth Level</label>
-          <select id="crawlDepth" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
-            <option value="1">1 — Homepage Only</option>
-            <option value="2" selected>2 — Homepage + Contact / About Pages (Recommended)</option>
-            <option value="3">3 — Deep Crawl (Follows all internal links)</option>
-          </select>
-        </div>
-        <button onclick="handleStartScrape()" id="scrapeBtn" class="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-sm text-white shadow-lg shadow-orange-500/25 transition-all">
-          Start Deep Website Scrape
-        </button>
-      </div>
-
-      <!-- Scraper Progress Indicator -->
-      <div id="scrapeProgressCard" class="hidden p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 animate-modal">
-        <div class="flex items-center justify-between text-xs font-semibold">
-          <span class="text-orange-400 flex items-center gap-2">
-            <span class="h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
-            <span id="scrapeStatusText">Crawling target domains...</span>
-          </span>
-          <span class="font-mono text-slate-400" id="scrapePercentText">Executing</span>
-        </div>
-        <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
-          <div id="scrapeProgressBar" class="bg-gradient-to-r from-orange-500 to-amber-400 h-full w-1/3 transition-all duration-300"></div>
-        </div>
-      </div>
-
-      <!-- Scrape Results Container -->
-      <div id="scrapeResultsCard" class="hidden space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-              <span>🎯 Batch Scrape Results</span>
-              <span id="resultsCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">0 found</span>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>📋</span> Enter Target Websites
             </h3>
-            <p class="text-xs text-slate-400 mt-0.5">Contacts verified against MX DNS records and added to your leads pool.</p>
+            <p class="text-xs text-slate-400 mt-0.5">Paste up to 50 URLs or domains (one per line). All sites are crawled in parallel.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="loadSampleDomains()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors border border-slate-700">
+              + Load 10 Example Sites
+            </button>
+            <button type="button" onclick="clearBulkDomains()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <form onsubmit="handleStartBulkScrape(event)" class="space-y-4">
+          <div>
+            <textarea id="bulkUrls" rows="7" required placeholder="stripe.com&#10;vercel.com&#10;supabase.com&#10;linear.app&#10;notion.so&#10;airbnb.com&#10;shopify.com&#10;webflow.com&#10;canva.com&#10;hubspot.com" class="w-full font-mono bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs sm:text-sm text-slate-100 placeholder-slate-600 focus:border-orange-500 focus:outline-none transition-colors leading-relaxed"></textarea>
+            <p class="text-[11px] text-slate-500 mt-1">Accepts raw domains (e.g. <code>stripe.com</code>) or full URLs (<code>https://example.com/about</code>).</p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4 pt-1">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Crawl Scope / Speed</label>
+              <select id="bulkCrawlScope" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:border-orange-500 focus:outline-none">
+                <option value="fast">⚡ Standard Crawl (Homepage + Contact, About, Team & Press, ~18 pages/site)</option>
+                <option value="deep">🔍 Exhaustive Deep Crawl (Follows all sublinks & subpages, ~35 pages/site)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Engine Concurrency</label>
+              <div class="px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300 flex items-center justify-between">
+                <span>Parallel Workers:</span>
+                <span class="text-orange-400 font-bold">5 sites at a time</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" id="bulkScrapeBtn" class="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-sm text-white shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2">
+            <span>🚀</span> Extract Clean Emails from All Websites
+          </button>
+        </form>
+      </div>
+
+      <!-- SINGLE SCRAPE FORM (OPTIONAL) -->
+      <div id="singleScrapeCard" class="hidden p-6 rounded-2xl bg-slate-900 border border-slate-800 max-w-2xl space-y-4">
+        <form onsubmit="handleStartSingleScrape(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Target Domain or URL *</label>
+            <input type="text" id="scrapeUrl" placeholder="https://example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-orange-500 focus:outline-none">
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Crawl Depth: Level <span id="depthVal">2</span></label>
+              <span class="text-xs text-slate-500" id="depthHint">Up to ~25 pages</span>
+            </div>
+            <input type="range" min="1" max="4" value="2" id="scrapeDepth" oninput="updateDepth(this.value)" class="w-full accent-orange-500 cursor-pointer">
+          </div>
+
+          <button type="submit" id="singleScrapeBtn" class="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-sm text-white shadow-lg shadow-orange-500/20 transition-all">
+            🕷️ Crawl & Extract Clean Emails
+          </button>
+        </form>
+      </div>
+
+      <!-- Loading / In-Progress Indicator -->
+      <div id="scrapeProgressBox" class="hidden p-6 rounded-2xl bg-slate-900 border border-orange-500/30 max-w-3xl space-y-3 animate-pulse">
+        <div class="flex items-center gap-3">
+          <div class="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <div>
+            <h4 class="font-bold text-sm text-white" id="scrapeProgressTitle">Crawling websites in parallel...</h4>
+            <p class="text-xs text-slate-400 mt-0.5" id="scrapeProgressSub">Visiting contact pages, parsing HTML, extracting mailto links, and running live DNS MX checks...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bulk Scrape Result Box -->
+      <div id="bulkResultBox" class="hidden p-6 rounded-2xl bg-slate-900 border border-emerald-500/30 max-w-4xl space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-white text-lg">Batch Extraction Complete</h3>
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">✓ Success</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">All discovered emails have been filtered, DNS MX verified, and stored in your Leads table.</p>
           </div>
           <div class="flex items-center gap-2">
             <button onclick="exportBatchCsv()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition-colors flex items-center gap-1.5">
-              📥 Export Batch CSV
+              <span>📥</span> Export CSV
             </button>
-            <button onclick="switchTab('leads')" class="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-colors">
-              View in Leads Table →
+            <button onclick="switchTab('leads')" class="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white shadow-md transition-colors flex items-center gap-1.5">
+              <span>👥</span> View Leads Table →
             </button>
           </div>
         </div>
 
-        <div class="rounded-3xl border border-slate-800/80 bg-slate-900/60 overflow-hidden divide-y divide-slate-800/60 text-xs" id="siteResultsTable">
-          <!-- Dynamically populated -->
+        <!-- Metric Counters -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+            <p class="text-2xl font-black text-white" id="bTotalSites">0</p>
+            <p class="text-[10px] uppercase font-bold text-slate-400 mt-1">Sites Scraped</p>
+          </div>
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+            <p class="text-2xl font-black text-emerald-400" id="bSuccessSites">0</p>
+            <p class="text-[10px] uppercase font-bold text-slate-400 mt-1">Sites w/ Emails</p>
+          </div>
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+            <p class="text-2xl font-black text-slate-300" id="bPagesVisited">0</p>
+            <p class="text-[10px] uppercase font-bold text-slate-400 mt-1">Pages Visited</p>
+          </div>
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+            <p class="text-2xl font-black text-orange-400" id="bCleanEmails">0</p>
+            <p class="text-[10px] uppercase font-bold text-slate-400 mt-1">MX Verified</p>
+          </div>
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 col-span-2 sm:col-span-1">
+            <p class="text-2xl font-black text-emerald-400" id="bSavedLeads">0</p>
+            <p class="text-[10px] uppercase font-bold text-slate-400 mt-1">Saved Leads</p>
+          </div>
+        </div>
+
+        <!-- Per-Site Breakdown List -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Site-by-Site Results Breakdown</h4>
+          <div class="rounded-xl border border-slate-800 bg-slate-950 overflow-hidden divide-y divide-slate-800 text-xs" id="siteResultsTable">
+            <!-- Dynamically populated -->
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ============================================== -->
     <!-- TAB 4: LEADS DATABASE -->
-    <!-- ============================================== -->
     <section id="tab-leads" class="tab-content space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Prospect Management</p>
-          <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Cold Leads</h2>
+          <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Contacts</p>
+          <h2 class="text-3xl font-extrabold text-white mt-1">Cold Leads</h2>
           <p class="text-sm text-slate-400 mt-1">All extracted prospects, verified against MX records and deduplicated.</p>
         </div>
         <div class="flex items-center gap-3">
-          <button onclick="exportAllLeadsCsv()" class="px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-bold text-slate-300 hover:bg-slate-800 hover:text-white transition-all flex items-center gap-2">
+          <button onclick="exportAllLeadsCsv()" class="px-4 py-2 rounded-xl border border-slate-800 text-xs font-bold text-slate-300 hover:bg-slate-800 transition-colors">
             📥 Export CSV
           </button>
-          <button onclick="switchTab('scraper')" class="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-all shadow-lg shadow-orange-500/20">
+          <button onclick="switchTab('scraper')" class="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-colors">
             + Scrape More
           </button>
         </div>
       </div>
 
-      <!-- Search & Filters -->
-      <div class="flex flex-col sm:flex-row gap-3">
-        <div class="relative flex-1 max-w-md">
-          <input type="text" id="leadSearchInput" onkeyup="if(event.key==='Enter') loadLeads()" placeholder="Search email or company..." class="w-full bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none transition-colors">
-        </div>
-        <button onclick="loadLeads()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-white transition-colors">
-          Search
+      <!-- Search Input -->
+      <div class="flex gap-2 max-w-md">
+        <input type="text" id="leadSearchInput" onkeyup="if(event.key==='Enter') loadLeads()" placeholder="Search email or company..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none">
+        <button onclick="loadLeads()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-white">
+          Filter
         </button>
       </div>
 
       <!-- Leads Table -->
-      <div class="rounded-3xl border border-slate-800/80 bg-slate-900/60 overflow-hidden shadow-xl">
+      <div class="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
-            <thead class="bg-slate-950/80 border-b border-slate-800/80 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <thead class="bg-slate-950/60 border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400">
               <tr>
-                <th class="px-6 py-4">Email / Prospect</th>
-                <th class="px-6 py-4">Company / Domain</th>
-                <th class="px-6 py-4">Filter Status</th>
-                <th class="px-6 py-4">Campaign State</th>
-                <th class="px-6 py-4 text-right">Actions</th>
+                <th class="px-5 py-3.5">Email / Prospect</th>
+                <th class="px-5 py-3.5">Company / Domain</th>
+                <th class="px-5 py-3.5">Filter Status</th>
+                <th class="px-5 py-3.5">Campaign State</th>
+                <th class="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="leadsTableBody" class="divide-y divide-slate-800/60 text-slate-200">
+            <tbody id="leadsTableBody" class="divide-y divide-slate-800 text-slate-200">
               <tr><td colspan="5" class="p-8 text-center text-slate-500">Loading leads...</td></tr>
             </tbody>
           </table>
@@ -445,39 +401,36 @@
       </div>
     </section>
 
-    <!-- ============================================== -->
     <!-- TAB 5: CAMPAIGNS -->
-    <!-- ============================================== -->
     <section id="tab-campaigns" class="tab-content space-y-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Outreach Execution</p>
-          <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Cold Email Campaigns</h2>
-          <p class="text-sm text-slate-400 mt-1">Launch personalized cold campaigns with randomized anti-spam pacing and full lifecycle controls.</p>
+          <h2 class="text-3xl font-extrabold text-white mt-1">Cold Email Campaigns</h2>
+          <p class="text-sm text-slate-400 mt-1">Send personalized pitches for backlinks, marketing services, or partnerships.</p>
         </div>
-        <button onclick="toggleCampaignForm()" class="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs text-white transition-all shadow-lg shadow-orange-500/20 flex items-center gap-2">
-          <span>+</span> New Campaign
+        <button onclick="toggleCampaignForm()" class="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs text-white transition-all">
+          + New Campaign
         </button>
       </div>
 
-      <!-- Campaign Form Card (Create & Edit) -->
-      <div id="campaignFormCard" class="hidden p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 max-w-3xl space-y-5 animate-modal shadow-2xl">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+      <!-- Campaign Form -->
+      <div id="campaignFormCard" class="hidden p-6 rounded-2xl bg-slate-900 border border-slate-800 max-w-3xl">
+        <div class="flex items-center justify-between mb-4">
           <h3 id="cFormTitle" class="text-base font-bold text-white">Create Cold Outreach Campaign</h3>
-          <button type="button" onclick="toggleCampaignForm()" class="text-slate-400 hover:text-white text-xs font-bold h-7 w-7 rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors">✕</button>
+          <button type="button" onclick="toggleCampaignForm()" class="text-slate-400 hover:text-white text-xs font-bold">✕ Close</button>
         </div>
         
         <form onsubmit="handleSaveCampaign(event)" class="space-y-4">
           <input type="hidden" id="cId" value="">
-          
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Campaign Name *</label>
-              <input type="text" id="cName" required placeholder="e.g. Q4 Growth Collaboration" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+              <input type="text" id="cName" required placeholder="e.g. Agency Growth Pitch Q4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Preset Goal</label>
-              <select id="cType" onchange="applyPresetTemplate(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+              <select id="cType" onchange="applyPresetTemplate(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
                 <option value="BACKLINK">Backlink & Guest Post Exchange</option>
                 <option value="SERVICE_PITCH">Service & Agency Pitch</option>
                 <option value="PARTNERSHIP">Partnership Proposal</option>
@@ -488,28 +441,19 @@
 
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Send From Mailbox *</label>
-            <select id="cSenderSelect" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+            <select id="cSenderSelect" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
               <option value="">-- Choose verified sender account --</option>
             </select>
           </div>
 
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Subject Line Template</label>
-            <input type="text" id="cSubject" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none transition-colors">
+            <input type="text" id="cSubject" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
           </div>
 
-          <!-- Template Editor with Variable Tag Buttons -->
           <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">HTML Email Template</label>
-              <div class="flex items-center gap-1.5 text-[11px]">
-                <span class="text-slate-500">Insert tag:</span>
-                <button type="button" onclick="insertVariableTag('firstName')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-orange-400 font-mono text-[10px]">+ firstName</button>
-                <button type="button" onclick="insertVariableTag('company')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-orange-400 font-mono text-[10px]">+ company</button>
-                <button type="button" onclick="insertVariableTag('website')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-orange-400 font-mono text-[10px]">+ website</button>
-              </div>
-            </div>
-            <textarea id="cBody" rows="7" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 focus:border-orange-500 focus:outline-none transition-colors"></textarea>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">HTML Email Template</label>
+            <textarea id="cBody" rows="7" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-slate-200 focus:border-orange-500 focus:outline-none"></textarea>
           </div>
 
           <div class="grid sm:grid-cols-2 gap-4">
@@ -520,12 +464,12 @@
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Base Delay (Seconds)</label>
               <input type="number" id="cDelay" value="45" min="10" max="300" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
-              <p class="text-[10px] text-amber-400 mt-1">⚡ Automatic + (0-120s) random jitter will be added after every email to evade spam filters.</p>
+              <p class="text-[10px] text-amber-400 mt-1">⚡ Automatic + (0-120s) random jitter will be added after every email to bypass spam filters.</p>
             </div>
           </div>
 
           <!-- Target Leads Selection Checklist -->
-          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <label class="text-xs font-bold text-white flex items-center gap-2">
                 👥 Select Prospects for this Campaign
@@ -542,7 +486,7 @@
               </div>
             </div>
 
-            <input type="text" id="cLeadSearchInput" oninput="filterLeadCheckboxes(this.value)" placeholder="Filter available prospects by email or company..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:border-orange-500 focus:outline-none">
+            <input type="text" id="cLeadSearchInput" oninput="filterLeadCheckboxes(this.value)" placeholder="Filter available prospects by email or company..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-orange-500 focus:outline-none">
 
             <div id="cLeadList" class="max-h-48 overflow-y-auto divide-y divide-slate-800/60 rounded-xl border border-slate-800 bg-slate-900/60 p-2 space-y-1">
               <div class="p-4 text-center text-xs text-slate-500">Loading prospects...</div>
@@ -550,7 +494,7 @@
           </div>
 
           <!-- Send Only Once Checkbox -->
-          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-start gap-3">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-start gap-3">
             <input type="checkbox" id="cSendOnlyOnce" checked class="mt-0.5 h-4 w-4 rounded border-slate-700 bg-slate-900 text-orange-500 focus:ring-orange-500/20">
             <div>
               <label for="cSendOnlyOnce" class="text-xs font-bold text-white cursor-pointer flex items-center gap-2">
@@ -567,8 +511,12 @@
             <button type="submit" id="cSubmitBtn" class="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs text-white transition-all shadow-lg shadow-orange-500/20">
               Save Campaign
             </button>
-            <button type="button" onclick="toggleCampaignForm()" class="px-4 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+            <button type="button" onclick="toggleCampaignForm()" class="px-4 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-400 hover:text-white">
               Cancel
+            </button>
+          </div>
+        </form>
+      </div>
             </button>
           </div>
         </form>

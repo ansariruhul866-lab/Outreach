@@ -2,15 +2,35 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-os.makedirs(DB_DIR, exist_ok=True)
-DB_PATH = os.path.join(DB_DIR, "outreachbot.db")
+raw_db_url = os.getenv("DATABASE_URL")
+if raw_db_url:
+    if raw_db_url.startswith("postgres://"):
+        DATABASE_URL = raw_db_url.replace("postgres://", "postgresql://", 1)
+    else:
+        DATABASE_URL = raw_db_url
+    DB_PATH = None
+else:
+    # Reliable local SQLite directory with fallback
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DB_DIR = os.path.join(base_dir, "data")
+    try:
+        os.makedirs(DB_DIR, exist_ok=True)
+        test_file = os.path.join(DB_DIR, ".write_test")
+        with open(test_file, "w") as f:
+            f.write("ok")
+        os.remove(test_file)
+    except Exception:
+        DB_DIR = os.path.join(os.getcwd(), "data")
+        os.makedirs(DB_DIR, exist_ok=True)
 
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
+    DB_PATH = os.path.join(DB_DIR, "outreachbot.db")
+    DATABASE_URL = f"sqlite:///{DB_PATH}"
 
+engine_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
+    connect_args=engine_args,
+    pool_pre_ping=True,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -18,7 +38,7 @@ Base = declarative_base()
 
 def run_migrations():
     import sqlite3
-    if "sqlite" in DATABASE_URL and os.path.exists(DB_PATH):
+    if "sqlite" in DATABASE_URL and DB_PATH and os.path.exists(DB_PATH):
         try:
             conn = sqlite3.connect(DB_PATH)
             cur = conn.cursor()

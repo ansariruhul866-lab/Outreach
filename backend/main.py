@@ -1,8 +1,8 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 import logging
 from dotenv import load_dotenv
 
@@ -41,9 +41,31 @@ app.include_router(campaigns_router, prefix="/api")
 app.include_router(tracking_router, prefix="/api")
 app.include_router(stats_router, prefix="/api")
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    tb = traceback.format_exc()
+    logger.error(f"Global exception on {request.method} {request.url.path}: {exc}\n{tb}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "traceback": tb}
+    )
+
 @app.get("/health")
 def health():
     return {"status": "ok", "platform": "OutreachBot Standalone SaaS"}
+
+@app.get("/api/debug-status")
+def debug_status():
+    from core.database import DATABASE_URL, DB_PATH
+    import os
+    return {
+        "status": "online",
+        "database_type": "postgresql" if "postgres" in str(DATABASE_URL) else "sqlite",
+        "database_url_masked": str(DATABASE_URL).split("@")[-1] if "@" in str(DATABASE_URL) else str(DATABASE_URL)[:35],
+        "db_exists": os.path.exists(DB_PATH) if DB_PATH else None,
+        "cwd": os.getcwd()
+    }
 
 # Mount static frontend
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
