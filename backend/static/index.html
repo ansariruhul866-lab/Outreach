@@ -9,6 +9,11 @@
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </style>
+
+  <!-- Firebase Web SDK (Compat mode for seamless browser usage) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="/static/firebase-config.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col justify-between">
   <!-- Nav -->
@@ -20,11 +25,15 @@
         </div>
         <div>
           <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">OutreachBot</span>
-          <span class="ml-2 text-[10px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20">SaaS v2</span>
+          <span class="ml-2 text-[10px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20">Firebase Auth</span>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
+        <button onclick="openConfigModal()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800/80 border border-slate-700 hover:border-orange-500/50 text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
+          <span id="firebaseStatusDot" class="h-2 w-2 rounded-full bg-amber-400"></span>
+          <span>Firebase Setup</span>
+        </button>
         <button onclick="openAuth('login')" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors">
           Log in
         </button>
@@ -39,7 +48,7 @@
   <main class="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-semibold text-orange-400 mb-8 shadow-inner">
       <span class="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
-      100% Free & Open-Source Stack · Multi-Tenant Architecture
+      Firebase Authentication & Verified Email Security Enabled
     </div>
 
     <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
@@ -72,9 +81,9 @@
 
       <div class="p-8 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all">
         <div class="text-3xl mb-4">🛡️</div>
-        <h3 class="text-lg font-bold text-white mb-2">7-Layer Spam Filter</h3>
+        <h3 class="text-lg font-bold text-white mb-2">Verified Auth & Email Checks</h3>
         <p class="text-sm text-slate-400 leading-relaxed">
-          Automatically verifies MX DNS records, filters out disposable mailboxes (Mailinator, TempMail), and drops malformed addresses.
+          Powered by Firebase Authentication with strict email verification, ensuring only confirmed mailboxes access campaigns.
         </p>
       </div>
 
@@ -82,7 +91,7 @@
         <div class="text-3xl mb-4">📬</div>
         <h3 class="text-lg font-bold text-white mb-2">Send From Your Mailbox</h3>
         <p class="text-sm text-slate-400 leading-relaxed">
-          Connect your Gmail or Outlook via App Passwords. Campaigns are sent directly from your address with anti-spam pacing.
+          Connect your Gmail via App Passwords. Campaigns are sent directly with randomized anti-spam jitter (0-120s delay).
         </p>
       </div>
     </div>
@@ -90,7 +99,7 @@
 
   <!-- Footer -->
   <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-500">
-    OutreachBot SaaS · Built with 100% Free Python & Open Source Tools
+    OutreachBot SaaS · Secured with Firebase Authentication & Email Verification
   </footer>
 
   <!-- Auth Modal -->
@@ -98,59 +107,251 @@
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 relative shadow-2xl">
       <button onclick="closeAuth()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">✕</button>
 
-      <div class="text-center mb-6">
-        <div class="h-12 w-12 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-2xl flex items-center justify-center mx-auto mb-3">
-          ⚡
+      <!-- Standard Form View -->
+      <div id="authFormView">
+        <div class="text-center mb-6">
+          <div class="h-12 w-12 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-2xl flex items-center justify-center mx-auto mb-3">
+            ⚡
+          </div>
+          <h2 id="modalTitle" class="text-2xl font-bold text-white">Create an Account</h2>
+          <p id="modalSub" class="text-sm text-slate-400 mt-1">Start running cold outreach with verified email</p>
         </div>
-        <h2 id="modalTitle" class="text-2xl font-bold text-white">Create an Account</h2>
-        <p id="modalSub" class="text-sm text-slate-400 mt-1">Start running cold outreach from your own mailbox</p>
+
+        <!-- Alerts -->
+        <div id="authError" class="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-semibold hidden"></div>
+        <div id="authNotice" class="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl text-xs font-semibold hidden"></div>
+
+        <!-- Google Sign-In Button -->
+        <button type="button" onclick="handleGoogleSignIn()" class="w-full py-3 px-4 bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-3 transition-all mb-4 shadow-sm">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="relative flex py-2 items-center mb-4">
+          <div class="flex-grow border-t border-slate-800"></div>
+          <span class="flex-shrink mx-3 text-xs uppercase tracking-wider text-slate-500 font-bold">Or with email</span>
+          <div class="flex-grow border-t border-slate-800"></div>
+        </div>
+
+        <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+          <div id="nameField">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Full Name</label>
+            <input type="text" id="authName" placeholder="e.g. Rahul Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
+            <input type="email" id="authEmail" required placeholder="you@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
+            <input type="password" id="authPassword" required placeholder="Min. 6 characters" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+          </div>
+
+          <button type="submit" id="authSubmitBtn" class="w-full py-3.5 text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-lg shadow-orange-600/30 transition-all flex items-center justify-center gap-2">
+            <span>Continue →</span>
+          </button>
+        </form>
+
+        <div class="mt-6 text-center text-xs text-slate-500">
+          <span id="toggleText">Already have an account?</span>
+          <button id="toggleBtn" onclick="toggleAuthMode()" class="ml-1 text-orange-400 font-bold hover:underline">
+            Sign In
+          </button>
+        </div>
       </div>
 
-      <div id="authError" class="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-semibold hidden"></div>
+      <!-- Verification Sent View -->
+      <div id="verificationSentView" class="hidden text-center py-4">
+        <div class="h-16 w-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-3xl flex items-center justify-center mx-auto mb-4">
+          📨
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Verify Your Email Address</h3>
+        <p class="text-sm text-slate-400 max-w-sm mx-auto mb-6">
+          A verification link has been sent to:
+          <span id="verificationTargetEmail" class="block font-bold text-white mt-1 break-all"></span>
+        </p>
 
-      <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
-        <div id="nameField">
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Full Name</label>
-          <input type="text" id="authName" placeholder="e.g. Rahul Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-left text-xs text-slate-400 mb-6 space-y-2">
+          <p class="flex items-start gap-2">
+            <span class="text-orange-400 font-bold">1.</span>
+            <span>Check your inbox (and spam/junk folder) for the verification link.</span>
+          </p>
+          <p class="flex items-start gap-2">
+            <span class="text-orange-400 font-bold">2.</span>
+            <span>Click the verification link to confirm your ownership.</span>
+          </p>
+          <p class="flex items-start gap-2">
+            <span class="text-orange-400 font-bold">3.</span>
+            <span>Return here and log in to open your workspace.</span>
+          </p>
         </div>
 
+        <div class="space-y-3">
+          <button onclick="resendVerificationEmail()" id="resendBtn" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition-all">
+            Resend Verification Email
+          </button>
+          <button onclick="switchToLoginAfterVerify()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-xs font-bold text-white shadow-lg shadow-orange-600/20 hover:from-orange-600 hover:to-amber-700 transition-all">
+            I've Verified My Email → Log In
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Setup Modal -->
+  <div id="configModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-8 relative shadow-2xl">
+      <button onclick="closeConfigModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">✕</button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-10 w-10 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xl flex items-center justify-center">
+          🔥
+        </div>
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
-          <input type="email" id="authEmail" required placeholder="you@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+          <h3 class="text-lg font-bold text-white">Firebase Project Configuration</h3>
+          <p class="text-xs text-slate-400">Connect your Firebase Authentication project</p>
         </div>
+      </div>
 
+      <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+        Get your web app config from 
+        <a href="https://console.firebase.google.com" target="_blank" class="text-orange-400 hover:underline">Firebase Console</a>:
+        <em>Project Overview → Project Settings → General → Your apps → Web app (&lt;/&gt;)</em>.
+      </p>
+
+      <div class="space-y-3">
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
-          <input type="password" id="authPassword" required placeholder="Min. 6 characters" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none">
+          <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Paste Firebase Config JSON or object</label>
+          <textarea id="firebaseConfigInput" rows="6" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "myproject.firebaseapp.com",
+  "projectId": "myproject",
+  "storageBucket": "myproject.appspot.com",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abcdef"
+}' class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:border-orange-500 focus:outline-none"></textarea>
         </div>
 
-        <button type="submit" id="authSubmitBtn" class="w-full py-3.5 text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-lg shadow-orange-600/30 transition-all">
-          Continue →
-        </button>
-      </form>
+        <div id="configFeedback" class="text-xs font-semibold hidden"></div>
 
-      <div class="mt-6 text-center text-xs text-slate-500">
-        <span id="toggleText">Already have an account?</span>
-        <button id="toggleBtn" onclick="toggleAuthMode()" class="ml-1 text-orange-400 font-bold hover:underline">
-          Sign In
-        </button>
+        <div class="flex items-center gap-3 pt-2">
+          <button onclick="saveFirebaseConfig()" class="flex-1 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-600/20">
+            Save & Activate Firebase
+          </button>
+          <button onclick="resetFirebaseConfig()" class="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl">
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
     let mode = 'signup';
+    let lastRegisteredUser = null;
+    let auth = null;
+
+    // Check Firebase status on load
+    function updateFirebaseStatusUI() {
+      const dot = document.getElementById('firebaseStatusDot');
+      if (isFirebaseConfigured()) {
+        dot.className = "h-2 w-2 rounded-full bg-emerald-400";
+        try {
+          auth = window.initFirebase();
+        } catch(e) {
+          console.error(e);
+        }
+      } else {
+        dot.className = "h-2 w-2 rounded-full bg-amber-400 animate-pulse";
+      }
+    }
+    updateFirebaseStatusUI();
+
+    function openConfigModal() {
+      const input = document.getElementById('firebaseConfigInput');
+      input.value = JSON.stringify(window.FIREBASE_CONFIG, null, 2);
+      document.getElementById('configModal').classList.remove('hidden');
+      document.getElementById('configModal').classList.add('flex');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+      document.getElementById('configModal').classList.remove('flex');
+    }
+
+    function saveFirebaseConfig() {
+      const input = document.getElementById('firebaseConfigInput').value.trim();
+      const fb = document.getElementById('configFeedback');
+      fb.classList.remove('hidden');
+
+      try {
+        let clean = input;
+        if (clean.includes('{')) {
+          clean = clean.substring(clean.indexOf('{'), clean.lastIndexOf('}') + 1);
+        }
+        // Handle unquoted JS keys if copied directly from JS
+        const parsed = (new Function(`return ${clean}`))();
+        if (!parsed.apiKey || !parsed.projectId) {
+          throw new Error('Config must contain apiKey and projectId');
+        }
+
+        localStorage.setItem('outreach_custom_firebase_config', JSON.stringify(parsed));
+        window.FIREBASE_CONFIG = parsed;
+        auth = window.initFirebase();
+
+        fb.className = 'text-xs font-semibold text-emerald-400';
+        fb.innerText = '✓ Firebase connected successfully!';
+        updateFirebaseStatusUI();
+        setTimeout(closeConfigModal, 1000);
+      } catch (err) {
+        fb.className = 'text-xs font-semibold text-red-400';
+        fb.innerText = `Invalid config: ${err.message}`;
+      }
+    }
+
+    function resetFirebaseConfig() {
+      localStorage.removeItem('outreach_custom_firebase_config');
+      location.reload();
+    }
 
     function openAuth(targetMode) {
       mode = targetMode;
       document.getElementById('authModal').classList.remove('hidden');
       document.getElementById('authModal').classList.add('flex');
+      showFormView();
       updateModalUI();
     }
 
     function closeAuth() {
       document.getElementById('authModal').classList.add('hidden');
       document.getElementById('authModal').classList.remove('flex');
+    }
+
+    function showFormView() {
+      document.getElementById('authFormView').classList.remove('hidden');
+      document.getElementById('verificationSentView').classList.add('hidden');
+    }
+
+    function showVerificationSentView(email) {
+      document.getElementById('authFormView').classList.add('hidden');
+      document.getElementById('verificationSentView').classList.remove('hidden');
+      document.getElementById('verificationTargetEmail').innerText = email;
+    }
+
+    function switchToLoginAfterVerify() {
+      mode = 'login';
+      showFormView();
+      updateModalUI();
+      const notice = document.getElementById('authNotice');
+      notice.innerText = 'Please sign in with your email and password now.';
+      notice.classList.remove('hidden');
     }
 
     function toggleAuthMode() {
@@ -161,27 +362,94 @@
     function updateModalUI() {
       const isSignup = mode === 'signup';
       document.getElementById('modalTitle').innerText = isSignup ? 'Create an Account' : 'Welcome Back';
-      document.getElementById('modalSub').innerText = isSignup ? 'Start running cold outreach from your mailbox' : 'Sign in to access your outreach workspace';
+      document.getElementById('modalSub').innerText = isSignup ? 'Start running cold outreach with verified email' : 'Sign in to access your outreach workspace';
       document.getElementById('nameField').style.display = isSignup ? 'block' : 'none';
-      document.getElementById('authSubmitBtn').innerText = isSignup ? 'Create Free Account' : 'Sign In';
+      document.getElementById('authSubmitBtn').querySelector('span').innerText = isSignup ? 'Create Account & Verify Email' : 'Sign In';
       document.getElementById('toggleText').innerText = isSignup ? 'Already have an account?' : "Don't have an account?";
       document.getElementById('toggleBtn').innerText = isSignup ? 'Sign In' : 'Sign Up Free';
       document.getElementById('authError').classList.add('hidden');
+      document.getElementById('authNotice').classList.add('hidden');
     }
 
     async function handleAuth(e) {
       e.preventDefault();
       const errBox = document.getElementById('authError');
+      const noticeBox = document.getElementById('authNotice');
       errBox.classList.add('hidden');
+      noticeBox.classList.add('hidden');
 
-      const email = document.getElementById('authEmail').value;
+      const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value;
-      const name = document.getElementById('authName').value || 'User';
+      const name = document.getElementById('authName').value.trim() || 'User';
 
-      const API_BASE = window.location.hostname.includes('vercel.app')
-        ? 'https://outreach-359l.onrender.com'
-        : '';
-      const endpoint = `${API_BASE}${mode === 'signup' ? '/api/auth/signup' : '/api/auth/login'}`;
+      // Ensure Firebase Auth is ready if configured
+      if (isFirebaseConfigured()) {
+        if (!auth) auth = window.initFirebase();
+        
+        if (mode === 'signup') {
+          try {
+            // 1. Create account with Firebase
+            const userCred = await auth.createUserWithEmailAndPassword(email, password);
+            const user = userCred.user;
+            lastRegisteredUser = user;
+
+            // 2. Update Display Name
+            if (name) {
+              await user.updateProfile({ displayName: name });
+            }
+
+            // 3. Send Official Firebase Verification Email
+            await user.sendEmailVerification();
+
+            // 4. Show Verification Sent screen
+            showVerificationSentView(email);
+            return;
+          } catch (err) {
+            errBox.innerText = `Firebase Signup Error: ${err.message}`;
+            errBox.classList.remove('hidden');
+            return;
+          }
+        } else {
+          // LOGIN
+          try {
+            const userCred = await auth.signInWithEmailAndPassword(email, password);
+            const user = userCred.user;
+
+            // Strict Email Verification enforcement
+            if (!user.emailVerified) {
+              lastRegisteredUser = user;
+              await auth.signOut(); // Don't persist unverified session
+              errBox.innerHTML = `
+                <div>
+                  <strong>⚠️ Email Not Verified:</strong> Your email address (${email}) has not been verified yet.
+                  <div class="mt-2">
+                    <button onclick="resendVerificationEmailDirect('${email}')" class="underline font-bold text-amber-400 hover:text-white">Click here to resend the verification email</button>
+                  </div>
+                </div>
+              `;
+              errBox.classList.remove('hidden');
+              return;
+            }
+
+            // User is verified! Exchange ID Token with backend
+            const idToken = await user.getIdToken();
+            await completeFirebaseBackendLogin(idToken, user.displayName);
+            return;
+          } catch (err) {
+            errBox.innerText = `Login failed: ${err.message}`;
+            errBox.classList.remove('hidden');
+            return;
+          }
+        }
+      }
+
+      // Fallback: If Firebase keys not entered yet, prompt user or use backend auth
+      noticeBox.innerHTML = `
+        <span>ℹ️ To enable strict email verification, <button onclick="openConfigModal()" class="underline font-bold">connect your Firebase project keys</button>. Proceeding with default authentication...</span>
+      `;
+      noticeBox.classList.remove('hidden');
+
+      const endpoint = mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
       const body = mode === 'signup' ? { name, email, password } : { email, password };
 
       try {
@@ -201,12 +469,95 @@
         localStorage.setItem('outreach_user', JSON.stringify(data.user));
         window.location.href = '/static/app.html';
       } catch (err) {
-        errBox.innerText = `Network error connecting to backend service (${err.message || 'Check server status'})`;
+        errBox.innerText = `Network error: ${err.message || 'Check server status'}`;
         errBox.classList.remove('hidden');
       }
     }
 
-    // Auto-redirect or handle verification
+    async function handleGoogleSignIn() {
+      const errBox = document.getElementById('authError');
+      errBox.classList.add('hidden');
+
+      if (!isFirebaseConfigured()) {
+        openConfigModal();
+        return;
+      }
+
+      try {
+        if (!auth) auth = window.initFirebase();
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        const idToken = await user.getIdToken();
+
+        await completeFirebaseBackendLogin(idToken, user.displayName);
+      } catch (err) {
+        errBox.innerText = `Google Sign-In failed: ${err.message}`;
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    async function completeFirebaseBackendLogin(idToken, name) {
+      const errBox = document.getElementById('authError');
+      try {
+        const res = await fetch('/api/auth/firebase-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_token: idToken, name: name })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errBox.innerText = data.detail || 'Failed to sync authentication session';
+          errBox.classList.remove('hidden');
+          return;
+        }
+
+        localStorage.setItem('outreach_token', data.access_token);
+        localStorage.setItem('outreach_user', JSON.stringify(data.user));
+        window.location.href = '/static/app.html';
+      } catch (err) {
+        errBox.innerText = `Session synchronization error: ${err.message}`;
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    async function resendVerificationEmail() {
+      const btn = document.getElementById('resendBtn');
+      if (lastRegisteredUser) {
+        try {
+          btn.disabled = true;
+          btn.innerText = 'Sending...';
+          await lastRegisteredUser.sendEmailVerification();
+          btn.innerText = '✓ Verification Link Resent!';
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = 'Resend Verification Email';
+          }, 4000);
+        } catch (e) {
+          alert('Could not resend email: ' + e.message);
+          btn.disabled = false;
+          btn.innerText = 'Resend Verification Email';
+        }
+      } else {
+        alert('Please log in with your credentials to trigger a new verification link.');
+      }
+    }
+
+    async function resendVerificationEmailDirect(email) {
+      const password = prompt(`Enter your password for ${email} to resend the verification link:`);
+      if (!password) return;
+      try {
+        if (!auth) auth = window.initFirebase();
+        const userCred = await auth.signInWithEmailAndPassword(email, password);
+        await userCred.user.sendEmailVerification();
+        await auth.signOut();
+        alert(`✓ A fresh verification link has been sent to ${email}! Please check your inbox.`);
+      } catch (err) {
+        alert('Could not send verification email: ' + err.message);
+      }
+    }
+
+    // Auto-redirect or handle verification params
     const urlParams = new URLSearchParams(window.location.search);
     if (localStorage.getItem('outreach_token')) {
       if (urlParams.get('verified') === '1') {
@@ -216,10 +567,10 @@
       }
     } else if (urlParams.get('verified') === '1') {
       openAuth('login');
-      const errBox = document.getElementById('authError');
-      errBox.className = 'p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold';
-      errBox.innerText = '✓ Mailbox verified successfully! Please log in to access your dashboard.';
-      errBox.classList.remove('hidden');
+      const notice = document.getElementById('authNotice');
+      notice.className = 'p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold';
+      notice.innerText = '✓ Mailbox verified successfully! Please log in to access your dashboard.';
+      notice.classList.remove('hidden');
     }
   </script>
 </body>

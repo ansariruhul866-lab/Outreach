@@ -12,7 +12,6 @@ from core.database import get_db, SessionLocal
 from core.models import User, Campaign, SenderEmail, Lead
 from core.auth import get_current_user
 from core.encryption import decrypt_password
-from core.email_dispatcher import dispatch_email_hybrid
 
 logger = logging.getLogger("outreachbot")
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
@@ -311,9 +310,7 @@ async def execute_send_batch(campaign_id: str, user_id: str):
         if not sender:
             return
 
-        smtp_pass = decrypt_password(sender.smtp_password_enc, user_id) if sender.smtp_password_enc else None
-        brevo_key = decrypt_password(sender.brevo_api_key_enc, user_id) if getattr(sender, "brevo_api_key_enc", None) else None
-        resend_key = decrypt_password(sender.resend_api_key_enc, user_id) if getattr(sender, "resend_api_key_enc", None) else None
+        smtp_pass = decrypt_password(sender.smtp_password_enc, user_id)
 
         # Get pending leads up to daily limit
         leads = db.query(Lead).filter(
@@ -380,41 +377,27 @@ async def execute_send_batch(campaign_id: str, user_id: str):
             </div>
             """
 
-            try:
-                ok, used_prov, delivery_msg = await dispatch_email_hybrid(
-                    from_name=sender.display_name,
-                    from_email=sender.email,
-                    to_name=lead.first_name,
-                    to_email=lead.email,
-                    subject=subject,
-                    html_content=full_html,
-                    unsubscribe_url=unsub_url,
-                    provider=sender.provider,
-                    brevo_key=brevo_key,
-                    resend_key=resend_key,
-                    smtp_host=sender.smtp_host,
-                    smtp_port=sender.smtp_port or 587,
-                    smtp_user=sender.smtp_user,
-                    smtp_pass=smtp_pass
-                )
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"{sender.display_name} <{sender.email}>"
+            msg["To"] = lead.email
+            msg["List-Unsubscribe"] = f"<{unsub_url}>"
+            msg.attach(MIMEText(full_html, "html"))
 
-                if ok:
-                    lead.status = "SENT"
-                    lead.sent_at = datetime.utcnow()
-                    lead.delivery_provider = used_prov
-                    sender.last_used_relay = used_prov
-                    sent_in_current_batch.add(clean_email)
-                    sent_count += 1
-                    campaign.total_sent = (campaign.total_sent or 0) + 1
-                    sender.sent_today = (sender.sent_today or 0) + 1
-                    db.commit()
-                    logger.info(f"Campaign {campaign.id}: Email sent to {lead.email} via {used_prov.upper()} ({delivery_msg})")
-                else:
-                    logger.error(f"Campaign {campaign.id}: Error sending to {lead.email} via {sender.provider}: {delivery_msg}")
-                    lead.status = "FAILED"
-                    db.commit()
+            try:
+                async with aiosmtplib.SMTP(hostname=sender.smtp_host, port=sender.smtp_port, start_tls=True) as smtp:
+                    await smtp.login(sender.smtp_user, smtp_pass)
+                    await smtp.send_message(msg)
+
+                lead.status = "SENT"
+                lead.sent_at = datetime.utcnow()
+                sent_in_current_batch.add(clean_email)
+                sent_count += 1
+                campaign.total_sent = (campaign.total_sent or 0) + 1
+                sender.sent_today = (sender.sent_today or 0) + 1
+                db.commit()
             except Exception as e:
-                logger.error(f"Error in send dispatcher for {lead.email}: {e}")
+                logger.error(f"Error sending to {lead.email}: {e}")
                 lead.status = "FAILED"
                 db.commit()
 

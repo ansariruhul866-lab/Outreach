@@ -13,7 +13,9 @@ class User(Base):
     id = Column(String, primary_key=True, default=gen_uuid)
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
-    password_hash = Column(String, nullable=False)
+    password_hash = Column(String, nullable=True)
+    firebase_uid = Column(String, unique=True, index=True, nullable=True)
+    is_email_verified = Column(Boolean, default=False)
     plan = Column(String, default="free")  # free | pro | agency
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -30,14 +32,11 @@ class SenderEmail(Base):
     user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
     email = Column(String, nullable=False)
     display_name = Column(String, nullable=False)
-    provider = Column(String, default="HYBRID")  # HYBRID | BREVO | RESEND | GMAIL | OUTLOOK | CUSTOM
+    provider = Column(String, default="GMAIL")  # GMAIL | OUTLOOK | CUSTOM
     smtp_host = Column(String, default="smtp.gmail.com")
     smtp_port = Column(Integer, default=587)
-    smtp_user = Column(String, nullable=True)
-    smtp_password_enc = Column(Text, nullable=True)
-    brevo_api_key_enc = Column(Text, nullable=True)
-    resend_api_key_enc = Column(Text, nullable=True)
-    last_used_relay = Column(String, nullable=True)
+    smtp_user = Column(String, nullable=False)
+    smtp_password_enc = Column(Text, nullable=False)
     status = Column(String, default="PENDING")  # PENDING | VERIFIED | FAILED
     verify_token = Column(String, unique=True, nullable=True)
     daily_limit = Column(Integer, default=100)
@@ -64,7 +63,6 @@ class Lead(Base):
     is_unsubscribed = Column(Boolean, default=False)
     unsub_token = Column(String, unique=True, nullable=True, default=gen_uuid)
     status = Column(String, default="PENDING")  # PENDING | SENT | OPENED | REPLIED | FAILED
-    delivery_provider = Column(String, nullable=True)  # brevo | resend | smtp
     tracking_id = Column(String, unique=True, nullable=True, default=gen_uuid)
     sent_at = Column(DateTime, nullable=True)
     opened_at = Column(DateTime, nullable=True)

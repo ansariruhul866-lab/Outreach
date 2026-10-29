@@ -136,9 +136,10 @@
       <div id="senderFormCard" class="hidden p-6 rounded-2xl bg-slate-900 border border-slate-800">
         <h3 class="text-base font-bold text-white mb-2">Connect Your Mailbox</h3>
         
-        <div id="senderGuideBanner" class="mb-4 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-xs text-slate-300 leading-relaxed">
-          <strong class="text-orange-400">Cloud Relay Mode (Recommended for Render):</strong> Uses secure <strong>HTTPS Port 443</strong> (never blocked by Render or firewalls).
-          Combines <strong>Brevo (300 free emails/day)</strong> + <strong>Resend (3,000 free emails/month)</strong>. When one's credits are exhausted, OutreachBot switches to the other automatically!
+        <div class="mb-4 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-xs text-slate-300 leading-relaxed">
+          <strong class="text-orange-400">Gmail Setup Guide:</strong> Generate a 16-character <strong>Google App Password</strong> at
+          <a href="https://myaccount.google.com/apppasswords" target="_blank" class="underline font-bold text-orange-400">myaccount.google.com/apppasswords</a>.
+          (Requires 2-Step Verification). Paste that password below so OutreachBot can authenticate your outgoing mail.
         </div>
 
         <form id="connectSenderForm" onsubmit="handleConnectSender(event)" class="space-y-4">
@@ -153,46 +154,21 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Delivery Method / Provider</label>
-            <select id="sProvider" onchange="handleProviderChange(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
-              <option value="HYBRID" selected>🚀 Cloud Relay: Brevo + Resend Auto-Failover (Render Safe, Port 443)</option>
-              <option value="BREVO">Brevo API (300 free emails/day)</option>
-              <option value="RESEND">Resend API (3,000 free emails/month)</option>
-              <option value="GMAIL">Gmail SMTP (Port 587 - Local only)</option>
-              <option value="OUTLOOK">Outlook SMTP</option>
-              <option value="CUSTOM">Custom SMTP</option>
-            </select>
-          </div>
-
-          <!-- Cloud Relay Fields (Brevo + Resend) -->
-          <div id="cloudRelayFields" class="space-y-4 pt-1">
-            <div class="grid sm:grid-cols-2 gap-4">
-              <div>
-                <div class="flex items-center justify-between mb-1.5">
-                  <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Brevo API Key (300/day free)</label>
-                  <a href="https://app.brevo.com/settings/keys/api" target="_blank" class="text-[11px] text-orange-400 hover:underline">Get Key ↗</a>
-                </div>
-                <input type="password" id="sBrevoKey" placeholder="xkeysib-..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
-              </div>
-              <div>
-                <div class="flex items-center justify-between mb-1.5">
-                  <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Resend API Key (3,000/mo free)</label>
-                  <a href="https://resend.com/api-keys" target="_blank" class="text-[11px] text-orange-400 hover:underline">Get Key ↗</a>
-                </div>
-                <input type="password" id="sResendKey" placeholder="re_..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
-              </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Provider</label>
+              <select id="sProvider" onchange="handleProviderChange(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
+                <option value="GMAIL">Gmail / Google Workspace</option>
+                <option value="OUTLOOK">Outlook / Office 365</option>
+                <option value="CUSTOM">Custom SMTP</option>
+              </select>
             </div>
-            <p class="text-[11px] text-slate-400">💡 Tip: Enter at least one key (or both for auto-failover). You can also set them as <code class="text-orange-400">BREVO_API_KEY</code> and <code class="text-orange-400">RESEND_API_KEY</code> in Render Environment Variables.</p>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">App Password / Secret *</label>
+              <input type="password" id="sPassword" required placeholder="16-character Google App Password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
+            </div>
           </div>
 
-          <!-- Direct SMTP Password -->
-          <div id="smtpFields" class="hidden">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">App Password / Secret *</label>
-            <input type="password" id="sPassword" placeholder="16-character Google App Password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none">
-          </div>
-
-          <!-- Custom SMTP Host & Port -->
           <div id="customSmtpFields" class="hidden grid sm:grid-cols-3 gap-4">
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">SMTP Host</label>
@@ -554,6 +530,9 @@
 
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="/static/firebase-config.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

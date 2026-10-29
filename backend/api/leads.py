@@ -24,7 +24,6 @@ class LeadResponse(BaseModel):
     website: str | None
     source_url: str | None
     status: str
-    delivery_provider: str | None = None
     spam_score: float
     is_verified: bool
     created_at: str
@@ -87,7 +86,6 @@ def list_leads(
                 website=l.website,
                 source_url=l.source_url,
                 status=l.status,
-                delivery_provider=getattr(l, "delivery_provider", None),
                 spam_score=l.spam_score,
                 is_verified=l.is_verified,
                 created_at=l.created_at.strftime("%Y-%m-%d") if l.created_at else ""
