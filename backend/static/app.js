@@ -17,7 +17,80 @@ document.getElementById('userName').innerText = user.name || 'User';
 document.getElementById('userEmail').innerText = user.email || '';
 document.getElementById('userAvatar').innerText = (user.name || 'U').charAt(0).toUpperCase();
 
-// Templates Presets
+// ----------------- TOAST SYSTEM -----------------
+function showToast(title, message = '', type = 'success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  const borderColors = {
+    success: 'border-emerald-500/30 bg-slate-900/95 text-emerald-300 shadow-emerald-950/20',
+    error: 'border-red-500/30 bg-slate-900/95 text-red-300 shadow-red-950/20',
+    info: 'border-blue-500/30 bg-slate-900/95 text-blue-300 shadow-blue-950/20',
+    warning: 'border-amber-500/30 bg-slate-900/95 text-amber-300 shadow-amber-950/20'
+  };
+
+  const icons = {
+    success: '✓',
+    error: '✕',
+    info: 'ℹ',
+    warning: '⚠'
+  };
+
+  toast.className = `p-4 rounded-2xl border ${borderColors[type] || borderColors.info} shadow-xl backdrop-blur-xl pointer-events-auto transform transition-all duration-300 translate-x-8 opacity-0 flex items-start gap-3`;
+  toast.innerHTML = `
+    <div class="h-6 w-6 rounded-lg bg-white/10 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+      ${icons[type] || '•'}
+    </div>
+    <div class="flex-1 overflow-hidden">
+      <p class="text-xs font-bold text-white">${title}</p>
+      ${message ? `<p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">${message}</p>` : ''}
+    </div>
+    <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-white text-xs font-bold shrink-0">✕</button>
+  `;
+
+  container.appendChild(toast);
+
+  // Trigger smooth enter animation
+  requestAnimationFrame(() => {
+    toast.classList.remove('translate-x-8', 'opacity-0');
+    toast.classList.add('translate-x-0', 'opacity-100');
+  });
+
+  // Auto remove after 3.8s
+  setTimeout(() => {
+    toast.classList.add('translate-x-8', 'opacity-0');
+    setTimeout(() => toast.remove(), 300);
+  }, 3800);
+}
+
+// ----------------- MOBILE NAVIGATION -----------------
+function toggleMobileNav() {
+  const drawer = document.getElementById('mobileDrawer');
+  drawer.classList.toggle('hidden');
+}
+
+function initMobileNavLinks() {
+  const navContainer = document.getElementById('mobileNavLinks');
+  if (!navContainer) return;
+
+  const tabs = [
+    { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+    { id: 'senders', icon: '📧', label: 'Sender Mailboxes' },
+    { id: 'scraper', icon: '🕷️', label: 'Bulk Scraper' },
+    { id: 'leads', icon: '👥', label: 'Cold Leads' },
+    { id: 'campaigns', icon: '🚀', label: 'Outreach Campaigns' },
+  ];
+
+  navContainer.innerHTML = tabs.map(t => `
+    <button onclick="switchTab('${t.id}'); toggleMobileNav();" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+      <span>${t.icon}</span> ${t.label}
+    </button>
+  `).join('');
+}
+initMobileNavLinks();
+
+// ----------------- TEMPLATES PRESETS -----------------
 const PRESETS = {
   BACKLINK: {
     subject: "Quick collaboration idea for {{company}}",
@@ -51,6 +124,34 @@ const PRESETS = {
   }
 };
 
+function insertVariableTag(tag) {
+  const textarea = document.getElementById('cBody');
+  if (!textarea) return;
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const insertion = `{{${tag}}}`;
+
+  textarea.value = text.substring(0, start) + insertion + text.substring(end);
+  textarea.selectionStart = textarea.selectionEnd = start + insertion.length;
+  textarea.focus();
+}
+
+function copyToClipboard(text, btnElement) {
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = btnElement.innerText;
+    btnElement.innerText = 'Copied! ✓';
+    btnElement.classList.add('text-emerald-400');
+    setTimeout(() => {
+      btnElement.innerText = originalText;
+      btnElement.classList.remove('text-emerald-400');
+    }, 1500);
+  }).catch(() => {
+    showToast('Failed to copy', text, 'error');
+  });
+}
+
 function logout() {
   localStorage.removeItem('outreach_token');
   localStorage.removeItem('outreach_user');
@@ -59,15 +160,16 @@ function logout() {
 
 function switchTab(tabId) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.getElementById(`tab-${tabId}`).classList.add('active');
+  const targetTab = document.getElementById(`tab-${tabId}`);
+  if (targetTab) targetTab.classList.add('active');
 
   // Update Nav highlighting
-  document.querySelectorAll('aside nav button').forEach(btn => {
-    btn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-800 hover:text-white";
+  document.querySelectorAll('#desktopNav button').forEach(btn => {
+    btn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:bg-slate-900 hover:text-white";
   });
   const activeNav = document.getElementById(`nav-${tabId}`);
   if (activeNav) {
-    activeNav.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-orange-500/10 text-orange-400 border border-orange-500/20";
+    activeNav.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 bg-orange-500/10 text-orange-400 border border-orange-500/20";
   }
 
   if (tabId === 'dashboard') loadStats();
@@ -133,7 +235,7 @@ async function loadSenders() {
 
     if (senders.length === 0) {
       container.innerHTML = `
-        <div class="p-8 text-center text-slate-500">
+        <div class="p-10 text-center text-slate-500">
           <p class="font-bold text-white text-base">No mailboxes connected</p>
           <p class="text-xs text-slate-400 mt-1">Connect your Gmail or Outlook account to start sending campaigns.</p>
         </div>`;
@@ -141,24 +243,24 @@ async function loadSenders() {
     }
 
     container.innerHTML = senders.map(s => `
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 sm:p-6 gap-4 hover:bg-slate-900/30 transition-colors">
         <div>
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-white">${s.display_name}</span>
-            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">${s.provider}</span>
+          <div class="flex items-center gap-2.5">
+            <span class="font-bold text-white text-base">${s.display_name}</span>
+            <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">${s.provider}</span>
           </div>
-          <p class="text-xs text-slate-400 mt-0.5">${s.email}</p>
+          <p class="text-xs text-slate-400 mt-1 font-mono">${s.email}</p>
           <p class="text-[11px] text-slate-500 mt-1">Daily quota: ${s.daily_limit} | Sent today: ${s.sent_today}</p>
         </div>
         <div class="flex items-center gap-3">
-          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${
+          <span class="text-xs px-3 py-1 rounded-full font-bold ${
             s.status === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
             s.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
             'bg-red-500/10 text-red-400 border border-red-500/20'
           }">
-            ${s.status === 'VERIFIED' ? '✓ Verified' : s.status === 'PENDING' ? '⏳ Verification Pending' : '✕ Failed'}
+            ${s.status === 'VERIFIED' ? '✓ Verified & Ready' : s.status === 'PENDING' ? '⏳ Verification Pending' : '✕ Auth Failed'}
           </span>
-          <button onclick="deleteSender('${s.id}')" class="text-xs text-red-400 hover:text-red-300 border border-red-500/20 px-2.5 py-1 rounded-lg">
+          <button onclick="deleteSender('${s.id}')" class="text-xs text-red-400 hover:text-red-300 border border-red-500/20 hover:bg-red-500/10 px-3 py-1.5 rounded-xl transition-colors">
             Disconnect
           </button>
         </div>
@@ -192,15 +294,15 @@ async function handleConnectSender(e) {
     });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.detail || 'Failed to authenticate with SMTP server');
+      showToast('Authentication Failed', data.detail || 'Could not authenticate with SMTP server', 'error');
       return;
     }
 
-    alert(data.message || 'Connected successfully! Check your inbox for verification link.');
+    showToast('Mailbox Connected!', data.message || 'Check your inbox for the verification email.', 'success');
     toggleSenderForm();
     loadSenders();
   } catch (err) {
-    alert('Connection error occurred');
+    showToast('Connection Error', 'Network error connecting to backend service', 'error');
   } finally {
     btn.disabled = false;
     btn.innerText = 'Test & Connect Mailbox';
@@ -208,9 +310,16 @@ async function handleConnectSender(e) {
 }
 
 async function deleteSender(id) {
-  if (!confirm('Disconnect this mailbox?')) return;
-  await apiFetch(`/senders/${id}`, { method: 'DELETE' });
-  loadSenders();
+  if (!confirm('Disconnect this mailbox from OutreachBot?')) return;
+  try {
+    const res = await apiFetch(`/senders/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('Mailbox Disconnected', 'Account removed successfully', 'info');
+      loadSenders();
+    }
+  } catch (err) {
+    showToast('Error', 'Failed to disconnect mailbox', 'error');
+  }
 }
 
 // ----------------- SCRAPER -----------------
@@ -238,263 +347,228 @@ function setScraperMode(mode) {
 function loadSampleDomains() {
   const sampleDomains = [
     'stripe.com',
-    'vercel.com',
+    'ycombinator.com',
     'supabase.com',
-    'github.com',
-    'linear.app',
-    'shopify.com',
-    'airbnb.com',
-    'notion.so',
-    'webflow.com',
-    'canva.com'
+    'postman.com'
   ];
-  document.getElementById('bulkUrls').value = sampleDomains.join('\n');
+  document.getElementById('bulkUrlsInput').value = sampleDomains.join('\n');
+  showToast('Samples Loaded', '4 sample tech domains ready to scrape', 'info');
 }
 
-function clearBulkDomains() {
-  document.getElementById('bulkUrls').value = '';
-}
+async function handleStartBulkScrape() {
+  const rawUrls = document.getElementById('bulkUrlsInput').value;
+  const urls = rawUrls.split('\n').map(u => u.trim()).filter(Boolean);
 
-function updateDepth(val) {
-  document.getElementById('depthVal').innerText = val;
-  const hints = ['Homepage only', 'Up to ~25 pages', 'Up to ~50 pages', 'Deep crawl'];
-  document.getElementById('depthHint').innerText = hints[val - 1];
-}
-
-async function handleStartBulkScrape(e) {
-  e.preventDefault();
-  const rawText = document.getElementById('bulkUrls').value.trim();
-  if (!rawText) {
-    alert('Please enter at least 1 website URL or domain.');
+  if (urls.length === 0) {
+    showToast('Input Required', 'Please enter at least one target website URL', 'warning');
     return;
   }
 
-  const urls = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-  const scope = document.getElementById('bulkCrawlScope').value;
-  const depth = scope === 'fast' ? 2 : 3;
-  const maxPages = scope === 'fast' ? 18 : 35;
+  const maxPages = parseInt(document.getElementById('bulkMaxPages').value) || 15;
+  const concurrency = parseInt(document.getElementById('bulkConcurrency').value) || 5;
 
   const btn = document.getElementById('bulkScrapeBtn');
-  const progressBox = document.getElementById('scrapeProgressBox');
-  const resultBox = document.getElementById('bulkResultBox');
-
   btn.disabled = true;
-  btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Extracting Emails from ${urls.length} Sites...`;
-  progressBox.classList.remove('hidden');
-  resultBox.classList.add('hidden');
-  document.getElementById('scrapeProgressTitle').innerText = `Crawling ${urls.length} websites in parallel...`;
+  btn.innerText = `Crawling ${urls.length} Websites in Parallel...`;
+
+  const progressCard = document.getElementById('scrapeProgressCard');
+  progressCard.classList.remove('hidden');
+  document.getElementById('scrapeStatusText').innerText = `Scraping & resolving MX for ${urls.length} sites...`;
+  document.getElementById('scrapeProgressBar').style.width = '25%';
 
   try {
-    const res = await apiFetch('/scraper/bulk-crawl', {
+    const res = await apiFetch('/scraper/bulk', {
       method: 'POST',
       body: JSON.stringify({
         urls,
-        depth,
-        max_pages_per_site: maxPages
+        max_pages_per_domain: maxPages,
+        concurrency
       })
     });
 
     const data = await res.json();
     if (!res.ok) {
-      alert(data.detail || 'Bulk scraping failed');
+      showToast('Scraper Error', data.detail || 'Bulk scrape failed', 'error');
       return;
     }
 
-    currentBatchResults = data.sites || [];
-
-    // Populate Metrics
-    document.getElementById('bTotalSites').innerText = data.total_sites;
-    document.getElementById('bSuccessSites').innerText = data.successful_sites;
-    document.getElementById('bPagesVisited').innerText = data.total_pages_visited;
-    document.getElementById('bCleanEmails').innerText = data.total_clean_emails;
-    document.getElementById('bSavedLeads').innerText = data.total_saved_leads;
-
-    // Populate Breakdown Table
-    const tableContainer = document.getElementById('siteResultsTable');
-    if (!data.sites || data.sites.length === 0) {
-      tableContainer.innerHTML = '<div class="p-6 text-center text-slate-500">No websites processed</div>';
-    } else {
-      tableContainer.innerHTML = data.sites.map(site => {
-        const isSuccess = site.emails && site.emails.length > 0;
-        const statusBadge = isSuccess
-          ? `<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px]">✓ ${site.emails.length} Found</span>`
-          : site.status === 'FAILED'
-            ? `<span class="px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-bold text-[11px]">Failed</span>`
-            : `<span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold text-[11px]">0 Emails</span>`;
-
-        const emailBadges = isSuccess
-          ? site.emails.map(email => `
-              <span onclick="copyEmail(this, '${email}')" title="Click to copy" class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-orange-500/30 hover:border-orange-500 text-orange-300 font-mono text-[11px] transition-all">
-                ✉️ ${email}
-              </span>
-            `).join(' ')
-          : `<span class="text-slate-500 italic">No public email found on crawled pages</span>`;
-
-        return `
-          <div class="p-4 hover:bg-slate-900/60 transition-colors flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div class="space-y-1.5">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-white text-sm">${site.company || site.domain}</span>
-                <a href="${site.url}" target="_blank" class="text-slate-500 hover:text-slate-300 text-[11px]">(${site.domain}) ↗</a>
-                ${statusBadge}
-                <span class="text-[10px] text-slate-500">${site.pages_visited} pages</span>
-              </div>
-              <div class="flex flex-wrap gap-1.5 pt-0.5">
-                ${emailBadges}
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    resultBox.classList.remove('hidden');
-    // Reload dashboard numbers in background
+    document.getElementById('scrapeProgressBar').style.width = '100%';
+    currentBatchResults = data.site_results || [];
+    renderBatchResults(data);
+    showToast('Scrape Completed!', `Extracted ${data.total_clean_emails_found} verified emails across ${data.total_sites_processed} domains`, 'success');
     loadStats();
   } catch (err) {
-    console.error('Bulk scrape error:', err);
-    alert('Scraper error: ' + (err.message || 'Network request failed. Make sure server is running.'));
+    showToast('Scraper Exception', 'Network error running bulk crawl', 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<span>🚀</span> Extract Clean Emails from All Websites`;
-    progressBox.classList.add('hidden');
+    btn.innerText = '🚀 Run Bulk Scrape & MX Verification';
+    progressCard.classList.add('hidden');
   }
 }
 
-async function handleStartSingleScrape(e) {
-  e.preventDefault();
-  const btn = document.getElementById('singleScrapeBtn');
-  const url = document.getElementById('scrapeUrl').value.trim();
-  const depth = parseInt(document.getElementById('scrapeDepth').value);
-
-  if (!url) {
-    alert('Please enter a target URL');
+async function handleStartScrape() {
+  const targetUrl = document.getElementById('targetUrl').value;
+  if (!targetUrl) {
+    showToast('Input Required', 'Please enter a target URL to scrape', 'warning');
     return;
   }
 
+  const depth = parseInt(document.getElementById('crawlDepth').value);
+  const btn = document.getElementById('scrapeBtn');
   btn.disabled = true;
-  btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2"></div> Crawling site...`;
+  btn.innerText = 'Initiating Scraper...';
 
   try {
-    const res = await apiFetch('/scraper/crawl', {
+    const res = await apiFetch('/scraper/jobs', {
       method: 'POST',
-      body: JSON.stringify({ url, depth })
+      body: JSON.stringify({ target_url: targetUrl, depth })
     });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.detail || 'Scraping failed');
+      showToast('Error', data.detail || 'Failed to start job', 'error');
+      btn.disabled = false;
+      btn.innerText = 'Start Deep Website Scrape';
       return;
     }
 
-    // Switch to bulk view and display the single result cleanly
-    setScraperMode('bulk');
-    document.getElementById('bTotalSites').innerText = '1';
-    document.getElementById('bSuccessSites').innerText = data.emails_clean > 0 ? '1' : '0';
-    document.getElementById('bPagesVisited').innerText = data.pages_visited;
-    document.getElementById('bCleanEmails').innerText = data.emails_clean;
-    document.getElementById('bSavedLeads').innerText = data.saved_to_db;
-
-    const emailBadges = data.emails && data.emails.length > 0
-      ? data.emails.map(email => `
-          <span onclick="copyEmail(this, '${email}')" title="Click to copy" class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-orange-500/30 hover:border-orange-500 text-orange-300 font-mono text-[11px] transition-all">
-            ✉️ ${email}
-          </span>
-        `).join(' ')
-      : `<span class="text-slate-500 italic">No public email found</span>`;
-
-    document.getElementById('siteResultsTable').innerHTML = `
-      <div class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="space-y-1.5">
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-white text-sm">${data.target_url}</span>
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px]">✓ ${data.emails_clean} Found</span>
-            <span class="text-[10px] text-slate-500">${data.pages_visited} pages</span>
-          </div>
-          <div class="flex flex-wrap gap-1.5 pt-0.5">${emailBadges}</div>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('bulkResultBox').classList.remove('hidden');
-    loadStats();
+    showToast('Job Started', 'Crawler dispatched. Polling for results...', 'info');
+    pollJob(data.id);
   } catch (err) {
-    console.error('Single scrape error:', err);
-    alert('Scraper error: ' + (err.message || 'Network request failed.'));
-  } finally {
+    showToast('Error', 'Scraper failed to launch', 'error');
     btn.disabled = false;
-    btn.innerText = '🕷️ Crawl & Extract Clean Emails';
+    btn.innerText = 'Start Deep Website Scrape';
   }
 }
 
-function copyEmail(el, email) {
-  navigator.clipboard.writeText(email);
-  const orig = el.innerHTML;
-  el.innerHTML = '✓ Copied!';
-  el.classList.add('bg-emerald-500/20', 'text-emerald-300');
-  setTimeout(() => {
-    el.innerHTML = orig;
-    el.classList.remove('bg-emerald-500/20', 'text-emerald-300');
-  }, 1500);
+async function pollJob(jobId) {
+  const btn = document.getElementById('scrapeBtn');
+  const progressCard = document.getElementById('scrapeProgressCard');
+  progressCard.classList.remove('hidden');
+
+  const interval = setInterval(async () => {
+    try {
+      const res = await apiFetch(`/scraper/jobs/${jobId}`);
+      if (!res.ok) return;
+      const job = await res.json();
+
+      document.getElementById('scrapeStatusText').innerText = `Crawling: ${job.target_url} (${job.pages_scraped} pages scanned)`;
+      document.getElementById('scrapeProgressBar').style.width = job.status === 'COMPLETED' ? '100%' : '60%';
+
+      if (job.status === 'COMPLETED') {
+        clearInterval(interval);
+        progressCard.classList.add('hidden');
+        btn.disabled = false;
+        btn.innerText = 'Start Deep Website Scrape';
+
+        currentBatchResults = [{
+          url: job.target_url,
+          status: 'SUCCESS',
+          pages_scraped: job.pages_scraped,
+          emails_found: job.emails_found,
+          clean_emails: job.clean_emails || []
+        }];
+
+        renderBatchResults({
+          total_sites_processed: 1,
+          total_clean_emails_found: job.emails_found,
+          site_results: currentBatchResults
+        });
+
+        showToast('Crawl Complete', `Extracted ${job.emails_found} emails from ${job.target_url}`, 'success');
+        loadStats();
+      } else if (job.status === 'FAILED') {
+        clearInterval(interval);
+        progressCard.classList.add('hidden');
+        btn.disabled = false;
+        btn.innerText = 'Start Deep Website Scrape';
+        showToast('Crawl Failed', 'Target site blocked connection or timed out', 'error');
+      }
+    } catch (err) {
+      clearInterval(interval);
+    }
+  }, 2500);
+}
+
+function renderBatchResults(data) {
+  const card = document.getElementById('scrapeResultsCard');
+  const table = document.getElementById('siteResultsTable');
+  const badge = document.getElementById('resultsCountBadge');
+
+  card.classList.remove('hidden');
+  badge.innerText = `${data.total_clean_emails_found} emails across ${data.total_sites_processed} sites`;
+
+  if (!data.site_results || data.site_results.length === 0) {
+    table.innerHTML = '<div class="p-6 text-center text-slate-500">No results found</div>';
+    return;
+  }
+
+  table.innerHTML = data.site_results.map(r => `
+    <div class="p-5 hover:bg-slate-900/30 transition-colors">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-white text-sm">${r.url}</span>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${
+            r.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400'
+          }">
+            ${r.status}
+          </span>
+        </div>
+        <div class="text-xs text-slate-400 font-mono">
+          Pages scanned: ${r.pages_scraped} | Clean emails: <span class="text-orange-400 font-bold">${r.clean_emails ? r.clean_emails.length : r.emails_found}</span>
+        </div>
+      </div>
+
+      ${r.clean_emails && r.clean_emails.length > 0 ? `
+        <div class="flex flex-wrap gap-2 pt-1">
+          ${r.clean_emails.map(email => `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono group hover:border-orange-500/40 transition-colors">
+              <span>${email}</span>
+              <button onclick="copyToClipboard('${email}', this)" title="Copy email" class="text-[10px] text-slate-500 hover:text-orange-400 transition-colors font-sans">
+                📋
+              </button>
+            </span>
+          `).join('')}
+        </div>
+      ` : `
+        <p class="text-xs text-slate-500 italic">No contact addresses found on reachable pages.</p>
+      `}
+    </div>
+  `).join('');
+
+  card.scrollIntoView({ behavior: 'smooth' });
 }
 
 function exportBatchCsv() {
   if (!currentBatchResults || currentBatchResults.length === 0) {
-    alert('No batch results to export yet. Run a scrape first.');
+    showToast('Export Unavailable', 'No batch results to export', 'warning');
     return;
   }
 
-  let rows = [["Email", "Company", "Website", "Status"]];
-  for (const site of currentBatchResults) {
-    if (site.emails && site.emails.length > 0) {
-      for (const email of site.emails) {
-        rows.push([email, site.company || '', site.url || '', site.status || '']);
-      }
+  const rows = [['Website Domain', 'Contact Email', 'Status']];
+  currentBatchResults.forEach(site => {
+    if (site.clean_emails && site.clean_emails.length > 0) {
+      site.clean_emails.forEach(email => {
+        rows.push([site.url, email, 'VERIFIED_MX']);
+      });
     } else {
-      rows.push(["", site.company || '', site.url || '', site.status || '']);
+      rows.push([site.url, 'NO_EMAIL_FOUND', site.status]);
     }
-  }
+  });
 
-  const csvString = rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(",")).join("\r\n");
-  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", `outreachbot_batch_${Date.now()}.csv`);
+  const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(e => e.join(',')).join('\n');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', 'outreachbot_batch_results.csv');
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
-}
-
-async function exportAllLeadsCsv() {
-  const t = localStorage.getItem('outreach_token');
-  if (!t) {
-    alert('Please log in first.');
-    return;
-  }
-  try {
-    const res = await apiFetch('/leads/export');
-    if (!res || !res.ok) {
-      window.open(`/api/leads/export?token=${encodeURIComponent(t)}`, '_blank');
-      return;
-    }
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `outreachbot_all_leads_${Date.now()}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    window.open(`/api/leads/export?token=${encodeURIComponent(t)}`, '_blank');
-  }
+  showToast('CSV Downloaded', 'Batch leads exported successfully', 'success');
 }
 
 // ----------------- LEADS -----------------
 async function loadLeads() {
-  const search = document.getElementById('leadSearchInput') ? document.getElementById('leadSearchInput').value : '';
+  const search = document.getElementById('leadSearchInput').value;
   const tbody = document.getElementById('leadsTableBody');
 
   try {
@@ -508,22 +582,25 @@ async function loadLeads() {
     }
 
     tbody.innerHTML = data.leads.map(l => `
-      <tr class="hover:bg-slate-800/40 transition-colors">
-        <td class="px-5 py-3.5 font-bold text-white">${l.email}</td>
-        <td class="px-5 py-3.5 text-xs text-slate-400">${l.company || '—'}</td>
-        <td class="px-5 py-3.5">
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+      <tr class="hover:bg-slate-900/40 transition-colors">
+        <td class="px-6 py-4 font-bold text-white font-mono text-xs flex items-center gap-2">
+          <span>${l.email}</span>
+          <button onclick="copyToClipboard('${l.email}', this)" class="text-[10px] text-slate-500 hover:text-orange-400">📋</button>
+        </td>
+        <td class="px-6 py-4 text-xs text-slate-400">${l.company || '—'}</td>
+        <td class="px-6 py-4">
+          <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             MX OK
           </span>
         </td>
-        <td class="px-5 py-3.5">
-          ${l.status === 'SENT' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SENT</span>' :
-            l.status === 'SKIPPED' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">SKIPPED (Duplicate)</span>' :
-            l.status === 'FAILED' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">FAILED</span>' :
-            `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">${l.status}</span>`}
+        <td class="px-6 py-4">
+          ${l.status === 'SENT' ? '<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SENT</span>' :
+            l.status === 'SKIPPED' ? '<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">SKIPPED (Duplicate)</span>' :
+            l.status === 'FAILED' ? '<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">FAILED</span>' :
+            `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">${l.status}</span>`}
         </td>
-        <td class="px-5 py-3.5 text-right">
-          <button onclick="deleteLead('${l.id}')" class="text-xs text-red-400 hover:text-red-300">Delete</button>
+        <td class="px-6 py-4 text-right">
+          <button onclick="deleteLead('${l.id}')" class="text-xs text-red-400 hover:text-red-300 font-semibold px-2 py-1 rounded hover:bg-red-500/10 transition-colors">Delete</button>
         </td>
       </tr>
     `).join('');
@@ -533,8 +610,38 @@ async function loadLeads() {
 }
 
 async function deleteLead(id) {
-  await apiFetch(`/leads/${id}`, { method: 'DELETE' });
-  loadLeads();
+  try {
+    const res = await apiFetch(`/leads/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('Lead Deleted', 'Contact removed from database', 'info');
+      loadLeads();
+      loadStats();
+    }
+  } catch (err) {
+    showToast('Error', 'Failed to delete lead', 'error');
+  }
+}
+
+async function exportAllLeadsCsv() {
+  try {
+    const res = await apiFetch('/leads/export');
+    if (!res || !res.ok) {
+      showToast('Export Error', 'Failed to generate CSV export', 'error');
+      return;
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `outreachbot_all_leads_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    showToast('Export Complete', 'All cold leads downloaded successfully', 'success');
+  } catch (err) {
+    showToast('Export Failed', 'Network error during download', 'error');
+  }
 }
 
 // ----------------- CAMPAIGNS -----------------
@@ -620,20 +727,20 @@ function renderLeadCheckboxes(preselectedIds = []) {
       : (!lead.campaign_id && lead.status === 'PENDING');
 
     const statusBadge = lead.status === 'SENT'
-      ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SENT</span>'
+      ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SENT</span>'
       : lead.status === 'SKIPPED'
-      ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">SKIPPED</span>'
-      : `<span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${lead.status}</span>`;
+      ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">SKIPPED</span>'
+      : `<span class="text-[9px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">${lead.status}</span>`;
 
-    const assignedTag = lead.campaign_id ? '<span class="text-[9px] text-slate-500 italic">(assigned)</span>' : '';
+    const assignedTag = lead.campaign_id ? '<span class="text-[10px] text-slate-500 italic mr-1">(assigned)</span>' : '';
 
     return `
-      <label class="lead-checkbox-row flex items-center justify-between p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer transition-colors" data-email="${lead.email.toLowerCase()}" data-company="${(lead.company || '').toLowerCase()}" data-unassigned="${!lead.campaign_id}">
-        <div class="flex items-center gap-2.5 overflow-hidden">
+      <label class="lead-checkbox-row flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 cursor-pointer transition-colors" data-email="${lead.email.toLowerCase()}" data-company="${(lead.company || '').toLowerCase()}" data-unassigned="${!lead.campaign_id}">
+        <div class="flex items-center gap-3 overflow-hidden">
           <input type="checkbox" value="${lead.id}" ${isChecked ? 'checked' : ''} onchange="updateSelectedCount()" class="cLeadCheckbox h-4 w-4 rounded border-slate-700 bg-slate-950 text-orange-500 focus:ring-0">
           <div class="truncate">
-            <span class="font-bold text-white text-xs">${lead.email}</span>
-            <span class="text-slate-400 text-[11px] ml-1.5">${lead.company || ''}</span>
+            <span class="font-bold text-white text-xs font-mono">${lead.email}</span>
+            <span class="text-slate-400 text-[11px] ml-2">${lead.company || ''}</span>
           </div>
         </div>
         <div class="flex items-center gap-1.5 shrink-0 ml-2">
@@ -696,7 +803,7 @@ async function openEditCampaign(campaignId) {
   try {
     const res = await apiFetch(`/campaigns/${campaignId}`);
     if (!res || !res.ok) {
-      alert('Failed to load campaign details');
+      showToast('Error', 'Failed to load campaign details', 'error');
       return;
     }
     const c = await res.json();
@@ -718,7 +825,7 @@ async function openEditCampaign(campaignId) {
     
     document.getElementById('campaignFormCard').scrollIntoView({ behavior: 'smooth' });
   } catch (err) {
-    alert('Error fetching campaign details');
+    showToast('Error', 'Failed to fetch campaign details', 'error');
   }
 }
 
@@ -750,15 +857,15 @@ async function handleSaveCampaign(e) {
     });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.detail || 'Failed to save campaign');
+      showToast('Validation Error', data.detail || 'Failed to save campaign', 'error');
       return;
     }
 
-    alert(isEdit ? 'Campaign updated successfully!' : 'Campaign created and leads assigned!');
+    showToast(isEdit ? 'Campaign Updated' : 'Campaign Created', isEdit ? 'Settings and leads updated.' : 'Leads assigned and campaign ready.', 'success');
     document.getElementById('campaignFormCard').classList.add('hidden');
     loadCampaigns();
   } catch (err) {
-    alert('Error saving campaign');
+    showToast('Error', 'Network error saving campaign', 'error');
   }
 }
 
@@ -767,12 +874,13 @@ async function startCampaign(campaignId) {
     const res = await apiFetch(`/campaigns/${campaignId}/start`, { method: 'POST' });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.detail || 'Failed to start campaign');
+      showToast('Cannot Start', data.detail || 'Failed to start campaign', 'warning');
       return;
     }
+    showToast('Campaign Started', 'Outreach batch launched with randomized anti-spam delays', 'success');
     loadCampaigns();
   } catch (err) {
-    alert('Error starting campaign');
+    showToast('Error', 'Failed to trigger campaign batch', 'error');
   }
 }
 
@@ -781,12 +889,13 @@ async function pauseCampaign(campaignId) {
     const res = await apiFetch(`/campaigns/${campaignId}/pause`, { method: 'POST' });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.detail || 'Failed to pause campaign');
+      showToast('Error', data.detail || 'Failed to pause campaign', 'error');
       return;
     }
+    showToast('Campaign Paused', 'Outbound sending halted safely', 'info');
     loadCampaigns();
   } catch (err) {
-    alert('Error pausing campaign');
+    showToast('Error', 'Failed to pause campaign', 'error');
   }
 }
 
@@ -798,12 +907,13 @@ async function deleteCampaign(campaignId) {
     const res = await apiFetch(`/campaigns/${campaignId}`, { method: 'DELETE' });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.detail || 'Failed to delete campaign');
+      showToast('Error', data.detail || 'Failed to delete campaign', 'error');
       return;
     }
+    showToast('Campaign Deleted', 'Campaign removed and prospects safely unassigned', 'info');
     loadCampaigns();
   } catch (err) {
-    alert('Error deleting campaign');
+    showToast('Error', 'Failed to delete campaign', 'error');
   }
 }
 
@@ -816,7 +926,7 @@ async function loadCampaigns() {
 
     if (campaigns.length === 0) {
       container.innerHTML = `
-        <div class="p-8 text-center text-slate-500 rounded-2xl border border-slate-800 bg-slate-900">
+        <div class="p-10 text-center text-slate-500 rounded-3xl border border-slate-800 bg-slate-900/40">
           <p class="font-bold text-white text-base">No campaigns yet</p>
           <p class="text-xs text-slate-400 mt-1">Create your first outreach campaign to pitch to your extracted leads.</p>
         </div>`;
@@ -834,31 +944,31 @@ async function loadCampaigns() {
       if (isRunning) hasRunningCampaign = true;
 
       const statusBadge = isRunning
-        ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span> RUNNING</span>`
+        ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shadow-sm"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span> RUNNING</span>`
         : c.status === 'PAUSED'
-        ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">⏸ PAUSED</span>`
+        ? `<span class="px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/25">⏸ PAUSED</span>`
         : c.status === 'COMPLETED'
-        ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">✓ COMPLETED</span>`
-        : `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300">${c.status}</span>`;
+        ? `<span class="px-3 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/25">✓ COMPLETED</span>`
+        : `<span class="px-3 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">${c.status}</span>`;
 
       const primaryActionBtn = isRunning
-        ? `<button onclick="pauseCampaign('${c.id}')" class="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-400 font-bold text-xs transition-all flex items-center gap-1.5">⏸ Pause / Stop</button>`
-        : `<button onclick="startCampaign('${c.id}')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-1.5">▶ ${c.status === 'PAUSED' ? 'Resume Campaign' : 'Start Campaign'}</button>`;
+        ? `<button onclick="pauseCampaign('${c.id}')" class="px-4 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm">⏸ Pause / Stop</button>`
+        : `<button onclick="startCampaign('${c.id}')" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white shadow-lg shadow-emerald-600/25 transition-all flex items-center gap-1.5">▶ ${c.status === 'PAUSED' ? 'Resume Campaign' : 'Start Campaign'}</button>`;
 
       return `
-        <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row md:items-center md:justify-between gap-5 transition-all hover:border-slate-700">
+        <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80 flex flex-col md:flex-row md:items-center md:justify-between gap-5 transition-all hover:border-slate-700/80 hover:bg-slate-900/80 shadow-lg">
           <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2.5">
               <h4 class="font-bold text-white text-base">${c.name}</h4>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">${c.type}</span>
+              <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">${c.type}</span>
               ${statusBadge}
-              ${c.send_only_once ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">🛡️ Send Once Active</span>' : ''}
+              ${c.send_only_once ? '<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">🛡️ Send Once Active</span>' : ''}
             </div>
             
             <p class="text-xs text-slate-400">
               Sender: <span class="text-white font-medium">${c.sender_email}</span> · 
-              Total Leads: <span class="text-white font-medium">${c.leads_count}</span> · 
-              Queue: <span class="text-orange-400 font-medium">${c.pending_count} pending</span>
+              Pool: <span class="text-white font-medium">${c.leads_count} leads</span> · 
+              Queue: <span class="text-orange-400 font-semibold">${c.pending_count} pending</span>
             </p>
 
             <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500 pt-1">
@@ -871,10 +981,10 @@ async function loadCampaigns() {
 
           <div class="flex items-center gap-2 shrink-0">
             ${primaryActionBtn}
-            <button onclick="openEditCampaign('${c.id}')" title="Edit campaign settings or leads" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition-all">
+            <button onclick="openEditCampaign('${c.id}')" title="Edit campaign settings or leads" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition-all">
               ✏️ Edit
             </button>
-            <button onclick="deleteCampaign('${c.id}')" title="Delete campaign" class="px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-bold text-xs transition-all">
+            <button onclick="deleteCampaign('${c.id}')" title="Delete campaign" class="px-3 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-bold text-xs transition-all">
               🗑️
             </button>
           </div>
@@ -894,16 +1004,11 @@ async function loadCampaigns() {
   }
 }
 
-// Check URL params for verification confirmation
+// ----------------- URL VERIFICATION PARAMS -----------------
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('verified') === '1') {
   switchTab('senders');
-  const notice = document.getElementById('senderNotice');
-  if (notice) {
-    notice.className = 'p-4 rounded-xl text-xs font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 block';
-    notice.innerHTML = '🎉 <strong>Mailbox Verified Successfully!</strong> Your email account is verified and ready to send cold campaigns.';
-    notice.classList.remove('hidden');
-  }
+  showToast('Mailbox Verified! 🎉', 'Your email account is authenticated and ready to launch cold campaigns.', 'success');
   window.history.replaceState({}, document.title, window.location.pathname);
 } else {
   loadStats();
