@@ -120,12 +120,35 @@ function toggleSenderForm() {
 
 function handleProviderChange(val) {
   const customFields = document.getElementById('customSmtpFields');
+  const smtpFields = document.getElementById('smtpFields');
+  const cloudRelayFields = document.getElementById('cloudRelayFields');
   const host = document.getElementById('sHost');
-  if (val === 'CUSTOM') {
-    customFields.classList.remove('hidden');
+  const banner = document.getElementById('senderGuideBanner');
+
+  if (val === 'HYBRID' || val === 'BREVO' || val === 'RESEND') {
+    if (cloudRelayFields) cloudRelayFields.classList.remove('hidden');
+    if (smtpFields) smtpFields.classList.add('hidden');
+    if (customFields) customFields.classList.add('hidden');
+    if (banner) {
+      banner.innerHTML = `<strong class="text-orange-400">Cloud Relay Mode (Recommended for Render):</strong> Uses secure <strong>HTTPS Port 443</strong> (never blocked by Render or firewalls).
+      Combines <strong>Brevo (300 free emails/day)</strong> + <strong>Resend (3,000 free emails/month)</strong>. When one's credits are exhausted, OutreachBot switches to the other automatically!`;
+    }
+  } else if (val === 'CUSTOM') {
+    if (cloudRelayFields) cloudRelayFields.classList.add('hidden');
+    if (smtpFields) smtpFields.classList.remove('hidden');
+    if (customFields) customFields.classList.remove('hidden');
+    if (banner) {
+      banner.innerHTML = `<strong class="text-amber-400">Custom SMTP:</strong> Requires outbound SMTP ports (587/465). Note: Render Free blocks these ports; use Cloud Relay on Render or run locally via <code class="text-white">run.bat</code>.`;
+    }
   } else {
-    customFields.classList.add('hidden');
-    host.value = val === 'GMAIL' ? 'smtp.gmail.com' : 'smtp.office365.com';
+    // GMAIL or OUTLOOK
+    if (cloudRelayFields) cloudRelayFields.classList.add('hidden');
+    if (smtpFields) smtpFields.classList.remove('hidden');
+    if (customFields) customFields.classList.add('hidden');
+    if (host) host.value = val === 'GMAIL' ? 'smtp.gmail.com' : 'smtp.office365.com';
+    if (banner) {
+      banner.innerHTML = `<strong class="text-orange-400">${val === 'GMAIL' ? 'Gmail' : 'Outlook'} SMTP:</strong> Generate an App Password in your account security settings. Note: Port 587 is blocked on Render Free; if deploying on Render, select <strong>Cloud Relay (Brevo + Resend)</strong> above.`;
+    }
   }
 }
 
@@ -140,17 +163,34 @@ async function loadSenders() {
       container.innerHTML = `
         <div class="p-8 text-center text-slate-500">
           <p class="font-bold text-white text-base">No mailboxes connected</p>
-          <p class="text-xs text-slate-400 mt-1">Connect your Gmail or Outlook account to start sending campaigns.</p>
+          <p class="text-xs text-slate-400 mt-1">Connect your Brevo, Resend, or Gmail account to start sending campaigns.</p>
         </div>`;
       return;
     }
 
-    container.innerHTML = senders.map(s => `
+    container.innerHTML = senders.map(s => {
+      let provBadge = s.provider;
+      let provClass = "bg-slate-800 text-slate-300";
+      if (s.provider === 'HYBRID') {
+        provBadge = '⚡ Cloud Relay (Brevo + Resend)';
+        provClass = 'bg-orange-500/10 text-orange-400 border border-orange-500/20';
+      } else if (s.provider === 'BREVO') {
+        provBadge = 'Brevo API (300/day)';
+        provClass = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+      } else if (s.provider === 'RESEND') {
+        provBadge = 'Resend API (3k/mo)';
+        provClass = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      }
+
+      const relayInfo = s.last_used_relay ? `<span class="text-[10px] text-orange-400 font-mono ml-2">Active: ${s.last_used_relay.toUpperCase()}</span>` : '';
+
+      return `
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 gap-3">
         <div>
           <div class="flex items-center gap-2">
             <span class="font-bold text-white">${s.display_name}</span>
-            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">${s.provider}</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${provClass}">${provBadge}</span>
+            ${relayInfo}
           </div>
           <p class="text-xs text-slate-400 mt-0.5">${s.email}</p>
           <p class="text-[11px] text-slate-500 mt-1">Daily quota: ${s.daily_limit} | Sent today: ${s.sent_today}</p>
@@ -168,7 +208,8 @@ async function loadSenders() {
           </button>
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
   } catch (err) {
     console.error(err);
   }
@@ -180,14 +221,17 @@ async function handleConnectSender(e) {
   btn.disabled = true;
   btn.innerText = 'Testing Connection...';
 
+  const provider = document.getElementById('sProvider').value;
   const payload = {
-    email: document.getElementById('sEmail').value,
-    display_name: document.getElementById('sName').value,
-    provider: document.getElementById('sProvider').value,
-    smtp_host: document.getElementById('sHost').value,
-    smtp_port: parseInt(document.getElementById('sPort').value),
-    smtp_user: document.getElementById('sEmail').value,
-    smtp_password: document.getElementById('sPassword').value
+    email: document.getElementById('sEmail').value.trim(),
+    display_name: document.getElementById('sName').value.trim(),
+    provider: provider,
+    smtp_host: document.getElementById('sHost') ? document.getElementById('sHost').value.trim() : 'smtp.gmail.com',
+    smtp_port: document.getElementById('sPort') ? parseInt(document.getElementById('sPort').value) : 587,
+    smtp_user: document.getElementById('sEmail').value.trim(),
+    smtp_password: document.getElementById('sPassword') ? document.getElementById('sPassword').value.trim() : '',
+    brevo_api_key: document.getElementById('sBrevoKey') ? document.getElementById('sBrevoKey').value.trim() : '',
+    resend_api_key: document.getElementById('sResendKey') ? document.getElementById('sResendKey').value.trim() : ''
   };
 
   try {
@@ -197,11 +241,11 @@ async function handleConnectSender(e) {
     });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.detail || 'Failed to authenticate with SMTP server');
+      alert(data.detail || 'Failed to authenticate mailbox');
       return;
     }
 
-    alert(data.message || 'Connected successfully! Check your inbox for verification link.');
+    alert(data.message || 'Connected & verified successfully!');
     toggleSenderForm();
     loadSenders();
   } catch (err) {

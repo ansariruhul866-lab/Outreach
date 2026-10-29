@@ -37,19 +37,54 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def run_migrations():
-    import sqlite3
     if "sqlite" in DATABASE_URL and DB_PATH and os.path.exists(DB_PATH):
+        import sqlite3
         try:
             conn = sqlite3.connect(DB_PATH)
             cur = conn.cursor()
-            cols = [c[1] for c in cur.execute("PRAGMA table_info(campaigns)").fetchall()]
-            if cols:
-                if "send_only_once" not in cols:
+            
+            # campaigns columns
+            c_cols = [c[1] for c in cur.execute("PRAGMA table_info(campaigns)").fetchall()]
+            if c_cols:
+                if "send_only_once" not in c_cols:
                     cur.execute("ALTER TABLE campaigns ADD COLUMN send_only_once BOOLEAN DEFAULT 1")
-                if "total_skipped" not in cols:
+                if "total_skipped" not in c_cols:
                     cur.execute("ALTER TABLE campaigns ADD COLUMN total_skipped INTEGER DEFAULT 0")
-                conn.commit()
+
+            # sender_emails columns
+            s_cols = [c[1] for c in cur.execute("PRAGMA table_info(sender_emails)").fetchall()]
+            if s_cols:
+                if "brevo_api_key_enc" not in s_cols:
+                    cur.execute("ALTER TABLE sender_emails ADD COLUMN brevo_api_key_enc TEXT")
+                if "resend_api_key_enc" not in s_cols:
+                    cur.execute("ALTER TABLE sender_emails ADD COLUMN resend_api_key_enc TEXT")
+                if "last_used_relay" not in s_cols:
+                    cur.execute("ALTER TABLE sender_emails ADD COLUMN last_used_relay VARCHAR")
+
+            # leads columns
+            l_cols = [c[1] for c in cur.execute("PRAGMA table_info(leads)").fetchall()]
+            if l_cols:
+                if "delivery_provider" not in l_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN delivery_provider VARCHAR")
+
+            conn.commit()
             conn.close()
+        except Exception:
+            pass
+    elif "postgres" in DATABASE_URL:
+        # PostgreSQL dynamic safe migration
+        from sqlalchemy import text
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS send_only_once BOOLEAN DEFAULT TRUE;"))
+                conn.execute(text("ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS total_skipped INTEGER DEFAULT 0;"))
+                conn.execute(text("ALTER TABLE sender_emails ADD COLUMN IF NOT EXISTS brevo_api_key_enc TEXT;"))
+                conn.execute(text("ALTER TABLE sender_emails ADD COLUMN IF NOT EXISTS resend_api_key_enc TEXT;"))
+                conn.execute(text("ALTER TABLE sender_emails ADD COLUMN IF NOT EXISTS last_used_relay VARCHAR;"))
+                conn.execute(text("ALTER TABLE sender_emails ALTER COLUMN smtp_user DROP NOT NULL;"))
+                conn.execute(text("ALTER TABLE sender_emails ALTER COLUMN smtp_password_enc DROP NOT NULL;"))
+                conn.execute(text("ALTER TABLE leads ADD COLUMN IF NOT EXISTS delivery_provider VARCHAR;"))
+                conn.commit()
         except Exception:
             pass
 
