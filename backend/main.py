@@ -11,8 +11,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("outreachbot")
 
 # Init DB models
-from core.database import engine, Base
+from core.database import engine, Base, run_migrations
+import core.models  # Ensure all SQLAlchemy models are registered
 Base.metadata.create_all(bind=engine)
+run_migrations()
 
 # Routers
 from api.auth import router as auth_router
@@ -50,6 +52,13 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={"detail": str(exc), "traceback": tb}
     )
+
+@app.on_event("startup")
+def startup_event():
+    import core.models
+    Base.metadata.create_all(bind=engine)
+    run_migrations()
+    logger.info("Database schema initialized and verified.")
 
 @app.get("/health")
 def health():
