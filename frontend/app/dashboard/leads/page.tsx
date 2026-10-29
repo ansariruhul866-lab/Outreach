@@ -293,7 +293,7 @@ export default function LeadsPage() {
       {/* Add Lead Modal */}
       {addModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl">
             <button
               onClick={() => setAddModalOpen(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white"

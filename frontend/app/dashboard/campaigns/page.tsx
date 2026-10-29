@@ -350,228 +350,234 @@ export default function CampaignsPage() {
 
       {/* Campaign Create/Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in overflow-y-auto">
-          <div className="relative w-full max-w-3xl my-8 p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl space-y-6">
-            <button
-              onClick={() => setModalOpen(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                {editingId ? "Edit Campaign Sequence" : "Create Cold Outreach Campaign"}
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                Configure your pitch template, selective lead checklist, and anti-spam delay
-              </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            {/* Pinned Header */}
+            <div className="shrink-0 px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/95 backdrop-blur-sm">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-white">
+                  {editingId ? "Edit Campaign Sequence" : "Create Cold Outreach Campaign"}
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Configure your pitch template, selective lead checklist, and anti-spam delay
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="p-2 -mr-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <form onSubmit={handleSaveCampaign} className="space-y-6">
-              {/* Name & Type */}
-              <div className="grid sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSaveCampaign} className="flex-1 flex flex-col overflow-hidden">
+              {/* Scrollable Form Fields */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {/* Name & Type */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
+                      Campaign Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Q4 SaaS Partnership Outreach"
+                      className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
+                      Sending Mailbox *
+                    </label>
+                    <select
+                      value={senderId}
+                      onChange={(e) => setSenderId(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                    >
+                      {senders.length === 0 ? (
+                        <option value="">No mailboxes connected</option>
+                      ) : (
+                        senders.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.display_name} ({s.email}) &bull; {s.provider}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Template Presets */}
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-2">
+                    Template Presets
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {(Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => handlePresetChange(key)}
+                        className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
+                          type === key
+                            ? "bg-orange-500/10 border-orange-500 text-orange-400 font-bold"
+                            : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
+                        }`}
+                      >
+                        <p className="truncate">{PRESETS[key].name}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Subject */}
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
-                    Campaign Name *
+                    Subject Line
                   </label>
                   <input
                     type="text"
                     required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Q4 SaaS Partnership Outreach"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
                   />
                 </div>
 
+                {/* Body */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
-                    Sending Mailbox *
-                  </label>
-                  <select
-                    value={senderId}
-                    onChange={(e) => setSenderId(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
-                  >
-                    {senders.length === 0 ? (
-                      <option value="">No mailboxes connected</option>
-                    ) : (
-                      senders.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.display_name} ({s.email}) &bull; {s.provider}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              {/* Template Presets */}
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-2">
-                  Template Presets
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {(Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((key) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => handlePresetChange(key)}
-                      className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
-                        type === key
-                          ? "bg-orange-500/10 border-orange-500 text-orange-400 font-bold"
-                          : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
-                      }`}
-                    >
-                      <p className="truncate">{PRESETS[key].name}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Subject */}
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
-                  Subject Line
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
-                />
-              </div>
-
-              {/* Body */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-bold uppercase text-slate-400">
-                    Email Body Template (HTML supported)
-                  </label>
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                    <span>Variables:</span>
-                    <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{firstName}}"}</span>
-                    <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{company}}"}</span>
-                    <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{website}}"}</span>
-                    <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{senderName}}"}</span>
-                  </div>
-                </div>
-                <textarea
-                  rows={6}
-                  required
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-white focus:border-orange-500 focus:outline-none"
-                />
-              </div>
-
-              {/* Selective Leads Checklist */}
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-bold text-white flex items-center gap-2">
-                      <Users className="w-4 h-4 text-orange-400" />
-                      <span>Select Target Leads ({selectedLeadIds.length} of {availableLeads.length} selected)</span>
-                    </span>
-                    <p className="text-[10px] text-slate-500">Choose exactly which prospects will receive this campaign</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={selectAllLeads}
-                      className="px-2 py-1 rounded bg-slate-800 text-[10px] font-semibold text-slate-300 hover:text-white"
-                    >
-                      Select All
-                    </button>
-                    <button
-                      type="button"
-                      onClick={deselectAllLeads}
-                      className="px-2 py-1 rounded bg-slate-800 text-[10px] font-semibold text-slate-300 hover:text-white"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
-
-                <div className="max-h-48 overflow-y-auto divide-y divide-slate-850/60 border border-slate-850 rounded-xl bg-slate-900/40 p-2 space-y-1">
-                  {leadLoading ? (
-                    <div className="p-4 text-center text-xs text-slate-500">Loading prospects...</div>
-                  ) : availableLeads.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-slate-500">
-                      No available leads. Run the scraper or import CSV first.
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px] font-bold uppercase text-slate-400">
+                      Email Body Template (HTML supported)
+                    </label>
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 flex-wrap">
+                      <span>Variables:</span>
+                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{firstName}}"}</span>
+                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{company}}"}</span>
+                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{website}}"}</span>
+                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{senderName}}"}</span>
                     </div>
-                  ) : (
-                    availableLeads.map((lead) => {
-                      const isChecked = selectedLeadIds.includes(lead.id);
-                      return (
-                        <label
-                          key={lead.id}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer text-xs"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => toggleLead(lead.id)}
-                            className="rounded border-slate-700 text-orange-500 focus:ring-0"
-                          />
-                          <span className="font-mono text-slate-200">{lead.email}</span>
-                          {lead.company && <span className="text-slate-500">({lead.company})</span>}
-                          <span className="ml-auto text-[10px] uppercase font-bold text-slate-500">
-                            {lead.status}
-                          </span>
-                        </label>
-                      );
-                    })
-                  )}
+                  </div>
+                  <textarea
+                    rows={5}
+                    required
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-white focus:border-orange-500 focus:outline-none"
+                  />
+                </div>
+
+                {/* Selective Leads Checklist */}
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                      <span className="text-xs font-bold text-white flex items-center gap-2">
+                        <Users className="w-4 h-4 text-orange-400" />
+                        <span>Select Target Leads ({selectedLeadIds.length} of {availableLeads.length} selected)</span>
+                      </span>
+                      <p className="text-[10px] text-slate-500">Choose exactly which prospects will receive this campaign</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={selectAllLeads}
+                        className="px-2 py-1 rounded bg-slate-800 text-[10px] font-semibold text-slate-300 hover:text-white"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={deselectAllLeads}
+                        className="px-2 py-1 rounded bg-slate-800 text-[10px] font-semibold text-slate-300 hover:text-white"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto divide-y divide-slate-850/60 border border-slate-850 rounded-xl bg-slate-900/40 p-2 space-y-1">
+                    {leadLoading ? (
+                      <div className="p-4 text-center text-xs text-slate-500">Loading prospects...</div>
+                    ) : availableLeads.length === 0 ? (
+                      <div className="p-4 text-center text-xs text-slate-500">
+                        No available leads. Run the scraper or import CSV first.
+                      </div>
+                    ) : (
+                      availableLeads.map((lead) => {
+                        const isChecked = selectedLeadIds.includes(lead.id);
+                        return (
+                          <label
+                            key={lead.id}
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer text-xs"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleLead(lead.id)}
+                              className="rounded border-slate-700 text-orange-500 focus:ring-0"
+                            />
+                            <span className="font-mono text-slate-200">{lead.email}</span>
+                            {lead.company && <span className="text-slate-500">({lead.company})</span>}
+                            <span className="ml-auto text-[10px] uppercase font-bold text-slate-500">
+                              {lead.status}
+                            </span>
+                          </label>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Anti-spam & Delivery Controls */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <Clock className="w-4 h-4 text-amber-400" />
+                      <span>Anti-Spam Human Delay</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min={10}
+                        max={3600}
+                        value={sendDelay}
+                        onChange={(e) => setSendDelay(parseInt(e.target.value) || 45)}
+                        className="w-24 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                      />
+                      <span className="text-xs text-slate-400">sec base delay</span>
+                    </div>
+                    <p className="text-[10px] text-amber-400/90 font-medium">
+                      ⚡ Auto-adds random 0–120 seconds jitter after every email to mimic human pacing.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                        <span>Send Only Once</span>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={sendOnlyOnce}
+                        onChange={(e) => setSendOnlyOnce(e.target.checked)}
+                        className="rounded border-slate-700 text-orange-500 focus:ring-0"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Guarantees prospects who have previously been sent an email or replied will be safely skipped.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Anti-spam & Delivery Controls */}
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-white">
-                    <Clock className="w-4 h-4 text-amber-400" />
-                    <span>Anti-Spam Human Delay</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="number"
-                      min={10}
-                      max={3600}
-                      value={sendDelay}
-                      onChange={(e) => setSendDelay(parseInt(e.target.value) || 45)}
-                      className="w-24 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
-                    />
-                    <span className="text-xs text-slate-400">sec base delay</span>
-                  </div>
-                  <p className="text-[10px] text-amber-400/90 font-medium">
-                    ⚡ Auto-adds random 0–120 seconds jitter after every email to mimic human pacing.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                      <span>Send Only Once</span>
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={sendOnlyOnce}
-                      onChange={(e) => setSendOnlyOnce(e.target.checked)}
-                      className="rounded border-slate-700 text-orange-500 focus:ring-0"
-                    />
-                  </div>
-                  <p className="text-[10px] text-slate-400">
-                    Guarantees prospects who have previously been sent an email or replied will be safely skipped.
-                  </p>
-                </div>
-              </div>
-
-              {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+              {/* Pinned Modal Actions */}
+              <div className="shrink-0 px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3 bg-slate-900/95 backdrop-blur-sm">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
