@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://outreach-359l.onrender.com/api/$1" },
+    { "source": "/static/(.*)", "destination": "/backend/static/$1" },
+    { "source": "/app.html", "destination": "/backend/static/app.html" },
+    { "source": "/index.html", "destination": "/backend/static/index.html" },
+    { "source": "/", "destination": "/backend/static/index.html" }
+  ]
+}
