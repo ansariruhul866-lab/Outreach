@@ -151,11 +151,15 @@ async function loadSenders() {
     }
 
     container.innerHTML = senders.map(s => `
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 gap-3 border-b border-slate-800/60 last:border-b-0">
         <div>
           <div class="flex items-center gap-2">
             <span class="font-bold text-white">${s.display_name}</span>
-            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">${s.provider}</span>
+            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+              s.provider === 'GMAIL_API' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-slate-800 text-slate-400'
+            }">
+              ${s.provider === 'GMAIL_API' ? '⚡ Google Sign-In (Gmail API)' : s.provider}
+            </span>
           </div>
           <p class="text-xs text-slate-400 mt-0.5">${s.email}</p>
           <p class="text-[11px] text-slate-500 mt-1">Daily quota: ${s.daily_limit} | Sent today: ${s.sent_today}</p>
@@ -166,7 +170,7 @@ async function loadSenders() {
             s.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
             'bg-red-500/10 text-red-400 border border-red-500/20'
           }">
-            ${s.status === 'VERIFIED' ? '✓ Verified' : s.status === 'PENDING' ? '⏳ Verification Pending' : '✕ Failed'}
+            ${s.status === 'VERIFIED' ? '✓ Ready to Send' : s.status === 'PENDING' ? '⏳ Verification Pending' : '✕ Failed'}
           </span>
           <button onclick="deleteSender('${s.id}')" class="text-xs text-red-400 hover:text-red-300 border border-red-500/20 px-2.5 py-1 rounded-lg">
             Disconnect

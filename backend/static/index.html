@@ -486,24 +486,33 @@
       try {
         if (!auth) auth = window.initFirebase();
         const provider = new firebase.auth.GoogleAuthProvider();
+        // Request Gmail Send scope so this Gmail address is automatically connected as a sending mailbox!
+        provider.addScope('https://www.googleapis.com/auth/gmail.send');
+
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
+        const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+        const googleAccessToken = credential ? credential.accessToken : null;
         const idToken = await user.getIdToken();
 
-        await completeFirebaseBackendLogin(idToken, user.displayName);
+        await completeFirebaseBackendLogin(idToken, user.displayName, googleAccessToken);
       } catch (err) {
         errBox.innerText = `Google Sign-In failed: ${err.message}`;
         errBox.classList.remove('hidden');
       }
     }
 
-    async function completeFirebaseBackendLogin(idToken, name) {
+    async function completeFirebaseBackendLogin(idToken, name, googleAccessToken = null) {
       const errBox = document.getElementById('authError');
       try {
         const res = await fetch('/api/auth/firebase-login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_token: idToken, name: name })
+          body: JSON.stringify({
+            id_token: idToken,
+            name: name,
+            google_access_token: googleAccessToken
+          })
         });
         const data = await res.json();
         if (!res.ok) {

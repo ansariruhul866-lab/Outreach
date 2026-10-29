@@ -12,6 +12,7 @@ from core.database import get_db, SessionLocal
 from core.models import User, Campaign, SenderEmail, Lead
 from core.auth import get_current_user
 from core.encryption import decrypt_password
+from core.gmail_api import send_via_gmail_api
 
 logger = logging.getLogger("outreachbot")
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
@@ -310,7 +311,24 @@ async def execute_send_batch(campaign_id: str, user_id: str):
         if not sender:
             return
 
-        smtp_pass = decrypt_password(sender.smtp_password_enc, user_id)
+        is_gmail_api = (sender.provider == "GMAIL_API")
+        smtp_pass = None
+        oauth_token = None
+
+        if is_gmail_api:
+            if not sender.oauth_token_enc:
+                logger.error(f"Sender {sender.id} is GMAIL_API but missing oauth_token_enc")
+                campaign.status = "PAUSED"
+                db.commit()
+                return
+            oauth_token = decrypt_password(sender.oauth_token_enc, user_id)
+        else:
+            if not sender.smtp_password_enc:
+                logger.error(f"Sender {sender.id} missing SMTP password")
+                campaign.status = "PAUSED"
+                db.commit()
+                return
+            smtp_pass = decrypt_password(sender.smtp_password_enc, user_id)
 
         # Get pending leads up to daily limit
         leads = db.query(Lead).filter(
@@ -385,9 +403,12 @@ async def execute_send_batch(campaign_id: str, user_id: str):
             msg.attach(MIMEText(full_html, "html"))
 
             try:
-                async with aiosmtplib.SMTP(hostname=sender.smtp_host, port=sender.smtp_port, start_tls=True) as smtp:
-                    await smtp.login(sender.smtp_user, smtp_pass)
-                    await smtp.send_message(msg)
+                if is_gmail_api:
+                    await send_via_gmail_api(oauth_token, msg)
+                else:
+                    async with aiosmtplib.SMTP(hostname=sender.smtp_host, port=sender.smtp_port, start_tls=True) as smtp:
+                        await smtp.login(sender.smtp_user, smtp_pass)
+                        await smtp.send_message(msg)
 
                 lead.status = "SENT"
                 lead.sent_at = datetime.utcnow()

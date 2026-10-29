@@ -61,6 +61,15 @@ def run_migrations():
                     cur.execute("ALTER TABLE users ADD COLUMN is_email_verified BOOLEAN DEFAULT 0")
                 conn.commit()
 
+            # SenderEmails migrations for Gmail API OAuth
+            sender_cols = [c[1] for c in cur.execute("PRAGMA table_info(sender_emails)").fetchall()]
+            if sender_cols:
+                if "oauth_token_enc" not in sender_cols:
+                    cur.execute("ALTER TABLE sender_emails ADD COLUMN oauth_token_enc TEXT")
+                if "oauth_refresh_token_enc" not in sender_cols:
+                    cur.execute("ALTER TABLE sender_emails ADD COLUMN oauth_refresh_token_enc TEXT")
+                conn.commit()
+
             conn.close()
         except Exception:
             pass

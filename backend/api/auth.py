@@ -3,15 +3,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from core.database import get_db
-from core.models import User
+from core.models import User, SenderEmail
 from core.auth import verify_password, hash_password, create_access_token, get_current_user
 from core.firebase_auth import verify_firebase_id_token
+from core.encryption import encrypt_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 class FirebaseLoginRequest(BaseModel):
     id_token: str
     name: Optional[str] = None
+    google_access_token: Optional[str] = None
 
 class SignupRequest(BaseModel):
     name: str
@@ -66,6 +68,32 @@ async def firebase_login(req: FirebaseLoginRequest, db: Session = Depends(get_db
 
     db.commit()
     db.refresh(user)
+
+    # Auto-provision or update Mailbox when signed in via Google OAuth
+    if req.google_access_token:
+        encrypted_oauth = encrypt_password(req.google_access_token, user.id)
+        sender = db.query(SenderEmail).filter(
+            SenderEmail.user_id == user.id,
+            SenderEmail.email == email
+        ).first()
+
+        if sender:
+            sender.provider = "GMAIL_API"
+            sender.oauth_token_enc = encrypted_oauth
+            sender.status = "VERIFIED"
+            sender.display_name = user.name
+        else:
+            sender = SenderEmail(
+                user_id=user.id,
+                email=email,
+                display_name=user.name,
+                provider="GMAIL_API",
+                oauth_token_enc=encrypted_oauth,
+                status="VERIFIED",
+                daily_limit=100
+            )
+            db.add(sender)
+        db.commit()
 
     token = create_access_token(user.id, user.email)
     return TokenResponse(
