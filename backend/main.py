@@ -60,6 +60,24 @@ def startup_event():
     run_migrations()
     logger.info("Database schema initialized and verified.")
 
+@app.get("/api/test-smtp")
+def test_smtp_connectivity():
+    import socket
+    results = {}
+    for host, port in [
+        ("smtp.gmail.com", 587),
+        ("smtp.gmail.com", 465),
+        ("smtp-mail.outlook.com", 587),
+        ("smtp.mail.me.com", 587)
+    ]:
+        try:
+            s = socket.create_connection((host, port), timeout=4)
+            s.close()
+            results[f"{host}:{port}"] = "CONNECTED"
+        except Exception as e:
+            results[f"{host}:{port}"] = f"FAILED: {e}"
+    return results
+
 @app.get("/health")
 def health():
     return {"status": "ok", "platform": "OutreachBot Standalone SaaS"}
