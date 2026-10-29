@@ -1,28 +1,24 @@
 /**
  * OutreachBot Firebase Client Configuration
- * 
- * To connect your Firebase project:
- * 1. Go to https://console.firebase.google.com
- * 2. Select your project (or create one for free)
- * 3. Go to Project Settings (gear icon) > General > Your apps > Web app (</>)
- * 4. Copy the firebaseConfig values and paste them below:
+ * Connected to project: outreach-71a0c
  */
 
 window.FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB3ba6NW9DFGxYZmD1ZX6OUMyEEk45ipL8",
+  authDomain: "outreach-71a0c.firebaseapp.com",
+  projectId: "outreach-71a0c",
+  storageBucket: "outreach-71a0c.firebasestorage.app",
+  messagingSenderId: "670213371259",
+  appId: "1:670213371259:web:66282ab5d8a585d562f9de",
+  measurementId: "G-QWMVQHPEJB"
 };
 
-// Allow custom config saved via the browser settings UI
+// Allow custom config saved via the browser settings UI if needed
 try {
   const saved = localStorage.getItem('outreach_custom_firebase_config');
   if (saved) {
     const parsed = JSON.parse(saved);
-    if (parsed && parsed.apiKey && parsed.apiKey !== 'YOUR_API_KEY') {
+    if (parsed && parsed.apiKey) {
       window.FIREBASE_CONFIG = parsed;
     }
   }
@@ -33,13 +29,12 @@ function isFirebaseConfigured() {
   return !!(
     window.FIREBASE_CONFIG &&
     window.FIREBASE_CONFIG.apiKey &&
-    window.FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY' &&
-    window.FIREBASE_CONFIG.projectId &&
-    window.FIREBASE_CONFIG.projectId !== 'YOUR_PROJECT_ID'
+    window.FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY" &&
+    window.FIREBASE_CONFIG.projectId
   );
 }
 
-// Initialize Firebase App if configured
+// Initialize Firebase App
 window.initFirebase = function() {
   if (isFirebaseConfigured() && window.firebase) {
     try {
