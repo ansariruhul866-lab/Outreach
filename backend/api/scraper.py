@@ -93,7 +93,8 @@ BROWSER_HEADERS = {
 }
 
 class ScrapeRequest(BaseModel):
-    url: str
+    url: str | None = None
+    target_url: str | None = None
     depth: int = 2
     campaign_id: str | None = None
 
@@ -410,12 +411,14 @@ async def crawl_domain(
 # ---------------- API ENDPOINTS ----------------
 
 @router.post("/crawl", response_model=SingleScrapeResponse)
+@router.post("/scrape", response_model=SingleScrapeResponse)
 async def crawl_single(
     req: ScrapeRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    target, domain, company = normalize_target_url(req.url)
+    input_url = req.url or req.target_url or ""
+    target, domain, company = normalize_target_url(input_url)
     if not target:
         raise HTTPException(status_code=400, detail="Invalid target URL provided")
 
@@ -484,6 +487,7 @@ async def crawl_single(
     )
 
 @router.post("/bulk-crawl", response_model=BulkScrapeResponse)
+@router.post("/bulk-scrape", response_model=BulkScrapeResponse)
 async def bulk_crawl(
     req: BulkScrapeRequest,
     current_user: User = Depends(get_current_user),

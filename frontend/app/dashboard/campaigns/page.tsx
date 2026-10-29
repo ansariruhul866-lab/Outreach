@@ -71,16 +71,18 @@ export default function CampaignsPage() {
     try {
       setLoading(true);
       const [cList, sList] = await Promise.all([
-        api.campaigns.list(),
-        api.senders.list(),
+        api.campaigns.list().catch(() => []),
+        api.senders.list().catch(() => []),
       ]);
-      setCampaigns(cList);
-      setSenders(sList);
-      if (sList.length > 0 && !senderId) {
+      setCampaigns(Array.isArray(cList) ? cList : []);
+      setSenders(Array.isArray(sList) ? sList : []);
+      if (Array.isArray(sList) && sList.length > 0 && !senderId) {
         setSenderId(sList[0].id);
       }
     } catch (e) {
       console.error(e);
+      setCampaigns([]);
+      setSenders([]);
     } finally {
       setLoading(false);
     }

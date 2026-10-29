@@ -26,8 +26,17 @@ export default function DashboardOverviewPage() {
     try {
       setLoading(true);
       const [s, c] = await Promise.all([
-        api.stats.getSummary(),
-        api.campaigns.list(),
+        api.stats.getSummary().catch(() => ({
+          total_leads: 0,
+          total_sent: 0,
+          total_opened: 0,
+          total_replied: 0,
+          open_rate: 0,
+          reply_rate: 0,
+          active_senders: 0,
+          active_campaigns: 0,
+        })),
+        api.campaigns.list().catch(() => []),
       ]);
       setStats(s);
       setCampaigns(c);

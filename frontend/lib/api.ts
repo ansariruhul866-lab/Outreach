@@ -143,7 +143,7 @@ export const api = {
     getMe: () => apiFetch<User>("/auth/me"),
   },
   stats: {
-    getSummary: () => apiFetch<StatsSummary>("/stats/summary"),
+    getSummary: () => apiFetch<StatsSummary>("/stats"),
   },
   senders: {
     list: () => apiFetch<Sender[]>("/senders"),
@@ -167,10 +167,14 @@ export const api = {
       }),
   },
   leads: {
-    list: (skip = 0, limit = 100, status?: string) => {
-      let q = `/leads?skip=${skip}&limit=${limit}`;
+    list: async (skip = 0, limit = 100, status?: string) => {
+      let q = `/leads?page=1&limit=${limit}`;
       if (status && status !== "ALL") q += `&status=${status}`;
-      return apiFetch<Lead[]>(q);
+      // Backend returns { total, page, limit, leads: [...] }
+      const res = await apiFetch<any>(q);
+      if (Array.isArray(res)) return res as Lead[];
+      if (res && Array.isArray(res.leads)) return res.leads as Lead[];
+      return [] as Lead[];
     },
     create: (lead: { email: string; first_name?: string; company?: string; website?: string; source_url?: string }) =>
       apiFetch<Lead>("/leads", {
@@ -193,12 +197,12 @@ export const api = {
   },
   scraper: {
     scrape: (targetUrl: string, depth = 2) =>
-      apiFetch<ScrapeJob>("/scraper/scrape", {
+      apiFetch<ScrapeJob>("/scraper/crawl", {
         method: "POST",
-        body: JSON.stringify({ target_url: targetUrl, depth }),
+        body: JSON.stringify({ url: targetUrl, depth }),
       }),
     bulkScrape: (urls: string[], depth = 2) =>
-      apiFetch<{ message: string; total_jobs: number; job_ids: string[] }>("/scraper/bulk-scrape", {
+      apiFetch<{ message: string; total_jobs: number; job_ids: string[] }>("/scraper/bulk-crawl", {
         method: "POST",
         body: JSON.stringify({ urls, depth }),
       }),

@@ -7,6 +7,7 @@ from core.auth import get_current_user
 router = APIRouter(prefix="/stats", tags=["stats"])
 
 @router.get("")
+@router.get("/summary")
 def get_dashboard_stats(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     total_leads = db.query(Lead).filter(Lead.user_id == current_user.id, Lead.is_unsubscribed == False).count()
     total_sent = db.query(Lead).filter(Lead.user_id == current_user.id, Lead.status.in_(["SENT", "OPENED", "REPLIED"])).count()
@@ -16,6 +17,7 @@ def get_dashboard_stats(current_user: User = Depends(get_current_user), db: Sess
     active_campaigns = db.query(Campaign).filter(Campaign.user_id == current_user.id).count()
 
     open_rate = round((total_opened / total_sent * 100), 1) if total_sent > 0 else 0.0
+    reply_rate = round((total_replied / total_sent * 100), 1) if total_sent > 0 else 0.0
 
     return {
         "total_leads": total_leads,
@@ -23,6 +25,7 @@ def get_dashboard_stats(current_user: User = Depends(get_current_user), db: Sess
         "total_opened": total_opened,
         "total_replied": total_replied,
         "open_rate": open_rate,
+        "reply_rate": reply_rate,
         "active_senders": active_senders,
         "active_campaigns": active_campaigns
     }

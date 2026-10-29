@@ -36,9 +36,10 @@ export default function MailboxesPage() {
     try {
       setLoading(true);
       const data = await api.senders.list();
-      setSenders(data);
+      setSenders(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
+      setSenders([]);
     } finally {
       setLoading(false);
     }

@@ -37,9 +37,10 @@ export default function LeadsPage() {
     try {
       setLoading(true);
       const data = await api.leads.list(0, 200, statusFilter);
-      setLeads(data);
+      setLeads(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
+      setLeads([]);
     } finally {
       setLoading(false);
     }
