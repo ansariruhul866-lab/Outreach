@@ -21,7 +21,7 @@ body {
   color: var(--foreground);
   overflow-x: hidden;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Custom Ultra-Smooth Scrollbars */
@@ -33,212 +33,199 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.4);
+  background: rgba(168, 85, 247, 0.3);
   border-radius: 9999px;
   backdrop-filter: blur(10px);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.8);
+  background: rgba(168, 85, 247, 0.7);
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
 }
 
-/* Dark Mode Glassmorphism (High-Contrast Obsidian & Purple) */
+/* Dark Mode Glassmorphism */
 html.dark .glass-panel {
-  background: rgba(13, 6, 26, 0.75);
+  background: rgba(10, 3, 20, 0.65);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(168, 85, 247, 0.25);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  border: 1px solid rgba(168, 85, 247, 0.22);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 html.dark .glass-card {
-  background: rgba(15, 7, 28, 0.7);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(147, 51, 234, 0.04) 100%);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(168, 85, 247, 0.22);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
-  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html.dark .glass-card:hover {
-  border-color: rgba(168, 85, 247, 0.55);
+  border-color: rgba(168, 85, 247, 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(168, 85, 247, 0.35);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 30px -5px rgba(168, 85, 247, 0.35);
 }
 
 html.dark .glass-input {
-  background: rgba(5, 1, 10, 0.85);
+  background: rgba(5, 1, 10, 0.8);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: #ffffff;
   transition: all 0.25s ease;
 }
 
 html.dark .glass-input:focus {
-  border-color: rgba(168, 85, 247, 0.85);
+  border-color: rgba(168, 85, 247, 0.8);
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25), 0 0 25px rgba(168, 85, 247, 0.25);
 }
 
-/* Light Mode Glassmorphism (High-Contrast Crisp Slate & Royal Purple) */
-html.light body {
-  background-color: #f8fafc;
-  color: #0f172a;
+/* Light Mode Glassmorphism & Contrast */
+html.light,
+html.light body,
+html.light .dashboard-root,
+html.light main {
+  background-color: #ffffff !important;
+  color: #09090b !important;
 }
 
+/* Tone down background glow orbs in Light Mode for pure white canvas */
+html.light .ambient-glow-purple-lg,
+html.light .ambient-glow-purple-accent,
+html.light .ambient-glow-white-subtle {
+  opacity: 0.06 !important;
+}
+
+/* Sidebar in Light Mode */
 html.light aside {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.04) !important;
+  background: #faf6ff !important;
+  border-right: 1px solid rgba(168, 85, 247, 0.22) !important;
+  box-shadow: 4px 0 25px rgba(147, 51, 234, 0.06) !important;
 }
 
-html.light .glass-panel {
-  background: #ffffff;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-  color: #0f172a;
-}
-
+/* Light Purple Containers (Requested: bg white, containers light purple) */
 html.light .glass-card {
-  background: #ffffff;
+  background: #f7f2fe !important; /* Soft, premium light purple container */
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-  color: #0f172a;
+  border: 1px solid rgba(168, 85, 247, 0.28) !important;
+  box-shadow: 0 4px 20px -2px rgba(147, 51, 234, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  color: #09090b !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html.light .glass-card:hover {
-  border-color: #a855f7;
+  background: #efe5fd !important;
+  border-color: rgba(168, 85, 247, 0.5) !important;
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px -6px rgba(147, 51, 234, 0.12);
+  box-shadow: 0 12px 30px -4px rgba(147, 51, 234, 0.16) !important;
 }
 
+html.light .glass-panel {
+  background: #f4ecfd !important; /* Light purple panel container */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  box-shadow: 0 10px 35px -5px rgba(147, 51, 234, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  color: #09090b !important;
+}
+
+/* Form Inputs inside light purple containers */
 html.light input,
 html.light textarea,
 html.light select {
   background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+  color: #09090b !important;
 }
 
 html.light input:focus,
 html.light textarea:focus,
 html.light select:focus {
   border-color: #9333ea !important;
-  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25) !important;
 }
 
 html.light input::placeholder,
 html.light textarea::placeholder {
-  color: #94a3b8 !important;
+  color: #9ca3af !important;
 }
 
 html.light select option {
   background-color: #ffffff !important;
-  color: #0f172a !important;
+  color: #09090b !important;
 }
 
+/* Tables inside light mode */
 html.light table thead {
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
+  background-color: #ede2fe !important;
+  border-color: rgba(168, 85, 247, 0.25) !important;
 }
 
 html.light table thead th {
-  color: #475569 !important;
+  color: #3b0764 !important;
+  font-weight: 800 !important;
 }
 
 html.light table tbody tr:hover {
-  background-color: rgba(147, 51, 234, 0.04) !important;
+  background-color: rgba(168, 85, 247, 0.1) !important;
 }
 
-/* High-Contrast Dual-Mode Stat Metrics */
-.stat-val-primary {
-  color: #ffffff;
-}
-html.light .stat-val-primary {
-  color: #0f172a !important;
-}
-
-.stat-val-purple {
-  color: #c084fc;
-}
-html.light .stat-val-purple {
-  color: #7e22ce !important;
-}
-
-.stat-val-fuchsia {
-  color: #f0abfc;
-}
-html.light .stat-val-fuchsia {
-  color: #a21caf !important;
-}
-
-/* Card Titles / Subtitles */
-.card-label {
-  color: #a1a1aa;
-}
-html.light .card-label {
-  color: #475569 !important;
-}
-
-.card-title {
-  color: #ffffff;
-}
-html.light .card-title {
-  color: #0f172a !important;
-}
-
-.card-desc {
-  color: #a1a1aa;
-}
-html.light .card-desc {
-  color: #334155 !important;
-}
-
-.action-link-purple {
-  color: #c084fc;
-}
-html.light .action-link-purple {
-  color: #7e22ce !important;
-}
-
-.action-link-fuchsia {
-  color: #e879f9;
-}
-html.light .action-link-fuchsia {
-  color: #a21caf !important;
-}
-
-.badge-quick {
-  background: rgba(168, 85, 247, 0.2);
-  color: #e9d5ff;
-  border: 1px solid rgba(168, 85, 247, 0.4);
-}
-html.light .badge-quick {
-  background: #f3e8ff !important;
-  color: #6b21a8 !important;
-  border-color: #d8b4fe !important;
-}
-
-/* Light mode text contrast overrides: keep white text on purple filled buttons */
+/* Light mode text contrast overrides */
 html.light h1:not([class*="text-transparent"]),
 html.light h2:not([class*="text-transparent"]),
 html.light h3:not([class*="text-transparent"]),
 html.light h4:not([class*="text-transparent"]) {
-  color: #0f172a !important;
+  color: #09090b !important;
 }
 
+/* Headings with gradient in light mode -> deep indigo to royal purple */
+html.light .bg-clip-text {
+  background-image: linear-gradient(135deg, #0f051d 0%, #4c1d95 50%, #7e22ce 100%) !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+}
+
+/* High-contrast text on light purple containers */
+html.light p.text-white,
+html.light div.text-white,
+html.light span.text-white:not(button span):not([class*="from-"]):not([class*="bg-purple-"]):not([data-keep-white]) {
+  color: #09090b !important;
+}
+
+html.light .text-zinc-400,
+html.light .text-slate-400 {
+  color: #4b5563 !important; /* High-contrast neutral */
+}
+
+html.light .text-zinc-500,
+html.light .text-slate-500 {
+  color: #6b7280 !important;
+}
+
+html.light .text-zinc-300,
+html.light .text-slate-300 {
+  color: #1f2937 !important;
+}
+
+/* Rich visible purples on light containers */
+html.light .text-purple-400,
+html.light .text-fuchsia-400 {
+  color: #7e22ce !important; /* Deep, vivid royal purple */
+}
+
+html.light .text-purple-300,
+html.light .text-fuchsia-300 {
+  color: #6b21a8 !important;
+}
+
+/* Solid Purple CTA Buttons keep sharp white text */
 html.light button.text-white,
 html.light a.text-white[class*="from-purple-"],
-html.light a.text-white[class*="bg-purple-"],
+html.light a[class*="bg-purple-600"],
 html.light button[class*="from-purple-"] *,
-html.light button[class*="bg-purple-"] * {
+html.light button[class*="bg-purple-"] *,
+html.light a[class*="from-purple-"] * {
   color: #ffffff !important;
 }
 

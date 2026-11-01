@@ -343,17 +343,19 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-500/10 border border-purple-300 dark:border-purple-500/30 text-purple-800 dark:text-purple-300 text-xs font-bold mb-2 shadow-sm dark:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-            <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
             <span>Black &amp; Purple Lead Intelligence</span>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-purple-100 dark:bg-purple-500/15 border border-purple-300 dark:border-purple-500/30 text-purple-700 dark:text-purple-300 shadow-sm">
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-lg shadow-purple-900/40">
               <Users className="w-6 h-6" />
             </span>
-            <span>Leads &amp; Folders</span>
+            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
+              Leads &amp; Folders
+            </span>
           </h1>
-          <p className="text-xs text-slate-600 dark:text-zinc-400 mt-1">
+          <p className="text-xs text-zinc-400 mt-1">
             Organize extracted prospects into folders of 50, batch select, delete, or export leads
           </p>
         </div>
