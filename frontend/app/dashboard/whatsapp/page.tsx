@@ -24,6 +24,8 @@ import {
   RotateCcw,
   ShieldAlert,
   History,
+  Zap,
+  Share2,
 } from "lucide-react";
 
 interface QueueItem {
@@ -61,6 +63,7 @@ export default function WhatsAppPage() {
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [bulkQueue, setBulkQueue] = useState<QueueItem[]>([]);
   const [generatingBulk, setGeneratingBulk] = useState(false);
+  const [isInstantSending, setIsInstantSending] = useState(false);
 
   // Auto-Runner State
   const [autoRunning, setAutoRunning] = useState(false);
@@ -103,7 +106,8 @@ export default function WhatsAppPage() {
         (l) => l.phone && l.phone.trim().length >= 7
       );
       setLeadsWithPhone(withPhone);
-      setSelectedLeadIds(withPhone.map((l) => l.id));
+      // Default to first 20 leads selected for 1-click convenience
+      setSelectedLeadIds(withPhone.slice(0, 20).map((l) => l.id));
     } catch (e) {
       console.error(e);
     } finally {
@@ -154,15 +158,12 @@ export default function WhatsAppPage() {
     const item = bulkQueue[idx];
     if (!item) return;
 
-    // Open WhatsApp Web/Universal link in a new window/tab
     window.open(item.web_link, "_blank");
 
-    // Mark as sent in state
     setBulkQueue((prev) =>
       prev.map((q, i) => (i === idx ? { ...q, sent: true } : q))
     );
 
-    // Record in backend log
     try {
       await api.whatsapp.logSent({
         lead_id: item.lead_id || undefined,
@@ -171,11 +172,84 @@ export default function WhatsAppPage() {
         message: item.message,
         sender_id: selectedSenderId || undefined,
       });
-      // Refresh history silently
       api.whatsapp.getHistory().then((h) => setHistory(h || [])).catch(() => {});
     } catch (err) {
       console.error("Failed to log message:", err);
     }
+  };
+
+  // 1-CLICK SEND TO 1-20 PERSONS IN ONE GO
+  const handleInstantBatchSend = async (targetCount?: number) => {
+    const leadsToSend = targetCount
+      ? leadsWithPhone.slice(0, targetCount)
+      : leadsWithPhone.filter((l) => selectedLeadIds.includes(l.id));
+
+    if (leadsToSend.length === 0) {
+      alert("Please select at least 1 contact with a phone number (up to 20).");
+      return;
+    }
+
+    const batch = leadsToSend.slice(0, 20); // Cap at 20 as requested
+    setIsInstantSending(true);
+
+    try {
+      // 1. Generate personalized items
+      const res = await api.whatsapp.bulkGenerateLinks({
+        sender_id: selectedSenderId || undefined,
+        message_template: directMessage,
+        lead_ids: batch.map((l) => l.id),
+      });
+
+      const items = res.items || [];
+      if (items.length === 0) {
+        alert("No valid phone numbers found for the selected contacts.");
+        setIsInstantSending(false);
+        return;
+      }
+
+      // Update state queue
+      const queueWithState = items.map((item) => ({ ...item, sent: true }));
+      setBulkQueue(queueWithState);
+
+      // 2. Open WhatsApp Web for all 1-20 contacts in rapid succession (300ms apart to prevent browser block)
+      items.forEach((item, index) => {
+        setTimeout(() => {
+          window.open(item.web_link, "_blank");
+        }, index * 350);
+      });
+
+      // 3. Log all 1-20 messages in database at once
+      await api.whatsapp.batchLogSent(
+        items.map((it) => ({
+          lead_id: it.lead_id,
+          recipient_phone: it.recipient_phone,
+          recipient_name: it.recipient_name,
+          message: it.message,
+          sender_id: selectedSenderId || undefined,
+        }))
+      );
+
+      // Refresh history
+      api.whatsapp.getHistory().then((h) => setHistory(h || [])).catch(() => {});
+
+      setNotice(
+        `🚀 Dispatched ${items.length} WhatsApp chats in 1 click! Click 'Send' in each tab to deliver.`
+      );
+      setTimeout(() => setNotice(null), 6000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to execute 1-click batch send");
+    } finally {
+      setIsInstantSending(false);
+    }
+  };
+
+  // Native WhatsApp Multi-Contact Share
+  const handleNativeWhatsAppShare = () => {
+    const rendered = directMessage
+      .replace("{{firstName}}", "there")
+      .replace("{{company}}", "your business");
+    const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(rendered)}`;
+    window.open(shareUrl, "_blank");
   };
 
   const handleStartAutoRun = () => {
@@ -183,7 +257,6 @@ export default function WhatsAppPage() {
       alert("Please generate a WhatsApp bulk queue first.");
       return;
     }
-    // Find next unsent index
     const nextIdx = bulkQueue.findIndex((item) => !item.sent);
     if (nextIdx === -1) {
       if (confirm("All leads in the queue have been marked sent. Do you want to reset and start over?")) {
@@ -310,14 +383,12 @@ export default function WhatsAppPage() {
     );
   };
 
-  const handleSelectAllLeads = () => {
-    if (selectedLeadIds.length === leadsWithPhone.length) {
-      setSelectedLeadIds([]);
-    } else {
-      setSelectedLeadIds(leadsWithPhone.map((l) => l.id));
-    }
+  const selectCount = (n: number) => {
+    const subset = leadsWithPhone.slice(0, n).map((l) => l.id);
+    setSelectedLeadIds(subset);
   };
 
+  const selectedCount = selectedLeadIds.length;
   const sentCount = bulkQueue.filter((q) => q.sent).length;
   const progressPercent =
     bulkQueue.length > 0 ? Math.round((sentCount / bulkQueue.length) * 100) : 0;
@@ -332,7 +403,7 @@ export default function WhatsAppPage() {
             <span>Direct WhatsApp Outreach</span>
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Reach contacts with phone numbers directly on WhatsApp &mdash; multi-number senders, bulk queue generation, and automated human-paced dispatch.
+            Send WhatsApp messages to 1&ndash;20 prospects in one go with one single template and one click.
           </p>
         </div>
 
@@ -351,6 +422,56 @@ export default function WhatsAppPage() {
           <span>{notice}</span>
         </div>
       )}
+
+      {/* 1-CLICK INSTANT DISPATCH HERO BANNER (1-20 PERSONS IN ONE GO) */}
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/60 via-slate-900 to-slate-900 border-2 border-emerald-500/30 shadow-2xl relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30">
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>1-Click Multi-Person Dispatch</span>
+            </div>
+            <h2 className="text-lg font-black text-white">
+              Send to {selectedCount > 0 ? Math.min(selectedCount, 20) : "1–20"} Contacts in One Go
+            </h2>
+            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+              Select up to 20 prospects, review your template, and hit the button below. All {Math.min(selectedCount || 20, 20)} personalized WhatsApp chats will open in one single click, with automatic delivery logging.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleInstantBatchSend()}
+              disabled={isInstantSending || selectedCount === 0}
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2.5 transition-all transform active:scale-95 disabled:opacity-50"
+            >
+              {isInstantSending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Dispatching {Math.min(selectedCount, 20)} Chats...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4 fill-current" />
+                  <span>1-Click Send to All {Math.min(selectedCount, 20)} Leads</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleNativeWhatsAppShare}
+              title="Open WhatsApp Multi-Contact Share picker to select multiple recipients inside WhatsApp"
+              className="px-4 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-700"
+            >
+              <Share2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Forward in WhatsApp</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Your Connected WhatsApp Numbers */}
       <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-4">
@@ -421,16 +542,16 @@ export default function WhatsAppPage() {
 
       {/* Main Grid: Direct Single Sender & Leads Contacts */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Quick Direct Message */}
+        {/* Message Composer & Template */}
         <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-5 flex flex-col justify-between">
           <div className="space-y-4">
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Send className="w-4 h-4 text-emerald-400" />
-                <span>Message Composer &amp; Quick Send</span>
+                <span>One Single Outreach Template</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Send a 1-off message or configure the template used for the bulk queue below
+                This template is automatically customized with lead details for all 1&ndash;20 recipients.
               </p>
             </div>
 
@@ -473,45 +594,17 @@ export default function WhatsAppPage() {
             </div>
 
             <form onSubmit={handleSendDirect} className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                    Phone Number (With Country Code)
-                  </label>
-                  <input
-                    type="text"
-                    value={directPhone}
-                    onChange={(e) => setDirectPhone(e.target.value)}
-                    placeholder="e.g. 919876543210 or +14155552671"
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                    Contact Name (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={directName}
-                    onChange={(e) => setDirectName(e.target.value)}
-                    placeholder="e.g. Alex"
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold uppercase text-slate-400">
-                    Message Body Template
+                    Template Body
                   </label>
                   <span className="text-[10px] text-slate-500 font-mono">
                     Tags: {"{{firstName}}"}, {"{{company}}"}, {"{{website}}"}
                   </span>
                 </div>
                 <textarea
-                  rows={5}
+                  rows={6}
                   required
                   value={directMessage}
                   onChange={(e) => setDirectMessage(e.target.value)}
@@ -519,58 +612,93 @@ export default function WhatsAppPage() {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={!directPhone.trim()}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all"
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>Launch Direct WhatsApp to Number</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </button>
+              {/* Quick 1-off single prospect send */}
+              <div className="pt-2 border-t border-slate-800/80 space-y-3">
+                <span className="text-[11px] font-bold uppercase text-slate-400 block">
+                  Or Send to a Single Individual:
+                </span>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={directPhone}
+                    onChange={(e) => setDirectPhone(e.target.value)}
+                    placeholder="Phone (e.g. 919876543210)"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none font-mono"
+                  />
+                  <input
+                    type="text"
+                    value={directName}
+                    onChange={(e) => setDirectName(e.target.value)}
+                    placeholder="Name (Optional)"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!directPhone.trim()}
+                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Send to this Single Phone Number</span>
+                  <ExternalLink className="w-3 h-3" />
+                </button>
+              </div>
             </form>
           </div>
         </div>
 
-        {/* Database Contacts with Phone Numbers */}
+        {/* Database Contacts with Phone Numbers (1-20 Selection) */}
         <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <h2 className="text-sm font-bold text-white flex items-center gap-2">
                   <Users className="w-4 h-4 text-emerald-400" />
-                  <span>Prospects with Phone Numbers ({leadsWithPhone.length})</span>
+                  <span>Prospect Contacts ({leadsWithPhone.length})</span>
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Select prospects to generate 1-click WhatsApp outreach queue
+                  Choose 1 to 20 prospects to send in one single click
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                {leadsWithPhone.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleSelectAllLeads}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition-colors"
-                  >
-                    {selectedLeadIds.length === leadsWithPhone.length ? "Deselect All" : "Select All"}
-                  </button>
-                )}
-
+              {/* 1-Click Batch Selection Buttons */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] text-slate-500 font-bold uppercase mr-1">Select:</span>
                 <button
                   type="button"
-                  onClick={handleGenerateBulk}
-                  disabled={generatingBulk || selectedLeadIds.length === 0}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-600/20"
+                  onClick={() => selectCount(5)}
+                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300"
                 >
-                  {generatingBulk ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <>
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Generate Bulk Queue ({selectedLeadIds.length})</span>
-                    </>
-                  )}
+                  5
+                </button>
+                <button
+                  type="button"
+                  onClick={() => selectCount(10)}
+                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300"
+                >
+                  10
+                </button>
+                <button
+                  type="button"
+                  onClick={() => selectCount(15)}
+                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300"
+                >
+                  15
+                </button>
+                <button
+                  type="button"
+                  onClick={() => selectCount(20)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold"
+                >
+                  Top 20
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedLeadIds([])}
+                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-400"
+                >
+                  Clear
                 </button>
               </div>
             </div>
@@ -584,7 +712,7 @@ export default function WhatsAppPage() {
                 </p>
               </div>
             ) : (
-              <div className="max-h-80 overflow-y-auto divide-y divide-slate-850 border border-slate-850 rounded-2xl bg-slate-950/80 p-2 space-y-1">
+              <div className="max-h-72 overflow-y-auto divide-y divide-slate-850 border border-slate-850 rounded-2xl bg-slate-950/80 p-2 space-y-1">
                 {leadsWithPhone.map((l) => {
                   const isChecked = selectedLeadIds.includes(l.id);
                   return (
@@ -636,6 +764,20 @@ export default function WhatsAppPage() {
                 })}
               </div>
             )}
+
+            {/* Quick 1-Click Trigger footer */}
+            <div className="pt-2 flex items-center justify-between text-xs text-slate-400">
+              <span>Selected: <strong className="text-white">{selectedCount}</strong> (max 20 per 1-click batch)</span>
+              <button
+                type="button"
+                onClick={handleGenerateBulk}
+                disabled={generatingBulk || selectedLeadIds.length === 0}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-xs flex items-center gap-1.5 transition-all"
+              >
+                {generatingBulk ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                <span>View Queue Details</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -650,12 +792,22 @@ export default function WhatsAppPage() {
                 <span>Bulk WhatsApp Dispatch Queue ({bulkQueue.length} Contacts)</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Dispatch with safe pacing to avoid WhatsApp spam triggers, or send individually with 1 click.
+                Send all in 1 click or use the automated safety runner with pacing
               </p>
             </div>
 
             {/* Automation Control Toolbar */}
             <div className="flex items-center flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => handleInstantBatchSend()}
+                disabled={isInstantSending}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5"
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>1-Click Launch All</span>
+              </button>
+
               <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-[11px] text-slate-400 font-semibold">Delay:</span>
@@ -677,19 +829,19 @@ export default function WhatsAppPage() {
                 <button
                   type="button"
                   onClick={handleStartAutoRun}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all"
                 >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Start Auto-Dispatch</span>
+                  <Play className="w-3.5 h-3.5 fill-current text-emerald-400" />
+                  <span>Auto Sequence</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={handlePauseAutoRun}
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all"
                 >
                   <Pause className="w-3.5 h-3.5 fill-current" />
-                  <span>Pause Sequence</span>
+                  <span>Pause</span>
                 </button>
               )}
 
@@ -707,45 +859,28 @@ export default function WhatsAppPage() {
                 onClick={() => setBulkQueue([])}
                 className="text-xs text-slate-400 hover:text-red-400 px-2 py-1"
               >
-                Clear Queue
+                Clear
               </button>
             </div>
           </div>
 
-          {/* Rate Limit Protection Banner & Progress Bar */}
-          <div className="space-y-3">
-            <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between flex-wrap gap-2 text-xs">
-              <div className="flex items-center gap-2 text-emerald-400">
-                <ShieldAlert className="w-4 h-4 shrink-0" />
-                <span>
-                  Anti-Spam Safety: Automatic delay pacing ensures safe sending without risking WhatsApp account suspensions.
-                </span>
-              </div>
+          {/* Progress */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs text-slate-400">
+              <span>
+                Dispatched: <strong className="text-white">{sentCount}</strong> of <strong className="text-white">{bulkQueue.length}</strong> ({progressPercent}%)
+              </span>
               {autoRunning && (
-                <span className="font-mono font-bold text-emerald-300 animate-pulse">
-                  Opening next contact in {countdown}s...
+                <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Sequence Active (Lead {currentIndex + 1} of {bulkQueue.length} &bull; Next in {countdown}s)
                 </span>
               )}
             </div>
-
-            {/* Progress */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-slate-400">
-                <span>
-                  Dispatched: <strong className="text-white">{sentCount}</strong> of <strong className="text-white">{bulkQueue.length}</strong> ({progressPercent}%)
-                </span>
-                {autoRunning && (
-                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                    <Loader2 className="w-3 h-3 animate-spin" /> Sequence Active (Lead {currentIndex + 1} of {bulkQueue.length})
-                  </span>
-                )}
-              </div>
-              <div className="w-full h-2.5 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
-                <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
+            <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
           </div>
 

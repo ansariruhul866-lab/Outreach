@@ -425,6 +425,17 @@ export const api = {
         method: "POST",
         body: JSON.stringify(payload),
       }),
+    batchLogSent: (items: Array<{
+      lead_id?: string;
+      recipient_phone: string;
+      recipient_name?: string;
+      message: string;
+      sender_id?: string;
+    }>) =>
+      apiFetch<{ success: boolean; count: number }>("/whatsapp/batch-log-sent", {
+        method: "POST",
+        body: JSON.stringify({ items }),
+      }),
     getHistory: () => apiFetch<WhatsAppMessageLog[]>("/whatsapp/history"),
   },
 };

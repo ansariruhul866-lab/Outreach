@@ -39,6 +39,9 @@ class LogSentRequest(BaseModel):
     message: str
     sender_id: str | None = None
 
+class BatchLogSentRequest(BaseModel):
+    items: list[LogSentRequest]
+
 # ----------------- WhatsApp Senders (Numbers) -----------------
 
 @router.get("/senders")
@@ -210,6 +213,40 @@ def log_sent_message(
             
     db.commit()
     return {"success": True, "message_id": msg_record.id}
+
+@router.post("/batch-log-sent")
+def batch_log_sent_messages(
+    req: BatchLogSentRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    lead_ids_to_update = []
+    now = datetime.utcnow()
+    for item in req.items:
+        clean_num = clean_phone_number(item.recipient_phone)
+        msg_record = WhatsAppMessage(
+            user_id=current_user.id,
+            sender_id=item.sender_id,
+            lead_id=item.lead_id,
+            recipient_phone=clean_num,
+            recipient_name=item.recipient_name,
+            message=item.message,
+            status="SENT",
+            sent_at=now
+        )
+        db.add(msg_record)
+        if item.lead_id:
+            lead_ids_to_update.append(item.lead_id)
+
+    if lead_ids_to_update:
+        db.query(Lead).filter(
+            Lead.id.in_(lead_ids_to_update),
+            Lead.user_id == current_user.id,
+            Lead.status == "PENDING"
+        ).update({"status": "CONTACTED"}, synchronize_session=False)
+
+    db.commit()
+    return {"success": True, "count": len(req.items)}
 
 @router.get("/history")
 def list_history(
