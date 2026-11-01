@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { api, Campaign, Sender, EmailTemplate, LeadFolder, AttachmentItem } from "@/lib/api";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
   Plus,
@@ -304,30 +305,32 @@ export default function CampaignsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>High-Deliverability Email Sequencing</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Black &amp; Purple Sequence Dispatcher</span>
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-orange-500/15 border border-orange-500/25 text-orange-400 shadow-lg shadow-orange-500/20">
+            <span className="p-2 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-lg shadow-purple-900/40">
               <Send className="w-6 h-6" />
             </span>
-            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
               Cold Outreach Campaigns
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-zinc-400 mt-1">
             Automated multi-mailbox email sequences with randomized anti-spam jitter (0-120s delay), attachments, and tracking.
           </p>
         </div>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={openCreateModal}
-          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-xs shadow-xl shadow-orange-500/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 w-fit"
+          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all w-fit"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Campaign</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* Campaigns List */}
@@ -353,9 +356,11 @@ export default function CampaignsPage() {
           </div>
         ) : (
           campaigns.map((c) => (
-            <div
+            <motion.div
               key={c.id}
-              className="p-6 rounded-3xl glass-panel hover:border-amber-500/40 transition-all duration-300 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 group hover:-translate-y-0.5"
+              whileHover={{ y: -3 }}
+              transition={{ type: "spring", stiffness: 300, damping: 24 }}
+              className="p-6 rounded-3xl glass-panel hover:border-purple-500/50 border-purple-500/20 transition-all duration-300 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 group"
             >
               <div className="space-y-2">
                 <div className="flex items-center gap-2.5 flex-wrap">
@@ -363,77 +368,85 @@ export default function CampaignsPage() {
                   <span
                     className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
                       c.status === "RUNNING"
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
                         : c.status === "PAUSED"
-                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        ? "bg-zinc-800 text-zinc-400 border-zinc-700"
                         : c.status === "COMPLETED"
-                        ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                        : "bg-slate-800 text-slate-400 border-slate-700"
+                        ? "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40"
+                        : "bg-black text-zinc-400 border-zinc-800"
                     }`}
                   >
                     {c.status}
                   </span>
-                  <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-slate-800/60 text-slate-400">
+                  <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-purple-950/40 text-purple-300 border border-purple-500/20">
                     {c.type}
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-400 flex items-center gap-4 flex-wrap">
-                  <span>Mailbox: <strong className="text-slate-200">{c.sender_email || "None"}</strong></span>
-                  <span>Assigned Leads: <strong className="text-slate-200">{c.leads_count}</strong> ({c.pending_count} pending)</span>
-                  <span>Anti-Spam Delay: <strong className="text-slate-200">{c.send_delay_seconds}s + [0-120s jitter]</strong></span>
+                <p className="text-xs text-zinc-400 flex items-center gap-4 flex-wrap">
+                  <span>Mailbox: <strong className="text-zinc-200">{c.sender_email || "None"}</strong></span>
+                  <span>Assigned Leads: <strong className="text-zinc-200">{c.leads_count}</strong> ({c.pending_count} pending)</span>
+                  <span>Anti-Spam Delay: <strong className="text-zinc-200">{c.send_delay_seconds}s + [0-120s jitter]</strong></span>
                 </p>
 
-                <div className="flex items-center gap-4 text-xs font-semibold text-slate-300 pt-1 flex-wrap">
+                <div className="flex items-center gap-4 text-xs font-semibold text-zinc-300 pt-1 flex-wrap">
                   <span>🚀 {c.total_sent} sent</span>
                   <span>👀 {c.total_opened} opened</span>
                   <span>💬 {c.total_replied} replied</span>
                   {(c.attachments_count ?? 0) > 0 && (
-                    <span className="text-orange-400 flex items-center gap-1 font-bold">
+                    <span className="text-purple-400 flex items-center gap-1 font-bold">
                       <Paperclip className="w-3.5 h-3.5" />
                       {c.attachments_count} attachments
                     </span>
                   )}
-                  {c.total_skipped > 0 && <span className="text-slate-500">🚫 {c.total_skipped} skipped (Send-Once)</span>}
+                  {c.total_skipped > 0 && <span className="text-zinc-500">🚫 {c.total_skipped} skipped (Send-Once)</span>}
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 shrink-0">
                 {c.status === "RUNNING" ? (
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => handlePauseCampaign(c.id)}
-                    className="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-xs font-bold flex items-center gap-1.5 transition-all"
+                    className="px-3.5 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-xs font-bold flex items-center gap-1.5 transition-all"
                   >
                     <Pause className="w-3.5 h-3.5" />
                     <span>Pause</span>
-                  </button>
+                  </motion.button>
                 ) : (
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => handleStartCampaign(c.id)}
-                    className="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-bold flex items-center gap-1.5 transition-all"
+                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-purple-900/30"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>{c.status === "PAUSED" ? "Resume" : "Start Sending"}</span>
-                  </button>
+                  </motion.button>
                 )}
 
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => openEditModal(c)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 rounded-xl glass-card text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   <span>Edit</span>
-                </button>
+                </motion.button>
 
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleDeleteCampaign(c.id)}
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-red-500/10 hover:text-red-400 text-slate-400 text-xs transition-colors"
+                  className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>

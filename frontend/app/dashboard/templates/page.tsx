@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { api, EmailTemplate, AttachmentItem } from "@/lib/api";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText,
   Plus,
@@ -21,10 +22,10 @@ import {
 
 const CATEGORIES = [
   { key: "ALL", label: "All Templates" },
-  { key: "PITCH", label: "Cold Pitch", color: "text-orange-400 bg-orange-500/10 border-orange-500/20" },
-  { key: "FOLLOW_UP", label: "Follow-Up", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
-  { key: "OFFER", label: "Discount / Offer", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
-  { key: "CUSTOM", label: "Custom", color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
+  { key: "PITCH", label: "Cold Pitch", color: "text-purple-300 bg-purple-500/20 border-purple-500/40" },
+  { key: "FOLLOW_UP", label: "Follow-Up", color: "text-fuchsia-300 bg-fuchsia-500/20 border-fuchsia-500/40" },
+  { key: "OFFER", label: "Discount / Offer", color: "text-white bg-purple-500/30 border-purple-400/50" },
+  { key: "CUSTOM", label: "Custom", color: "text-zinc-300 bg-zinc-800 border-zinc-700" },
 ];
 
 export default function TemplatesPage() {
@@ -173,53 +174,57 @@ export default function TemplatesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>High-Converting Email Asset Library</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Black &amp; Purple Template Engine</span>
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-orange-500/15 border border-orange-500/25 text-orange-400 shadow-lg shadow-orange-500/20">
+            <span className="p-2 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-lg shadow-purple-900/40">
               <FileText className="w-6 h-6" />
             </span>
-            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
               Email Templates Library
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-zinc-400 mt-1">
             Craft reusable templates for cold pitches, follow-ups, and promotional offers with variables and multimedia attachments.
           </p>
         </div>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={openCreateModal}
-          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-xs shadow-xl shadow-orange-500/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 w-fit"
+          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all w-fit"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Template</span>
-        </button>
+        </motion.button>
       </div>
 
       {notice && (
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
+        <div className="p-4 rounded-2xl glass-panel border border-purple-500/40 text-purple-200 text-xs font-semibold flex items-center gap-2 shadow-lg shadow-purple-950/40">
+          <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0" />
           <span>{notice}</span>
         </div>
       )}
 
       {/* Categories Filter Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/[0.06]">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-purple-500/20">
         {CATEGORIES.map((c) => (
-          <button
+          <motion.button
             key={c.key}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => setCategoryFilter(c.key)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               categoryFilter === c.key
-                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 border border-orange-400/40"
-                : "glass-card text-slate-400 hover:text-white"
+                ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
+                : "glass-card text-zinc-400 hover:text-white"
             }`}
           >
             {c.label}
-          </button>
+          </motion.button>
         ))}
       </div>
 

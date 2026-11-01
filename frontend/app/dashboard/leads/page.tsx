@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { api, Lead, LeadFolder, FolderListResponse } from "@/lib/api";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   Search,
@@ -20,6 +21,7 @@ import {
   ArrowRight,
   Filter,
   Layers,
+  Sparkles,
 } from "lucide-react";
 
 export default function LeadsPage() {
@@ -341,34 +343,40 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-2">
-            <Layers className="w-3.5 h-3.5" />
-            <span>Prospect Intelligence &amp; Lead Management</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Black &amp; Purple Lead Intelligence</span>
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-orange-500/15 border border-orange-500/25 text-orange-400 shadow-lg shadow-orange-500/20">
+            <span className="p-2 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-lg shadow-purple-900/40">
               <Users className="w-6 h-6" />
             </span>
-            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
               Leads &amp; Folders
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-zinc-400 mt-1">
             Organize extracted prospects into folders of 50, batch select, delete, or export leads
           </p>
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setCreateFolderModalOpen(true)}
-            className="px-4 py-2.5 rounded-2xl glass-card hover:border-orange-500/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md"
           >
-            <FolderPlus className="w-3.5 h-3.5 text-orange-400" />
+            <FolderPlus className="w-3.5 h-3.5 text-purple-400" />
             <span>New Folder</span>
-          </button>
+          </motion.button>
 
-          <label className="px-4 py-2.5 rounded-2xl glass-card hover:border-orange-500/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95">
-            <Upload className="w-3.5 h-3.5 text-orange-400" />
+          <motion.label
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all shadow-md"
+          >
+            <Upload className="w-3.5 h-3.5 text-purple-400" />
             <span>{importing ? "Importing..." : "Import CSV"}</span>
             <input
               type="file"
@@ -377,21 +385,23 @@ export default function LeadsPage() {
               disabled={importing}
               className="hidden"
             />
-          </label>
+          </motion.label>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setAddModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-xs shadow-xl shadow-orange-500/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Single Lead</span>
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {notice && (
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
+        <div className="p-4 rounded-2xl glass-panel border border-purple-500/40 text-purple-200 text-xs font-semibold flex items-center gap-2 shadow-lg shadow-purple-950/40">
+          <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0" />
           <span>{notice}</span>
         </div>
       )}
@@ -399,40 +409,44 @@ export default function LeadsPage() {
       {/* Folders Bar */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-            <Folder className="w-4 h-4 text-orange-400" />
+          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+            <Folder className="w-4 h-4 text-purple-400" />
             <span>Prospect Folders ({folders.length})</span>
           </span>
-          <span className="text-[11px] text-slate-500">
+          <span className="text-[11px] text-zinc-500">
             Crawl jobs automatically segment every ~50 prospects into separate folders
           </span>
         </div>
 
         <div className="flex items-center gap-2.5 overflow-x-auto pb-2">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => setSelectedFolderId("ALL")}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all ${
               selectedFolderId === "ALL"
-                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 border border-orange-400/50"
-                : "glass-card text-slate-300 hover:text-white"
+                ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
+                : "glass-card text-zinc-300 hover:text-white"
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
             <span>All Leads ({totalLeadsCount})</span>
-          </button>
+          </motion.button>
 
           {unassignedCount > 0 && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setSelectedFolderId("UNASSIGNED")}
               className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all ${
                 selectedFolderId === "UNASSIGNED"
-                  ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 border border-orange-400/50"
-                  : "glass-card text-slate-300 hover:text-white"
+                  ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
+                : "glass-card text-zinc-300 hover:text-white"
               }`}
             >
-              <Folder className="w-3.5 h-3.5 text-slate-400" />
+              <Folder className="w-3.5 h-3.5 text-zinc-400" />
               <span>Unassigned ({unassignedCount})</span>
-            </button>
+            </motion.button>
           )}
 
           {folders.map((f) => (
@@ -440,23 +454,23 @@ export default function LeadsPage() {
               key={f.id}
               className={`flex items-center rounded-2xl transition-all shrink-0 ${
                 selectedFolderId === f.id
-                  ? "bg-orange-500/20 border border-orange-500/50 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.15)]"
-                  : "glass-card hover:border-white/20 text-slate-300"
+                  ? "bg-purple-500/25 border border-purple-500/60 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.25)]"
+                  : "glass-card hover:border-purple-500/30 text-zinc-300"
               }`}
             >
               <button
                 onClick={() => setSelectedFolderId(f.id)}
                 className="px-3.5 py-2 text-xs font-bold flex items-center gap-2"
               >
-                <Folder className="w-3.5 h-3.5 text-orange-400" />
+                <Folder className="w-3.5 h-3.5 text-purple-400" />
                 <span className="max-w-[180px] truncate">{f.name}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-950/60 font-mono text-slate-400 border border-slate-800">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/60 font-mono text-purple-300 border border-purple-500/30">
                   {f.leads_count}
                 </span>
               </button>
               <button
                 onClick={() => handleDeleteFolder(f.id, f.name)}
-                className="p-2 pr-3 text-slate-500 hover:text-red-400 transition-colors"
+                className="p-2 pr-3 text-zinc-500 hover:text-red-400 transition-colors"
                 title="Delete folder"
               >
                 <Trash2 className="w-3 h-3" />
@@ -487,8 +501,8 @@ export default function LeadsPage() {
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
                   statusFilter === s
-                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20"
-                    : "glass-card text-slate-400 hover:text-white"
+                    ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-md shadow-purple-900/40"
+                    : "glass-card text-zinc-400 hover:text-white"
                 }`}
               >
                 {s}
@@ -501,40 +515,46 @@ export default function LeadsPage() {
         <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
           {selectedLeadIds.length > 0 && (
             <>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => setMoveModalOpen(true)}
                 disabled={actionLoading}
-                className="px-4 py-2 rounded-xl glass-card hover:border-orange-500/40 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                className="px-4 py-2 rounded-xl glass-card hover:border-purple-500/50 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
               >
-                <Folder className="w-3.5 h-3.5 text-orange-400" />
+                <Folder className="w-3.5 h-3.5 text-purple-400" />
                 <span>Move ({selectedLeadIds.length})</span>
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={handleDeleteSelected}
                 disabled={actionLoading}
                 className="px-4 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-xs font-bold flex items-center gap-1.5 transition-all"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete Selected ({selectedLeadIds.length})</span>
-              </button>
+              </motion.button>
             </>
           )}
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={handleDeleteAll}
             disabled={actionLoading || filteredLeads.length === 0}
-            className="px-4 py-2 rounded-xl glass-card hover:bg-red-500/15 hover:border-red-500/40 text-slate-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
+            className="px-4 py-2 rounded-xl glass-card hover:bg-red-500/15 hover:border-red-500/40 text-zinc-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
             title="Delete all leads in current view"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Delete All ({filteredLeads.length})</span>
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Leads Table */}
-      <div className="rounded-3xl glass-panel overflow-hidden">
+      <div className="rounded-3xl glass-panel overflow-hidden border border-purple-500/20">
         {loading ? (
           <div className="p-12 text-center text-slate-500 flex flex-col items-center gap-2">
             <Loader2 className="w-6 h-6 animate-spin text-orange-400" />

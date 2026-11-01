@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, ScrapeJob, LeadFolder } from "@/lib/api";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Globe,
@@ -126,54 +127,60 @@ export default function ScraperPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Autonomous Web Crawler &amp; MX Verifier</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Black &amp; Purple Autonomous Crawler</span>
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-orange-500/15 border border-orange-500/25 text-orange-400 shadow-lg shadow-orange-500/20">
+            <span className="p-2 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-lg shadow-purple-900/40">
               <Search className="w-6 h-6" />
             </span>
-            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
               Deep Web Scraper
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-zinc-400 mt-1">
             Crawl target websites up to 4 levels deep, segment contacts into folders of 50, and verify MX records
           </p>
         </div>
 
-        <Link
-          href="/dashboard/leads"
-          className="px-5 py-2.5 rounded-2xl glass-card hover:border-orange-500/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 w-fit"
-        >
-          <Users className="w-3.5 h-3.5 text-orange-400" />
-          <span>View Leads Database</span>
-        </Link>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Link
+            href="/dashboard/leads"
+            className="px-5 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md block"
+          >
+            <Users className="w-3.5 h-3.5 text-purple-400" />
+            <span>View Leads Database</span>
+          </Link>
+        </motion.div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-4">
-        <button
+      <div className="flex items-center gap-2 border-b border-purple-500/20 pb-4">
+        <motion.button
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
           onClick={() => setTab("single")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             tab === "single"
-              ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md shadow-orange-600/20"
-              : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white"
+              ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
+              : "glass-card text-zinc-400 hover:text-white"
           }`}
         >
           Single Target URL
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
           onClick={() => setTab("bulk")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             tab === "bulk"
-              ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md shadow-orange-600/20"
-              : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white"
+              ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
+              : "glass-card text-zinc-400 hover:text-white"
           }`}
         >
           Bulk Domain Crawler
-        </button>
+        </motion.button>
       </div>
 
       {error && (
@@ -191,7 +198,7 @@ export default function ScraperPage() {
       )}
 
       {/* Scrape Input Card */}
-      <div className="p-8 rounded-3xl glass-panel relative overflow-hidden">
+      <div className="p-8 rounded-3xl glass-panel relative overflow-hidden border border-purple-500/20">
         {tab === "single" ? (
           <form onSubmit={handleSingleScrape} className="space-y-6">
             <div>
