@@ -304,15 +304,26 @@ export default function CampaignsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Cold Outreach Campaigns</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Automated email sequences with randomized anti-spam jitter (0-120s delay)
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>High-Deliverability Email Sequencing</span>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-2xl bg-orange-500/15 border border-orange-500/25 text-orange-400 shadow-lg shadow-orange-500/20">
+              <Send className="w-6 h-6" />
+            </span>
+            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              Cold Outreach Campaigns
+            </span>
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Automated multi-mailbox email sequences with randomized anti-spam jitter (0-120s delay), attachments, and tracking.
           </p>
         </div>
 
         <button
           onClick={openCreateModal}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20 flex items-center gap-2 transition-all w-fit"
+          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-xs shadow-xl shadow-orange-500/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 w-fit"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Campaign</span>
@@ -344,7 +355,7 @@ export default function CampaignsPage() {
           campaigns.map((c) => (
             <div
               key={c.id}
-              className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
+              className="p-6 rounded-3xl glass-panel hover:border-amber-500/40 transition-all duration-300 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 group hover:-translate-y-0.5"
             >
               <div className="space-y-2">
                 <div className="flex items-center gap-2.5 flex-wrap">

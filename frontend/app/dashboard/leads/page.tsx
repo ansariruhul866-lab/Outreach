@@ -341,11 +341,19 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-orange-400" />
-            <span>Leads &amp; Folders</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-2">
+            <Layers className="w-3.5 h-3.5" />
+            <span>Prospect Intelligence &amp; Lead Management</span>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-2xl bg-orange-500/15 border border-orange-500/25 text-orange-400 shadow-lg shadow-orange-500/20">
+              <Users className="w-6 h-6" />
+            </span>
+            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              Leads &amp; Folders
+            </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-400 mt-1">
             Organize extracted prospects into folders of 50, batch select, delete, or export leads
           </p>
         </div>
@@ -353,13 +361,13 @@ export default function LeadsPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={() => setCreateFolderModalOpen(true)}
-            className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all"
+            className="px-4 py-2.5 rounded-2xl glass-card hover:border-orange-500/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
           >
             <FolderPlus className="w-3.5 h-3.5 text-orange-400" />
             <span>New Folder</span>
           </button>
 
-          <label className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all">
+          <label className="px-4 py-2.5 rounded-2xl glass-card hover:border-orange-500/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95">
             <Upload className="w-3.5 h-3.5 text-orange-400" />
             <span>{importing ? "Importing..." : "Import CSV"}</span>
             <input
@@ -373,7 +381,7 @@ export default function LeadsPage() {
 
           <button
             onClick={() => setAddModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20 flex items-center gap-2 transition-all"
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-xs shadow-xl shadow-orange-500/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Single Lead</span>
@@ -403,10 +411,10 @@ export default function LeadsPage() {
         <div className="flex items-center gap-2.5 overflow-x-auto pb-2">
           <button
             onClick={() => setSelectedFolderId("ALL")}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all border ${
+            className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all ${
               selectedFolderId === "ALL"
-                ? "bg-orange-500 text-white border-orange-400 shadow-md shadow-orange-500/20"
-                : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800"
+                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 border border-orange-400/50"
+                : "glass-card text-slate-300 hover:text-white"
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -416,10 +424,10 @@ export default function LeadsPage() {
           {unassignedCount > 0 && (
             <button
               onClick={() => setSelectedFolderId("UNASSIGNED")}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all border ${
+              className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all ${
                 selectedFolderId === "UNASSIGNED"
-                  ? "bg-orange-500 text-white border-orange-400 shadow-md shadow-orange-500/20"
-                  : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800"
+                  ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 border border-orange-400/50"
+                  : "glass-card text-slate-300 hover:text-white"
               }`}
             >
               <Folder className="w-3.5 h-3.5 text-slate-400" />
@@ -430,10 +438,10 @@ export default function LeadsPage() {
           {folders.map((f) => (
             <div
               key={f.id}
-              className={`flex items-center rounded-2xl border transition-all shrink-0 ${
+              className={`flex items-center rounded-2xl transition-all shrink-0 ${
                 selectedFolderId === f.id
-                  ? "bg-orange-500/15 border-orange-500 text-orange-400"
-                  : "bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-300"
+                  ? "bg-orange-500/20 border border-orange-500/50 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.15)]"
+                  : "glass-card hover:border-white/20 text-slate-300"
               }`}
             >
               <button
@@ -462,13 +470,13 @@ export default function LeadsPage() {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search email, name, company..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 glass-input rounded-2xl text-xs text-white placeholder-slate-400 focus:outline-none"
             />
           </div>
 
@@ -477,10 +485,10 @@ export default function LeadsPage() {
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
                   statusFilter === s
-                    ? "bg-orange-500 text-white shadow-sm"
-                    : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800"
+                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20"
+                    : "glass-card text-slate-400 hover:text-white"
                 }`}
               >
                 {s}
@@ -496,7 +504,7 @@ export default function LeadsPage() {
               <button
                 onClick={() => setMoveModalOpen(true)}
                 disabled={actionLoading}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 rounded-xl glass-card hover:border-orange-500/40 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
               >
                 <Folder className="w-3.5 h-3.5 text-orange-400" />
                 <span>Move ({selectedLeadIds.length})</span>
@@ -505,7 +513,7 @@ export default function LeadsPage() {
               <button
                 onClick={handleDeleteSelected}
                 disabled={actionLoading}
-                className="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-xs font-bold flex items-center gap-1.5 transition-all"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete Selected ({selectedLeadIds.length})</span>
@@ -516,7 +524,7 @@ export default function LeadsPage() {
           <button
             onClick={handleDeleteAll}
             disabled={actionLoading || filteredLeads.length === 0}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-red-500/10 hover:border-red-500/30 text-slate-400 hover:text-red-400 border border-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-all"
+            className="px-4 py-2 rounded-xl glass-card hover:bg-red-500/15 hover:border-red-500/40 text-slate-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
             title="Delete all leads in current view"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -526,7 +534,7 @@ export default function LeadsPage() {
       </div>
 
       {/* Leads Table */}
-      <div className="rounded-3xl bg-slate-900/50 border border-slate-800/80 overflow-hidden">
+      <div className="rounded-3xl glass-panel overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-slate-500 flex flex-col items-center gap-2">
             <Loader2 className="w-6 h-6 animate-spin text-orange-400" />

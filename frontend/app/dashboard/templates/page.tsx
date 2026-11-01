@@ -173,18 +173,26 @@ export default function TemplatesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
-            <FileText className="w-6 h-6 text-orange-400" />
-            <span>Email Templates Library</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>High-Converting Email Asset Library</span>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-2xl bg-orange-500/15 border border-orange-500/25 text-orange-400 shadow-lg shadow-orange-500/20">
+              <FileText className="w-6 h-6" />
+            </span>
+            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              Email Templates Library
+            </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Craft reusable templates for cold pitches, follow-ups, and promotional offers without rewriting them every time
+          <p className="text-xs text-slate-400 mt-1">
+            Craft reusable templates for cold pitches, follow-ups, and promotional offers with variables and multimedia attachments.
           </p>
         </div>
 
         <button
           onClick={openCreateModal}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20 flex items-center gap-2 transition-all w-fit"
+          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-xs shadow-xl shadow-orange-500/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 w-fit"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Template</span>
@@ -199,15 +207,15 @@ export default function TemplatesPage() {
       )}
 
       {/* Categories Filter Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-800">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/[0.06]">
         {CATEGORIES.map((c) => (
           <button
             key={c.key}
             onClick={() => setCategoryFilter(c.key)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               categoryFilter === c.key
-                ? "bg-orange-500 text-white shadow-sm"
-                : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800"
+                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 border border-orange-400/40"
+                : "glass-card text-slate-400 hover:text-white"
             }`}
           >
             {c.label}
@@ -222,7 +230,7 @@ export default function TemplatesPage() {
           <span className="text-xs">Loading email templates...</span>
         </div>
       ) : filteredTemplates.length === 0 ? (
-        <div className="p-16 text-center rounded-3xl bg-slate-900/40 border border-slate-800 text-slate-500">
+        <div className="p-16 text-center rounded-3xl glass-card text-slate-500">
           <FileText className="w-10 h-10 mx-auto mb-3 opacity-30 text-orange-400" />
           <p className="font-bold text-white text-sm">No templates in this category</p>
           <p className="text-xs text-slate-400 mt-1">
@@ -241,7 +249,7 @@ export default function TemplatesPage() {
             return (
               <div
                 key={t.id}
-                className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition-all flex flex-col justify-between space-y-4 group"
+                className="p-6 rounded-3xl glass-panel hover:border-orange-500/40 transition-all duration-300 flex flex-col justify-between space-y-4 group hover:-translate-y-1"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">

@@ -124,8 +124,19 @@ export default function MailboxesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Mailbox Dispatcher</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold mb-2">
+            <Zap className="w-3.5 h-3.5" />
+            <span>Gmail REST API &amp; Multi-SMTP Infrastructure</span>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-2xl bg-blue-500/15 border border-blue-500/25 text-blue-400 shadow-lg shadow-blue-500/20">
+              <Mail className="w-6 h-6" />
+            </span>
+            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              Mailbox Dispatcher
+            </span>
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
             Connect mailboxes via official Gmail REST API or standard SMTP App Passwords
           </p>
         </div>
@@ -133,7 +144,7 @@ export default function MailboxesPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleGoogleConnect}
-            className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold text-xs flex items-center gap-2.5 shadow-sm transition-all"
+            className="px-5 py-2.5 rounded-2xl glass-card hover:border-blue-500/40 text-white font-bold text-xs flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 shadow-lg"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -158,7 +169,7 @@ export default function MailboxesPage() {
 
           <button
             onClick={() => setModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20 flex items-center gap-2 transition-all"
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-xs shadow-xl shadow-orange-500/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add SMTP Mailbox</span>
@@ -174,13 +185,17 @@ export default function MailboxesPage() {
       )}
 
       {/* Gmail API Highlight Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-950/40 via-slate-900/60 to-slate-950 border border-blue-500/20 flex items-start gap-4">
-        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-          <Zap className="w-5 h-5" />
+      <div className="p-6 rounded-3xl glass-panel border border-blue-500/30 flex items-start gap-4 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 ambient-glow-cyan opacity-25 blur-3xl pointer-events-none" />
+        <div className="w-12 h-12 rounded-2xl bg-blue-500/15 border border-blue-500/25 text-blue-400 flex items-center justify-center shrink-0 shadow-inner">
+          <Zap className="w-6 h-6" />
         </div>
-        <div className="space-y-1">
-          <h3 className="text-sm font-bold text-white">Recommended: 1-Click Gmail REST API</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
+        <div className="space-y-1 relative z-10">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <span>Recommended: 1-Click Gmail REST API</span>
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-500/20 text-blue-300 border border-blue-500/30">Official</span>
+          </h3>
+          <p className="text-xs text-slate-300 leading-relaxed">
             Logging in with Google automatically connects your mailbox. Emails dispatch over <strong>HTTPS (port 443)</strong>, eliminating all cloud firewall timeouts (Render, Vercel, Railway) and bypassing manual App Password setups.
           </p>
         </div>

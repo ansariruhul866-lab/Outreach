@@ -189,11 +189,10 @@ export default function WhatsAppPage() {
       return;
     }
 
-    const batch = leadsToSend.slice(0, 20); // Cap at 20 as requested
+    const batch = leadsToSend.slice(0, 20);
     setIsInstantSending(true);
 
     try {
-      // 1. Generate personalized items
       const res = await api.whatsapp.bulkGenerateLinks({
         sender_id: selectedSenderId || undefined,
         message_template: directMessage,
@@ -207,18 +206,15 @@ export default function WhatsAppPage() {
         return;
       }
 
-      // Update state queue
       const queueWithState = items.map((item) => ({ ...item, sent: true }));
       setBulkQueue(queueWithState);
 
-      // 2. Open WhatsApp Web for all 1-20 contacts in rapid succession (300ms apart to prevent browser block)
       items.forEach((item, index) => {
         setTimeout(() => {
           window.open(item.web_link, "_blank");
         }, index * 350);
       });
 
-      // 3. Log all 1-20 messages in database at once
       await api.whatsapp.batchLogSent(
         items.map((it) => ({
           lead_id: it.lead_id,
@@ -229,7 +225,6 @@ export default function WhatsAppPage() {
         }))
       );
 
-      // Refresh history
       api.whatsapp.getHistory().then((h) => setHistory(h || [])).catch(() => {});
 
       setNotice(
@@ -398,18 +393,26 @@ export default function WhatsAppPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
-            <MessageSquare className="w-6 h-6 text-emerald-400" />
-            <span>Direct WhatsApp Outreach</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold mb-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>High-Velocity WhatsApp Multi-Channel Engine</span>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+            <span className="p-2 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 shadow-lg shadow-emerald-500/20">
+              <MessageSquare className="w-6 h-6" />
+            </span>
+            <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+              Direct WhatsApp Outreach
+            </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Send WhatsApp messages to 1&ndash;20 prospects in one go with one single template and one click.
+          <p className="text-xs text-slate-400 mt-1">
+            Send high-impact WhatsApp messages to 1&ndash;20 prospects in one go with one single template and one click.
           </p>
         </div>
 
         <button
           onClick={() => setAddSenderModalOpen(true)}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition-all w-fit"
+          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white font-extrabold text-xs shadow-xl shadow-emerald-500/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 w-fit"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add WhatsApp Number</span>
@@ -417,25 +420,28 @@ export default function WhatsAppPage() {
       </div>
 
       {notice && (
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
+        <div className="p-4 rounded-2xl glass-panel border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2.5 shadow-lg shadow-emerald-500/10 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{notice}</span>
         </div>
       )}
 
       {/* 1-CLICK INSTANT DISPATCH HERO BANNER (1-20 PERSONS IN ONE GO) */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/60 via-slate-900 to-slate-900 border-2 border-emerald-500/30 shadow-2xl relative overflow-hidden">
+      <div className="p-8 rounded-3xl glass-panel border border-emerald-500/40 relative overflow-hidden group shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 ambient-glow-emerald opacity-30 blur-3xl pointer-events-none group-hover:opacity-50 transition-opacity" />
+        <div className="absolute bottom-0 left-10 w-64 h-64 ambient-glow-cyan opacity-20 blur-3xl pointer-events-none" />
+
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30">
-              <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>1-Click Multi-Person Dispatch</span>
+          <div className="space-y-2.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30 backdrop-blur-md">
+              <Zap className="w-3.5 h-3.5 fill-current text-emerald-400" />
+              <span>1-Click Multi-Contact Dispatch</span>
             </div>
-            <h2 className="text-lg font-black text-white">
-              Send to {selectedCount > 0 ? Math.min(selectedCount, 20) : "1–20"} Contacts in One Go
+            <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+              <span>Send to {selectedCount > 0 ? Math.min(selectedCount, 20) : "1–20"} Contacts in One Go</span>
             </h2>
             <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Select up to 20 prospects, review your template, and hit the button below. All {Math.min(selectedCount || 20, 20)} personalized WhatsApp chats will open in one single click, with automatic delivery logging.
+              Select up to 20 prospects, review your active template, and launch with a single click. All {Math.min(selectedCount || 20, 20)} personalized WhatsApp chats open seamlessly in rapid succession, with automatic delivery logging.
             </p>
           </div>
 
@@ -444,16 +450,16 @@ export default function WhatsAppPage() {
               type="button"
               onClick={() => handleInstantBatchSend()}
               disabled={isInstantSending || selectedCount === 0}
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2.5 transition-all transform active:scale-95 disabled:opacity-50"
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-2.5 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
             >
               {isInstantSending ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
                   <span>Dispatching {Math.min(selectedCount, 20)} Chats...</span>
                 </>
               ) : (
                 <>
-                  <Zap className="w-4 h-4 fill-current" />
+                  <Zap className="w-4 h-4 fill-current text-slate-950" />
                   <span>1-Click Send to All {Math.min(selectedCount, 20)} Leads</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </>
@@ -464,7 +470,7 @@ export default function WhatsAppPage() {
               type="button"
               onClick={handleNativeWhatsAppShare}
               title="Open WhatsApp Multi-Contact Share picker to select multiple recipients inside WhatsApp"
-              className="px-4 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-700"
+              className="px-5 py-3.5 rounded-2xl glass-card hover:border-emerald-500/40 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all"
             >
               <Share2 className="w-3.5 h-3.5 text-emerald-400" />
               <span>Forward in WhatsApp</span>
@@ -474,7 +480,7 @@ export default function WhatsAppPage() {
       </div>
 
       {/* Your Connected WhatsApp Numbers */}
-      <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-4">
+      <div className="p-6 rounded-3xl glass-panel space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -482,18 +488,18 @@ export default function WhatsAppPage() {
               <span>Your Sender WhatsApp Numbers ({senders.length})</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Select which WhatsApp sender profile you want to send from. You can add personal or business numbers.
+              Select which WhatsApp sender profile you want to send from. Add personal or business numbers.
             </p>
           </div>
         </div>
 
         {senders.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl bg-slate-950/60 border border-slate-800/80 text-slate-400 space-y-3">
+          <div className="p-8 text-center rounded-2xl glass-card border border-white/[0.06] text-slate-400 space-y-3">
             <Phone className="w-8 h-8 mx-auto opacity-30 text-emerald-400" />
             <p className="text-xs">No WhatsApp sender numbers added yet.</p>
             <button
               onClick={() => setAddSenderModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold transition-colors"
+              className="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 hover:bg-emerald-500/25 text-emerald-300 text-xs font-bold transition-all"
             >
               + Add Your First WhatsApp Number
             </button>
@@ -504,21 +510,21 @@ export default function WhatsAppPage() {
               <div
                 key={s.id}
                 onClick={() => setSelectedSenderId(s.id)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 flex items-center justify-between ${
                   selectedSenderId === s.id
-                    ? "bg-emerald-500/10 border-emerald-500/50 shadow-md shadow-emerald-500/10"
-                    : "bg-slate-950 border-slate-800/80 hover:border-slate-700"
+                    ? "glass-panel border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.2)] bg-emerald-500/[0.08]"
+                    : "glass-card hover:border-white/20"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 font-bold shadow-inner">
                     <MessageSquare className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-xs font-bold text-white">{s.display_name}</h3>
-                    <p className="text-[11px] font-mono text-emerald-400">+{s.phone_number}</p>
+                    <p className="text-[11px] font-mono text-emerald-400 font-semibold">+{s.phone_number}</p>
                     {s.is_default && (
-                      <span className="text-[9px] uppercase font-bold text-slate-500">Default Sender</span>
+                      <span className="text-[9px] uppercase font-bold text-slate-400">Default Sender</span>
                     )}
                   </div>
                 </div>
@@ -529,7 +535,7 @@ export default function WhatsAppPage() {
                     e.stopPropagation();
                     handleDeleteSender(s.id);
                   }}
-                  className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/15 transition-colors"
                   title="Remove number"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -543,7 +549,7 @@ export default function WhatsAppPage() {
       {/* Main Grid: Direct Single Sender & Leads Contacts */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Message Composer & Template */}
-        <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-5 flex flex-col justify-between">
+        <div className="p-6 rounded-3xl glass-panel space-y-5 flex flex-col justify-between">
           <div className="space-y-4">
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -556,15 +562,15 @@ export default function WhatsAppPage() {
             </div>
 
             {/* Template Presets */}
-            <div className="flex items-center gap-2 pb-1 border-b border-slate-800/80">
+            <div className="flex items-center gap-2 pb-2 border-b border-white/[0.06]">
               <span className="text-[11px] uppercase font-bold text-slate-400 mr-1">Presets:</span>
               <button
                 type="button"
                 onClick={() => handleTemplateSelect("pitch")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all ${
                   templateType === "pitch"
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold"
-                    : "bg-slate-950 text-slate-400 hover:text-slate-200"
+                    ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm"
+                    : "glass-card text-slate-400 hover:text-slate-200"
                 }`}
               >
                 Pitch &amp; Outreach
@@ -572,10 +578,10 @@ export default function WhatsAppPage() {
               <button
                 type="button"
                 onClick={() => handleTemplateSelect("followup")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all ${
                   templateType === "followup"
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold"
-                    : "bg-slate-950 text-slate-400 hover:text-slate-200"
+                    ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm"
+                    : "glass-card text-slate-400 hover:text-slate-200"
                 }`}
               >
                 Follow Up
@@ -583,10 +589,10 @@ export default function WhatsAppPage() {
               <button
                 type="button"
                 onClick={() => setTemplateType("custom")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all ${
                   templateType === "custom"
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold"
-                    : "bg-slate-950 text-slate-400 hover:text-slate-200"
+                    ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm"
+                    : "glass-card text-slate-400 hover:text-slate-200"
                 }`}
               >
                 Custom
@@ -595,11 +601,11 @@ export default function WhatsAppPage() {
 
             <form onSubmit={handleSendDirect} className="space-y-4">
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-[11px] font-bold uppercase text-slate-400">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     Template Body
                   </label>
-                  <span className="text-[10px] text-slate-500 font-mono">
+                  <span className="text-[10px] text-emerald-400 font-mono">
                     Tags: {"{{firstName}}"}, {"{{company}}"}, {"{{website}}"}
                   </span>
                 </div>
@@ -608,13 +614,13 @@ export default function WhatsAppPage() {
                   required
                   value={directMessage}
                   onChange={(e) => setDirectMessage(e.target.value)}
-                  className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-white focus:border-emerald-500 focus:outline-none"
+                  className="w-full p-4 glass-input rounded-2xl text-xs font-mono text-white focus:outline-none leading-relaxed"
                 />
               </div>
 
               {/* Quick 1-off single prospect send */}
-              <div className="pt-2 border-t border-slate-800/80 space-y-3">
-                <span className="text-[11px] font-bold uppercase text-slate-400 block">
+              <div className="pt-3 border-t border-white/[0.06] space-y-3">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
                   Or Send to a Single Individual:
                 </span>
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -623,21 +629,21 @@ export default function WhatsAppPage() {
                     value={directPhone}
                     onChange={(e) => setDirectPhone(e.target.value)}
                     placeholder="Phone (e.g. 919876543210)"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs text-white focus:outline-none font-mono"
                   />
                   <input
                     type="text"
                     value={directName}
                     onChange={(e) => setDirectName(e.target.value)}
                     placeholder="Name (Optional)"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs text-white focus:outline-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={!directPhone.trim()}
-                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2.5 rounded-xl glass-card hover:border-emerald-500/40 disabled:opacity-40 text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 transition-all"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Send to this Single Phone Number</span>
@@ -649,7 +655,7 @@ export default function WhatsAppPage() {
         </div>
 
         {/* Database Contacts with Phone Numbers (1-20 Selection) */}
-        <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-4 flex flex-col justify-between">
+        <div className="p-6 rounded-3xl glass-panel space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
@@ -668,35 +674,35 @@ export default function WhatsAppPage() {
                 <button
                   type="button"
                   onClick={() => selectCount(5)}
-                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300"
+                  className="px-2.5 py-1 rounded-lg glass-card hover:border-white/20 text-xs font-semibold text-slate-300 transition-all"
                 >
                   5
                 </button>
                 <button
                   type="button"
                   onClick={() => selectCount(10)}
-                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300"
+                  className="px-2.5 py-1 rounded-lg glass-card hover:border-white/20 text-xs font-semibold text-slate-300 transition-all"
                 >
                   10
                 </button>
                 <button
                   type="button"
                   onClick={() => selectCount(15)}
-                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300"
+                  className="px-2.5 py-1 rounded-lg glass-card hover:border-white/20 text-xs font-semibold text-slate-300 transition-all"
                 >
                   15
                 </button>
                 <button
                   type="button"
                   onClick={() => selectCount(20)}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold"
+                  className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all shadow-sm"
                 >
                   Top 20
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedLeadIds([])}
-                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-400"
+                  className="px-2 py-1 rounded-lg glass-card text-[11px] text-slate-400 hover:text-white transition-all"
                 >
                   Clear
                 </button>
@@ -704,7 +710,7 @@ export default function WhatsAppPage() {
             </div>
 
             {leadsWithPhone.length === 0 ? (
-              <div className="p-8 text-center rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-500 space-y-2">
+              <div className="p-8 text-center rounded-2xl glass-card border border-white/[0.06] text-slate-500 space-y-2">
                 <Smartphone className="w-8 h-8 mx-auto opacity-30 text-emerald-400" />
                 <p className="text-xs text-white font-semibold">No contacts with phone numbers found</p>
                 <p className="text-[11px] text-slate-400">
@@ -712,13 +718,15 @@ export default function WhatsAppPage() {
                 </p>
               </div>
             ) : (
-              <div className="max-h-72 overflow-y-auto divide-y divide-slate-850 border border-slate-850 rounded-2xl bg-slate-950/80 p-2 space-y-1">
+              <div className="max-h-72 overflow-y-auto divide-y divide-white/[0.06] border border-white/[0.08] rounded-2xl bg-black/40 backdrop-blur-md p-2 space-y-1">
                 {leadsWithPhone.map((l) => {
                   const isChecked = selectedLeadIds.includes(l.id);
                   return (
                     <label
                       key={l.id}
-                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-900 cursor-pointer text-xs"
+                      className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer text-xs transition-colors ${
+                        isChecked ? "bg-white/[0.05]" : "hover:bg-white/[0.02]"
+                      }`}
                     >
                       <input
                         type="checkbox"
@@ -753,7 +761,7 @@ export default function WhatsAppPage() {
                             sender_id: selectedSenderId || undefined,
                           }).catch(() => {});
                         }}
-                        className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-1 transition-colors"
+                        className="p-1.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-semibold flex items-center gap-1 transition-all"
                         title="Send via WhatsApp"
                       >
                         <Send className="w-3.5 h-3.5" />
@@ -772,7 +780,7 @@ export default function WhatsAppPage() {
                 type="button"
                 onClick={handleGenerateBulk}
                 disabled={generatingBulk || selectedLeadIds.length === 0}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-xs flex items-center gap-1.5 transition-all"
+                className="px-3.5 py-1.5 rounded-xl glass-card hover:border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center gap-1.5 transition-all"
               >
                 {generatingBulk ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                 <span>View Queue Details</span>
@@ -784,7 +792,7 @@ export default function WhatsAppPage() {
 
       {/* Bulk Dispatch Queue & Automation Controls */}
       {bulkQueue.length > 0 && (
-        <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-6">
+        <div className="p-6 rounded-3xl glass-panel space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -802,13 +810,13 @@ export default function WhatsAppPage() {
                 type="button"
                 onClick={() => handleInstantBatchSend()}
                 disabled={isInstantSending}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all"
               >
                 <Zap className="w-3.5 h-3.5 fill-current" />
                 <span>1-Click Launch All</span>
               </button>
 
-              <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+              <div className="flex items-center gap-2 glass-input px-3 py-1.5 rounded-xl">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-[11px] text-slate-400 font-semibold">Delay:</span>
                 <select
@@ -817,11 +825,11 @@ export default function WhatsAppPage() {
                   disabled={autoRunning}
                   className="bg-transparent text-xs text-emerald-400 font-bold focus:outline-none"
                 >
-                  <option value={5} className="bg-slate-900">5 seconds (Rapid)</option>
-                  <option value={10} className="bg-slate-900">10 seconds</option>
-                  <option value={15} className="bg-slate-900">15 seconds (Recommended)</option>
-                  <option value={25} className="bg-slate-900">25 seconds (Safe)</option>
-                  <option value={40} className="bg-slate-900">40 seconds (Ultra Safe)</option>
+                  <option value={5} className="bg-slate-950">5 seconds (Rapid)</option>
+                  <option value={10} className="bg-slate-950">10 seconds</option>
+                  <option value={15} className="bg-slate-950">15 seconds (Recommended)</option>
+                  <option value={25} className="bg-slate-950">25 seconds (Safe)</option>
+                  <option value={40} className="bg-slate-950">40 seconds (Ultra Safe)</option>
                 </select>
               </div>
 
@@ -829,7 +837,7 @@ export default function WhatsAppPage() {
                 <button
                   type="button"
                   onClick={handleStartAutoRun}
-                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 rounded-xl glass-card hover:border-emerald-500/40 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all"
                 >
                   <Play className="w-3.5 h-3.5 fill-current text-emerald-400" />
                   <span>Auto Sequence</span>
@@ -838,7 +846,7 @@ export default function WhatsAppPage() {
                 <button
                   type="button"
                   onClick={handlePauseAutoRun}
-                  className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all"
                 >
                   <Pause className="w-3.5 h-3.5 fill-current" />
                   <span>Pause</span>
@@ -849,7 +857,7 @@ export default function WhatsAppPage() {
                 type="button"
                 onClick={handleResetQueue}
                 title="Reset all to unsent"
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+                className="p-2 rounded-xl glass-card text-slate-400 hover:text-white transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
@@ -876,9 +884,9 @@ export default function WhatsAppPage() {
                 </span>
               )}
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+            <div className="w-full h-2 rounded-full bg-slate-950/80 overflow-hidden border border-white/[0.08]">
               <div
-                className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
+                className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -889,20 +897,20 @@ export default function WhatsAppPage() {
             {bulkQueue.map((item, idx) => (
               <div
                 key={idx}
-                className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
+                className={`p-4 rounded-2xl transition-all duration-200 flex flex-col justify-between space-y-3 ${
                   item.sent
-                    ? "bg-slate-950/40 border-slate-800/40 opacity-70"
+                    ? "glass-card opacity-60"
                     : autoRunning && idx === currentIndex
-                    ? "bg-emerald-500/10 border-emerald-500 ring-2 ring-emerald-500/30"
-                    : "bg-slate-950 border-slate-850 hover:border-slate-700"
+                    ? "glass-panel border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.25)] ring-1 ring-emerald-500/40"
+                    : "glass-card hover:border-emerald-500/40"
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white truncate">{item.recipient_name}</span>
-                    <span className="font-mono text-emerald-400 text-xs">+{item.recipient_phone}</span>
+                    <span className="font-mono text-emerald-400 text-xs font-semibold">+{item.recipient_phone}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 font-mono line-clamp-3 mt-2 leading-relaxed bg-slate-900/60 p-2.5 rounded-xl border border-slate-850">
+                  <p className="text-[11px] text-slate-300 font-mono line-clamp-3 mt-2 leading-relaxed bg-black/40 p-2.5 rounded-xl border border-white/[0.06]">
                     {item.message}
                   </p>
                 </div>
@@ -913,8 +921,8 @@ export default function WhatsAppPage() {
                     onClick={() => dispatchLead(idx)}
                     className={`flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
                       item.sent
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-600/10"
+                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        : "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black shadow-md shadow-emerald-500/20"
                     }`}
                   >
                     {item.sent ? (
@@ -939,17 +947,17 @@ export default function WhatsAppPage() {
 
       {/* Message Dispatch History */}
       {history.length > 0 && (
-        <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-4">
+        <div className="p-6 rounded-3xl glass-panel space-y-4">
           <h2 className="text-sm font-bold text-white flex items-center gap-2">
             <History className="w-4 h-4 text-emerald-400" />
             <span>Recent WhatsApp Dispatch Activity ({history.length})</span>
           </h2>
 
-          <div className="divide-y divide-slate-800/80 rounded-2xl bg-slate-950 border border-slate-800/80 overflow-hidden">
+          <div className="divide-y divide-white/[0.06] rounded-2xl glass-card overflow-hidden">
             {history.slice(0, 10).map((h) => (
-              <div key={h.id} className="p-3.5 flex items-center justify-between text-xs gap-4">
+              <div key={h.id} className="p-3.5 flex items-center justify-between text-xs gap-4 hover:bg-white/[0.02] transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center shrink-0">
                     <MessageSquare className="w-4 h-4" />
                   </div>
                   <div>
@@ -961,7 +969,7 @@ export default function WhatsAppPage() {
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
                     DISPATCHED
                   </span>
                   <p className="text-[10px] text-slate-500 mt-1">{h.created_at}</p>
@@ -974,8 +982,8 @@ export default function WhatsAppPage() {
 
       {/* Add WhatsApp Number Modal */}
       {addSenderModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 glass-panel rounded-3xl shadow-2xl border border-white/10">
             <button
               onClick={() => setAddSenderModalOpen(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white"
@@ -990,7 +998,7 @@ export default function WhatsAppPage() {
 
             <form onSubmit={handleAddSender} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                   WhatsApp Number (with country code) *
                 </label>
                 <input
@@ -999,7 +1007,7 @@ export default function WhatsAppPage() {
                   value={newPhoneNumber}
                   onChange={(e) => setNewPhoneNumber(e.target.value)}
                   placeholder="e.g. 919876543210 (India) or 14155552671 (US)"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none font-mono"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:outline-none font-mono"
                 />
                 <p className="text-[10px] text-slate-500 mt-1">
                   Include country code without &apos;+&apos; or spaces.
@@ -1007,7 +1015,7 @@ export default function WhatsAppPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                   Sender Label / Name *
                 </label>
                 <input
@@ -1016,7 +1024,7 @@ export default function WhatsAppPage() {
                   value={newSenderName}
                   onChange={(e) => setNewSenderName(e.target.value)}
                   placeholder="e.g. Rahul Personal WA or Sales Team Desk"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:outline-none"
                 />
               </div>
 
@@ -1024,14 +1032,14 @@ export default function WhatsAppPage() {
                 <button
                   type="button"
                   onClick={() => setAddSenderModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs"
+                  className="flex-1 py-2.5 rounded-xl glass-card text-slate-300 font-semibold text-xs hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={addingSender}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-1.5"
                 >
                   {addingSender ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save Number"}
                 </button>

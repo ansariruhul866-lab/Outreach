@@ -126,15 +126,26 @@ export default function ScraperPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Deep Web Scraper</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Crawl target websites up to 4 levels deep &amp; verify emails against MX DNS records
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Autonomous Web Crawler &amp; MX Verifier</span>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-2xl bg-orange-500/15 border border-orange-500/25 text-orange-400 shadow-lg shadow-orange-500/20">
+              <Search className="w-6 h-6" />
+            </span>
+            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              Deep Web Scraper
+            </span>
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Crawl target websites up to 4 levels deep, segment contacts into folders of 50, and verify MX records
           </p>
         </div>
 
         <Link
           href="/dashboard/leads"
-          className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all w-fit"
+          className="px-5 py-2.5 rounded-2xl glass-card hover:border-orange-500/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 w-fit"
         >
           <Users className="w-3.5 h-3.5 text-orange-400" />
           <span>View Leads Database</span>
@@ -180,7 +191,7 @@ export default function ScraperPage() {
       )}
 
       {/* Scrape Input Card */}
-      <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+      <div className="p-8 rounded-3xl glass-panel relative overflow-hidden">
         {tab === "single" ? (
           <form onSubmit={handleSingleScrape} className="space-y-6">
             <div>
