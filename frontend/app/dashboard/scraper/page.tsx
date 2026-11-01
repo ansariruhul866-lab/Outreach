@@ -202,41 +202,41 @@ export default function ScraperPage() {
         {tab === "single" ? (
           <form onSubmit={handleSingleScrape} className="space-y-6">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
                 Target Website Domain or URL
               </label>
               <div className="relative">
-                <Globe className="absolute left-4 top-3.5 w-4 h-4 text-purple-400/60" />
+                <Globe className="absolute left-4 top-3.5 w-4 h-4 text-purple-400" />
                 <input
                   type="text"
                   required
                   value={singleUrl}
                   onChange={(e) => setSingleUrl(e.target.value)}
                   placeholder="https://example.com or stripe.com"
-                  className="w-full pl-11 pr-4 py-3 bg-black/60 border border-purple-500/30 rounded-2xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 focus:outline-none transition-colors"
+                  className="w-full pl-11 pr-4 py-3 glass-input rounded-2xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
                   Crawl Depth
                 </label>
                 <select
                   value={depth}
                   onChange={(e) => setDepth(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 bg-black/60 border border-purple-500/30 rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 glass-input rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 >
-                  <option value={1} className="bg-black text-white">1 Level (Homepage only - Fastest)</option>
-                  <option value={2} className="bg-black text-white">2 Levels (Homepage + /contact, /about - Recommended)</option>
-                  <option value={3} className="bg-black text-white">3 Levels (Deep team &amp; subpage discovery)</option>
-                  <option value={4} className="bg-black text-white">4 Levels (Exhaustive full-site spider)</option>
+                  <option value={1} className="bg-zinc-950 text-white">1 Level (Homepage only - Fastest)</option>
+                  <option value={2} className="bg-zinc-950 text-white">2 Levels (Homepage + /contact, /about - Recommended)</option>
+                  <option value={3} className="bg-zinc-950 text-white">3 Levels (Deep team &amp; subpage discovery)</option>
+                  <option value={4} className="bg-zinc-950 text-white">4 Levels (Exhaustive full-site spider)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
                   Quick Sample Domains
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -245,7 +245,7 @@ export default function ScraperPage() {
                       key={d}
                       type="button"
                       onClick={() => setSingleUrl(d)}
-                      className="px-2.5 py-1.5 rounded-lg bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-white border border-purple-500/20 text-[11px] font-semibold transition-colors cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-[11px] font-semibold transition-all hover:scale-105"
                     >
                       {d}
                     </button>
@@ -259,18 +259,18 @@ export default function ScraperPage() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="py-3.5 px-6 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+              className="py-3.5 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
                   <span>Crawling &amp; Verifying MX Records...</span>
                 </>
               ) : (
                 <>
-                  <Search className="w-4 h-4" />
+                  <Search className="w-4 h-4 text-white" />
                   <span>Start Deep Crawl</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 text-white" />
                 </>
               )}
             </motion.button>
@@ -279,7 +279,7 @@ export default function ScraperPage() {
           <form onSubmit={handleBulkScrape} className="space-y-6">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
                   Folder Name (Batch of ~50 leads per folder)
                 </label>
                 <input
@@ -287,28 +287,28 @@ export default function ScraperPage() {
                   value={folderName}
                   onChange={(e) => setFolderName(e.target.value)}
                   placeholder="e.g. Fintech Founders Batch, SaaS Directories"
-                  className="w-full px-4 py-3 bg-black/60 border border-purple-500/30 rounded-2xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 glass-input rounded-2xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
                   Crawl Depth
                 </label>
                 <select
                   value={depth}
                   onChange={(e) => setDepth(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 bg-black/60 border border-purple-500/30 rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 glass-input rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 >
-                  <option value={1} className="bg-black text-white">1 Level (Homepage only)</option>
-                  <option value={2} className="bg-black text-white">2 Levels (Homepage + /contact, /about - Recommended)</option>
-                  <option value={3} className="bg-black text-white">3 Levels (Deep subpage discovery)</option>
+                  <option value={1} className="bg-zinc-950 text-white">1 Level (Homepage only)</option>
+                  <option value={2} className="bg-zinc-950 text-white">2 Levels (Homepage + /contact, /about - Recommended)</option>
+                  <option value={3} className="bg-zinc-950 text-white">3 Levels (Deep subpage discovery)</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
                 Paste Multiple Domains / URLs (One per line)
               </label>
               <textarea
@@ -317,7 +317,7 @@ export default function ScraperPage() {
                 value={bulkUrls}
                 onChange={(e) => setBulkUrls(e.target.value)}
                 placeholder="stripe.com&#10;vercel.com&#10;linear.app&#10;supabase.com"
-                className="w-full p-4 bg-black/60 border border-purple-500/30 rounded-2xl text-xs font-mono text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none transition-colors"
+                className="w-full p-4 glass-input rounded-2xl text-xs font-mono text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
               />
             </div>
 
@@ -325,7 +325,7 @@ export default function ScraperPage() {
               <button
                 type="button"
                 onClick={() => setBulkUrls(sampleDomains.join("\n"))}
-                className="text-xs text-purple-400 hover:text-purple-300 font-semibold cursor-pointer"
+                className="text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors"
               >
                 + Insert 5 Sample Tech Domains
               </button>
@@ -335,16 +335,16 @@ export default function ScraperPage() {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={loading}
-                className="py-3 px-6 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                className="py-3 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all disabled:opacity-50"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
                     <span>Initiating Bulk Spider...</span>
                   </>
                 ) : (
                   <>
-                    <Layers className="w-4 h-4" />
+                    <Layers className="w-4 h-4 text-white" />
                     <span>Run Bulk Crawler</span>
                   </>
                 )}

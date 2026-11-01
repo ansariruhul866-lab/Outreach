@@ -235,7 +235,7 @@ export default function TemplatesPage() {
           <span className="text-xs">Loading email templates...</span>
         </div>
       ) : filteredTemplates.length === 0 ? (
-        <div className="p-16 text-center rounded-3xl glass-card text-zinc-500 border-purple-500/20">
+        <div className="p-16 text-center rounded-3xl glass-card text-zinc-400 border border-purple-500/20">
           <FileText className="w-10 h-10 mx-auto mb-3 opacity-30 text-purple-400" />
           <p className="font-bold text-white text-sm">No templates in this category</p>
           <p className="text-xs text-zinc-400 mt-1">
@@ -248,13 +248,15 @@ export default function TemplatesPage() {
             const catInfo =
               CATEGORIES.find((c) => c.key === t.category) || {
                 label: t.category,
-                color: "text-zinc-300 bg-purple-950/40 border-purple-500/30",
+                color: "text-zinc-300 bg-zinc-800 border-zinc-700",
               };
 
             return (
-              <div
+              <motion.div
                 key={t.id}
-                className="p-6 rounded-3xl glass-panel hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between space-y-4 group hover:-translate-y-1 border border-purple-500/20"
+                whileHover={{ y: -4 }}
+                transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                className="p-6 rounded-3xl glass-panel hover:border-purple-500/50 border-purple-500/20 transition-all duration-300 flex flex-col justify-between space-y-4 group"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
@@ -264,7 +266,7 @@ export default function TemplatesPage() {
                       {catInfo.label}
                     </span>
                     {t.is_default && (
-                      <span className="text-[10px] text-zinc-400 font-semibold flex items-center gap-1">
+                      <span className="text-[10px] text-purple-300 font-semibold flex items-center gap-1">
                         <Sparkles className="w-3 h-3 text-purple-400" />
                         Built-in
                       </span>
@@ -280,33 +282,33 @@ export default function TemplatesPage() {
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-black/60 border border-purple-500/20 text-[11px] text-zinc-300 font-mono line-clamp-4 leading-relaxed whitespace-pre-wrap">
+                  <div className="p-3 rounded-xl bg-black/50 border border-purple-500/10 text-[11px] text-zinc-300 font-mono line-clamp-4 leading-relaxed whitespace-pre-wrap">
                     {t.body.replace(/<[^>]*>?/gm, "")}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-purple-500/20 text-xs">
+                <div className="flex items-center justify-between pt-3 border-t border-purple-500/10 text-xs">
                   <span className="text-[10px] text-zinc-500">
                     Updated {t.updated_at || t.created_at}
                   </span>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => openEditModal(t)}
-                      className="p-2 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 text-purple-300 hover:text-white transition-colors cursor-pointer"
+                      className="p-2 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white transition-colors"
                       title="Edit template"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(t.id, t.is_default)}
-                      className="p-2 rounded-xl bg-slate-800 hover:bg-red-500/10 hover:text-red-400 text-slate-400 transition-colors"
+                      className="p-2 rounded-xl glass-card hover:bg-red-500/10 hover:text-red-400 text-zinc-400 transition-colors"
                       title="Delete template"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -314,21 +316,21 @@ export default function TemplatesPage() {
 
       {/* Template Create / Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-2xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-            <div className="shrink-0 px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xl animate-in fade-in">
+          <div className="relative w-full max-w-2xl max-h-[90vh] glass-panel border border-purple-500/30 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="shrink-0 px-6 py-5 border-b border-purple-500/20 flex items-center justify-between bg-black/90">
               <div>
                 <h2 className="text-lg font-bold text-white">
                   {editingId ? "Edit Email Template" : "Create New Email Template"}
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-zinc-400 mt-0.5">
                   Save structured outreach templates for quick reuse in campaigns
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+                className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.08]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -338,7 +340,7 @@ export default function TemplatesPage() {
               <div className="flex-1 overflow-y-auto p-6 space-y-5">
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
+                    <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1.5">
                       Template Title *
                     </label>
                     <input
@@ -347,29 +349,29 @@ export default function TemplatesPage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Q4 Growth Pitch, Follow-Up #1, Black Friday Discount"
-                      className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
+                    <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1.5">
                       Category
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                     >
-                      <option value="PITCH" className="bg-black text-white">Cold Pitch</option>
-                      <option value="FOLLOW_UP" className="bg-black text-white">Follow-Up (Bump)</option>
-                      <option value="OFFER" className="bg-black text-white">Offer &amp; Discount</option>
-                      <option value="CUSTOM" className="bg-black text-white">Custom</option>
+                      <option value="PITCH" className="bg-zinc-950 text-white">Cold Pitch</option>
+                      <option value="FOLLOW_UP" className="bg-zinc-950 text-white">Follow-Up (Bump)</option>
+                      <option value="OFFER" className="bg-zinc-950 text-white">Offer &amp; Discount</option>
+                      <option value="CUSTOM" className="bg-zinc-950 text-white">Custom</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
+                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1.5">
                     Default Subject Line *
                   </label>
                   <input
@@ -378,13 +380,13 @@ export default function TemplatesPage() {
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="Quick question for {{company}}"
-                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
-                    <label className="text-[11px] font-bold uppercase text-zinc-400">
+                    <label className="text-[11px] font-bold uppercase text-purple-300">
                       Email Body Template (HTML supported) *
                     </label>
                     <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 flex-wrap">
@@ -400,12 +402,12 @@ export default function TemplatesPage() {
                     required
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    className="w-full p-4 bg-black/60 border border-purple-500/30 rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full p-4 glass-input rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Attachments / References / Photos */}
-                <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/20 space-y-3">
+                <div className="p-4 rounded-2xl glass-card border border-purple-500/20 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold text-white flex items-center gap-2">
@@ -417,7 +419,7 @@ export default function TemplatesPage() {
                       </p>
                     </div>
 
-                    <label className="px-3 py-1.5 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 text-purple-200 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
+                    <label className="px-3 py-1.5 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
                       <Plus className="w-3.5 h-3.5 text-purple-400" />
                       <span>Add File</span>
                       <input
@@ -436,7 +438,7 @@ export default function TemplatesPage() {
                         return (
                           <div
                             key={idx}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-xs text-purple-200"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl glass-card border border-purple-500/30 text-xs text-zinc-200"
                           >
                             {isImage ? (
                               <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
@@ -447,7 +449,7 @@ export default function TemplatesPage() {
                             <button
                               type="button"
                               onClick={() => removeAttachment(idx)}
-                              className="text-zinc-400 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
+                              className="text-zinc-500 hover:text-red-400 p-0.5 rounded transition-colors"
                               title="Remove attachment"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -464,21 +466,23 @@ export default function TemplatesPage() {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
                 >
                   Cancel
                 </button>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center gap-2"
                 >
                   {saving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
                   ) : (
                     <span>{editingId ? "Update Template" : "Save Template"}</span>
                   )}
-                </button>
+                </motion.button>
               </div>
             </form>
           </div>

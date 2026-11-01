@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user) return null;
 
   return (
-    <div className="min-h-screen flex bg-black text-white dark:bg-black dark:text-white antialiased relative overflow-hidden select-none dashboard-root">
+    <div className="min-h-screen flex bg-black text-white antialiased relative overflow-hidden select-none">
       {/* Black & Purple Ambient Glow Mesh */}
       <div className="fixed top-[-10%] right-[-5%] w-[700px] h-[700px] ambient-glow-purple-lg rounded-full blur-[140px] pointer-events-none opacity-60 animate-float" />
       <div className="fixed bottom-[-15%] left-[15%] w-[750px] h-[750px] ambient-glow-purple-accent rounded-full blur-[160px] pointer-events-none opacity-40 animate-pulse-glow" />

@@ -215,8 +215,8 @@ export default function MailboxesPage() {
             <span className="text-xs">Loading mailboxes...</span>
           </div>
         ) : senders.length === 0 ? (
-          <div className="p-12 text-center text-zinc-500 rounded-3xl glass-card border-purple-500/20">
-            <Mail className="w-8 h-8 mx-auto mb-3 text-purple-400/40" />
+          <div className="p-12 text-center text-zinc-400 rounded-3xl glass-panel border border-purple-500/20">
+            <Mail className="w-8 h-8 mx-auto mb-3 text-purple-400/50" />
             <p className="font-bold text-white text-sm">No mailboxes connected</p>
             <p className="text-xs text-zinc-400 mt-1 mb-4">
               Click &apos;Connect Google Account&apos; or add an SMTP account to start sending campaigns.
@@ -234,8 +234,8 @@ export default function MailboxesPage() {
                   <span
                     className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
                       s.provider === "GMAIL_API"
-                        ? "bg-purple-500/15 text-purple-300 border border-purple-500/30"
-                        : "bg-black/60 text-zinc-400 border border-purple-500/20"
+                        ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                        : "bg-zinc-800 text-zinc-400"
                     }`}
                   >
                     {s.provider === "GMAIL_API" ? "⚡ GMAIL REST API (OAuth)" : s.provider}
@@ -243,9 +243,9 @@ export default function MailboxesPage() {
                   <span
                     className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
                       s.status === "VERIFIED"
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
                         : s.status === "PENDING"
-                        ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
+                        ? "bg-purple-950/60 text-purple-300 border-purple-500/30"
                         : "bg-red-500/10 text-red-400 border-red-500/20"
                     }`}
                   >
@@ -260,7 +260,7 @@ export default function MailboxesPage() {
 
               <button
                 onClick={() => handleDeleteSender(s.id)}
-                className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-red-500/15 hover:text-red-400 text-zinc-400 text-xs font-semibold flex items-center gap-1.5 transition-all w-fit cursor-pointer border border-transparent hover:border-red-500/30"
+                className="px-3.5 py-2 rounded-xl glass-card hover:bg-red-500/15 hover:text-red-400 text-zinc-400 text-xs font-semibold flex items-center gap-1.5 transition-all w-fit"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Disconnect</span>
@@ -272,11 +272,11 @@ export default function MailboxesPage() {
 
       {/* Manual SMTP Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 bg-black/95 border border-purple-500/30 rounded-2xl sm:rounded-3xl shadow-2xl shadow-purple-950/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 glass-panel border border-purple-500/30 rounded-2xl sm:rounded-3xl shadow-2xl">
             <button
               onClick={() => setModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white cursor-pointer"
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
@@ -286,22 +286,22 @@ export default function MailboxesPage() {
 
             <form onSubmit={handleConnectSmtp} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Mailbox Provider
                 </label>
                 <select
                   value={provider}
                   onChange={(e) => handleProviderSelect(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 >
-                  <option value="GMAIL" className="bg-black text-white">Gmail (App Password)</option>
-                  <option value="OUTLOOK" className="bg-black text-white">Outlook / Office 365</option>
-                  <option value="CUSTOM" className="bg-black text-white">Custom SMTP Server</option>
+                  <option value="GMAIL" className="bg-zinc-950 text-white">Gmail (App Password)</option>
+                  <option value="OUTLOOK" className="bg-zinc-950 text-white">Outlook / Office 365</option>
+                  <option value="CUSTOM" className="bg-zinc-950 text-white">Custom SMTP Server</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Sender Display Name
                 </label>
                 <input
@@ -309,12 +309,12 @@ export default function MailboxesPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Rahul from Acme"
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Email Address *
                 </label>
                 <input
@@ -323,13 +323,13 @@ export default function MailboxesPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@domain.com"
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                     SMTP Host
                   </label>
                   <input
@@ -337,11 +337,11 @@ export default function MailboxesPage() {
                     required
                     value={host}
                     onChange={(e) => setHost(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                     SMTP Port
                   </label>
                   <input
@@ -349,13 +349,13 @@ export default function MailboxesPage() {
                     required
                     value={port}
                     onChange={(e) => setPort(parseInt(e.target.value) || 587)}
-                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   App Password / SMTP Password *
                 </label>
                 <input
@@ -364,7 +364,7 @@ export default function MailboxesPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="16-character App Password"
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
@@ -372,17 +372,19 @@ export default function MailboxesPage() {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs transition-colors cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
                 >
                   Cancel
                 </button>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={connecting}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-1.5"
                 >
-                  {connecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Test & Connect"}
-                </button>
+                  {connecting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : "Test & Connect"}
+                </motion.button>
               </div>
             </form>
           </div>

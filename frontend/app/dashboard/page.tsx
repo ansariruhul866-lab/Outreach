@@ -88,16 +88,16 @@ export default function DashboardOverviewPage() {
       {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-500/10 border border-purple-300 dark:border-purple-500/30 text-purple-800 dark:text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
-            <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
             <span>Black &amp; Purple Intelligence Engine</span>
           </div>
-          <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
-            <span className="bg-gradient-to-r from-purple-950 via-purple-800 to-purple-600 dark:from-white dark:via-purple-100 dark:to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2">
+            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
               Outreach Overview
             </span>
           </h1>
-          <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 font-medium">
+          <p className="text-xs text-zinc-400 mt-1">
             Real-time pipeline performance, multi-channel analytics, and active outreach campaigns
           </p>
         </div>
@@ -108,15 +108,15 @@ export default function DashboardOverviewPage() {
             whileTap={{ scale: 0.95 }}
             onClick={loadData}
             disabled={loading}
-            className="p-2.5 rounded-2xl glass-card text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+            className="p-2.5 rounded-2xl glass-card text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-purple-500" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-purple-400" : ""}`} />
             <span>Refresh</span>
           </motion.button>
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
             <Link
               href="/dashboard/scraper"
-              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-extrabold text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all block cursor-pointer"
+              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-extrabold text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all block"
             >
               <Search className="w-3.5 h-3.5" />
               <span>New Scrape Job</span>

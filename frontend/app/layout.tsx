@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
-import { ThemeProvider } from "@/lib/theme-context";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -23,10 +22,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark h-full">
-      <body className={`${jakarta.variable} font-sans min-h-screen bg-black text-white antialiased selection:bg-purple-500/40 selection:text-white transition-colors duration-300`}>
-        <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>
+      <body className={`${jakarta.variable} font-sans min-h-screen bg-black text-white antialiased selection:bg-purple-600/40 selection:text-white`}>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

@@ -562,7 +562,7 @@ export default function LeadsPage() {
           </div>
         ) : filteredLeads.length === 0 ? (
           <div className="p-12 text-center text-zinc-500">
-            <Users className="w-8 h-8 mx-auto mb-3 text-purple-400/40" />
+            <Users className="w-8 h-8 mx-auto mb-3 text-purple-400/50" />
             <p className="font-bold text-white text-sm">No leads found in this folder</p>
             <p className="text-xs text-zinc-400 mt-1">
               {search ? "No leads matching your search" : "Run the scraper or import a CSV to add prospects."}
@@ -571,13 +571,13 @@ export default function LeadsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-black/60 border-b border-purple-500/20 text-[10px] uppercase font-bold text-zinc-400">
+              <thead className="bg-black/40 border-b border-purple-500/20 text-[10px] uppercase font-bold text-zinc-400">
                 <tr>
                   <th className="p-4 w-10">
                     <button
                       type="button"
                       onClick={handleToggleSelectAll}
-                      className="text-zinc-400 hover:text-white cursor-pointer"
+                      className="text-zinc-400 hover:text-white"
                       title="Select all on this page"
                     >
                       {selectedLeadIds.length === filteredLeads.length && filteredLeads.length > 0 ? (
@@ -603,15 +603,15 @@ export default function LeadsPage() {
                   return (
                     <tr
                       key={lead.id}
-                      className={`hover:bg-purple-950/20 transition-colors ${
-                        isChecked ? "bg-purple-600/10" : ""
+                      className={`hover:bg-white/[0.04] transition-colors ${
+                        isChecked ? "bg-purple-600/15" : ""
                       }`}
                     >
                       <td className="p-4">
                         <button
                           type="button"
                           onClick={() => handleToggleLead(lead.id)}
-                          className="text-zinc-400 hover:text-white cursor-pointer"
+                          className="text-zinc-400 hover:text-white"
                         >
                           {isChecked ? (
                             <CheckSquare className="w-4 h-4 text-purple-400" />
@@ -625,7 +625,7 @@ export default function LeadsPage() {
                           <p className="font-mono text-white font-medium">{lead.email}</p>
                         ) : null}
                         {lead.phone ? (
-                          <p className="font-mono text-emerald-400 text-[11px] font-semibold flex items-center gap-1">
+                          <p className="font-mono text-purple-300 text-[11px] font-semibold flex items-center gap-1">
                             <span>WA:</span> +{lead.phone}
                           </p>
                         ) : null}
@@ -634,12 +634,12 @@ export default function LeadsPage() {
                       <td className="p-4">
                         <p className="text-white font-semibold">{lead.company || "—"}</p>
                         {lead.website && (
-                          <p className="text-[11px] text-zinc-500 truncate max-w-xs">{lead.website}</p>
+                          <p className="text-[11px] text-zinc-400 truncate max-w-xs">{lead.website}</p>
                         )}
                       </td>
                       <td className="p-4">
                         {folderObj ? (
-                          <span className="px-2 py-0.5 rounded-lg bg-purple-950/40 text-[10px] text-purple-300 font-semibold border border-purple-500/30">
+                          <span className="px-2 py-0.5 rounded-lg bg-purple-950/40 text-[10px] text-purple-300 font-semibold border border-purple-500/20">
                             {folderObj.name}
                           </span>
                         ) : (
@@ -650,11 +650,11 @@ export default function LeadsPage() {
                         <span
                           className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border ${
                             lead.status === "SENT"
-                              ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                              ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
                               : lead.status === "OPENED"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              ? "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40"
                               : lead.status === "PENDING"
-                              ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
+                              ? "bg-purple-950/60 text-purple-200 border-purple-500/30"
                               : lead.status === "SKIPPED"
                               ? "bg-zinc-800 text-zinc-400 border-zinc-700"
                               : "bg-red-500/10 text-red-400 border-red-500/20"
@@ -666,7 +666,7 @@ export default function LeadsPage() {
                       <td className="p-4 text-right">
                         <button
                           onClick={() => handleDeleteSingleLead(lead.id)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                          className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                           title="Delete single lead"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -683,11 +683,11 @@ export default function LeadsPage() {
 
       {/* Create Folder Modal */}
       {createFolderModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 bg-black/95 border border-purple-500/30 rounded-3xl shadow-2xl shadow-purple-950/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 glass-panel border border-purple-500/30 rounded-3xl shadow-2xl">
             <button
               onClick={() => setCreateFolderModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white cursor-pointer"
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
@@ -697,7 +697,7 @@ export default function LeadsPage() {
 
             <form onSubmit={handleCreateFolder} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Folder Name *
                 </label>
                 <input
@@ -706,12 +706,12 @@ export default function LeadsPage() {
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   placeholder="e.g. B2B SaaS Leads - Batch 1"
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Description (Optional)
                 </label>
                 <input
@@ -719,7 +719,7 @@ export default function LeadsPage() {
                   value={newFolderDesc}
                   onChange={(e) => setNewFolderDesc(e.target.value)}
                   placeholder="e.g. Scraped from TechCrunch top 50 SaaS list"
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
@@ -727,13 +727,13 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setCreateFolderModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40"
                 >
                   Create Folder
                 </button>
@@ -745,11 +745,11 @@ export default function LeadsPage() {
 
       {/* Move Selected Leads Modal */}
       {moveModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 bg-black/95 border border-purple-500/30 rounded-3xl shadow-2xl shadow-purple-950/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 glass-panel border border-purple-500/30 rounded-3xl shadow-2xl">
             <button
               onClick={() => setMoveModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white cursor-pointer"
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
@@ -761,18 +761,18 @@ export default function LeadsPage() {
 
             <form onSubmit={handleMoveSelected} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Target Destination Folder
                 </label>
                 <select
                   value={targetMoveFolderId}
                   onChange={(e) => setTargetMoveFolderId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 >
-                  <option value="" className="bg-black text-white">Select a folder...</option>
-                  <option value="UNASSIGNED" className="bg-black text-white">Unassigned (Remove from folder)</option>
+                  <option value="" className="bg-zinc-950 text-white">Select a folder...</option>
+                  <option value="UNASSIGNED" className="bg-zinc-950 text-white">Unassigned (Remove from folder)</option>
                   {folders.map((f) => (
-                    <option key={f.id} value={f.id} className="bg-black text-white">
+                    <option key={f.id} value={f.id} className="bg-zinc-950 text-white">
                       {f.name} ({f.leads_count} leads)
                     </option>
                   ))}
@@ -783,14 +783,14 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setMoveModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading || !targetMoveFolderId}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40"
                 >
                   Confirm Move
                 </button>
@@ -802,11 +802,11 @@ export default function LeadsPage() {
 
       {/* Add Lead Modal */}
       {addModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 bg-black/95 border border-purple-500/30 rounded-2xl sm:rounded-3xl shadow-2xl shadow-purple-950/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 glass-panel border border-purple-500/30 rounded-2xl sm:rounded-3xl shadow-2xl">
             <button
               onClick={() => setAddModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white cursor-pointer"
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
@@ -816,17 +816,17 @@ export default function LeadsPage() {
 
             <form onSubmit={handleCreateLead} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Folder Assignment
                 </label>
                 <select
                   value={newLeadFolderId}
                   onChange={(e) => setNewLeadFolderId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 >
-                  <option value="" className="bg-black text-white">Unassigned</option>
+                  <option value="" className="bg-zinc-950 text-white">Unassigned</option>
                   {folders.map((f) => (
-                    <option key={f.id} value={f.id} className="bg-black text-white">
+                    <option key={f.id} value={f.id} className="bg-zinc-950 text-white">
                       {f.name}
                     </option>
                   ))}
@@ -835,7 +835,7 @@ export default function LeadsPage() {
 
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                     Email Address
                   </label>
                   <input
@@ -843,12 +843,12 @@ export default function LeadsPage() {
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="contact@brand.com"
-                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-emerald-400 mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                     WhatsApp Phone Number
                   </label>
                   <input
@@ -856,13 +856,13 @@ export default function LeadsPage() {
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
                     placeholder="e.g. 919876543210"
-                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none font-mono"
+                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   First Name
                 </label>
                 <input
@@ -870,12 +870,12 @@ export default function LeadsPage() {
                   value={newFirstName}
                   onChange={(e) => setNewFirstName(e.target.value)}
                   placeholder="Rahul"
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Company Name
                 </label>
                 <input
@@ -883,12 +883,12 @@ export default function LeadsPage() {
                   value={newCompany}
                   onChange={(e) => setNewCompany(e.target.value)}
                   placeholder="Acme Inc"
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
                   Website URL
                 </label>
                 <input
@@ -896,7 +896,7 @@ export default function LeadsPage() {
                   value={newWebsite}
                   onChange={(e) => setNewWebsite(e.target.value)}
                   placeholder="https://acme.com"
-                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
@@ -904,17 +904,19 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setAddModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs transition-colors cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
                 >
                   Cancel
                 </button>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={modalLoading}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-1.5"
                 >
-                  {modalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save Lead"}
-                </button>
+                  {modalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : "Save Lead"}
+                </motion.button>
               </div>
             </form>
           </div>
