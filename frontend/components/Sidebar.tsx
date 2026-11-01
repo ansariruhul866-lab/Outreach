@@ -11,6 +11,7 @@ import {
   Send,
   Mail,
   FileText,
+  MessageSquare,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -31,6 +32,7 @@ export function Sidebar() {
     { label: "Leads & Folders", href: "/dashboard/leads", icon: Users },
     { label: "Templates", href: "/dashboard/templates", icon: FileText },
     { label: "Campaigns", href: "/dashboard/campaigns", icon: Send },
+    { label: "WhatsApp Direct", href: "/dashboard/whatsapp", icon: MessageSquare },
     { label: "Mailboxes", href: "/dashboard/mailboxes", icon: Mail },
   ];
 

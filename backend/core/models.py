@@ -26,6 +26,8 @@ class User(Base):
     scrape_jobs = relationship("ScrapeJob", back_populates="user", cascade="all, delete-orphan")
     lead_folders = relationship("LeadFolder", back_populates="user", cascade="all, delete-orphan")
     templates = relationship("EmailTemplate", back_populates="user", cascade="all, delete-orphan")
+    whatsapp_senders = relationship("WhatsAppSender", back_populates="user", cascade="all, delete-orphan")
+    whatsapp_messages = relationship("WhatsAppMessage", back_populates="user", cascade="all, delete-orphan")
 
 class SenderEmail(Base):
     __tablename__ = "sender_emails"
@@ -71,7 +73,8 @@ class Lead(Base):
     user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
     folder_id = Column(String, ForeignKey("lead_folders.id"), nullable=True, index=True)
     campaign_id = Column(String, ForeignKey("campaigns.id"), nullable=True, index=True)
-    email = Column(String, nullable=False, index=True)
+    email = Column(String, nullable=True, index=True)
+    phone = Column(String, nullable=True, index=True)
     first_name = Column(String, nullable=True)
     company = Column(String, nullable=True)
     website = Column(String, nullable=True)
@@ -145,3 +148,33 @@ class EmailTemplate(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", back_populates="templates")
+
+class WhatsAppSender(Base):
+    __tablename__ = "whatsapp_senders"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    phone_number = Column(String, nullable=False)  # Formatted E.164 without plus e.g. 919876543210
+    display_name = Column(String, nullable=False)   # e.g. "Rahul Personal WA" or "Sales Team WA"
+    is_default = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="whatsapp_senders")
+    messages = relationship("WhatsAppMessage", back_populates="sender", cascade="all, delete-orphan")
+
+class WhatsAppMessage(Base):
+    __tablename__ = "whatsapp_messages"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    sender_id = Column(String, ForeignKey("whatsapp_senders.id"), nullable=True)
+    lead_id = Column(String, ForeignKey("leads.id"), nullable=True)
+    recipient_phone = Column(String, nullable=False)
+    recipient_name = Column(String, nullable=True)
+    message = Column(Text, nullable=False)
+    status = Column(String, default="QUEUED")  # QUEUED | SENT | CANCELLED
+    created_at = Column(DateTime, default=datetime.utcnow)
+    sent_at = Column(DateTime, nullable=True)
+
+    user = relationship("User", back_populates="whatsapp_messages")
+    sender = relationship("WhatsAppSender", back_populates="messages")

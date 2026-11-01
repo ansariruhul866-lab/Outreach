@@ -61,11 +61,13 @@ def run_migrations():
                     cur.execute("ALTER TABLE email_templates ADD COLUMN attachments TEXT")
                 conn.commit()
 
-            # Leads migrations for folders
+            # Leads migrations for folders and phone numbers
             lead_cols = [c[1] for c in cur.execute("PRAGMA table_info(leads)").fetchall()]
             if lead_cols:
                 if "folder_id" not in lead_cols:
                     cur.execute("ALTER TABLE leads ADD COLUMN folder_id TEXT")
+                if "phone" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN phone TEXT")
                 conn.commit()
 
             # Users migrations for Firebase Auth

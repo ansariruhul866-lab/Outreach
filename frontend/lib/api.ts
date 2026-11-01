@@ -30,7 +30,8 @@ export interface Sender {
 export interface Lead {
   id: string;
   folder_id?: string | null;
-  email: string;
+  email?: string;
+  phone?: string;
   first_name?: string;
   company?: string;
   website?: string;
@@ -42,6 +43,23 @@ export interface Lead {
   sent_at?: string;
   opened_at?: string;
   created_at?: string;
+}
+
+export interface WhatsAppSender {
+  id: string;
+  phone_number: string;
+  display_name: string;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface WhatsAppMessageLog {
+  id: string;
+  recipient_phone: string;
+  recipient_name: string;
+  message: string;
+  status: string;
+  created_at: string;
 }
 
 export interface LeadFolder {
@@ -214,7 +232,7 @@ export const api = {
       if (res && Array.isArray(res.leads)) return res.leads as Lead[];
       return [] as Lead[];
     },
-    create: (lead: { email: string; first_name?: string; company?: string; website?: string; source_url?: string; folder_id?: string }) =>
+    create: (lead: { email?: string; phone?: string; first_name?: string; company?: string; website?: string; source_url?: string; folder_id?: string }) =>
       apiFetch<Lead>("/leads", {
         method: "POST",
         body: JSON.stringify(lead),
@@ -225,7 +243,7 @@ export const api = {
       if (campaignId) params.push(`campaign_id=${campaignId}`);
       if (folderId && folderId !== "ALL") params.push(`folder_id=${folderId}`);
       if (params.length) q += `?${params.join("&")}`;
-      return apiFetch<{ id: string; email: string; company?: string; status: string; campaign_id?: string; folder_id?: string }[]>(q);
+      return apiFetch<{ id: string; email: string; phone?: string; company?: string; status: string; campaign_id?: string; folder_id?: string }[]>(q);
     },
     delete: (id: string) =>
       apiFetch<{ success: boolean; message: string }>(`/leads/${id}`, {
@@ -245,7 +263,7 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ lead_ids: leadIds, folder_id: folderId }),
       }),
-    importCsv: (leads: Array<{ email: string; first_name?: string; company?: string; website?: string }>, folderId?: string) =>
+    importCsv: (leads: Array<{ email?: string; phone?: string; first_name?: string; company?: string; website?: string }>, folderId?: string) =>
       apiFetch<{ success: boolean; imported: number; duplicates: number }>("/leads/import-csv", {
         method: "POST",
         body: JSON.stringify({ leads, folder_id: folderId }),
@@ -348,5 +366,54 @@ export const api = {
       apiFetch<{ success: boolean; message: string }>(`/campaigns/${id}/pause`, {
         method: "POST",
       }),
+  },
+  whatsapp: {
+    listSenders: () => apiFetch<WhatsAppSender[]>("/whatsapp/senders"),
+    addSender: (payload: { phone_number: string; display_name: string; is_default?: boolean }) =>
+      apiFetch<{ id: string; phone_number: string; display_name: string }>("/whatsapp/senders", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    deleteSender: (senderId: string) =>
+      apiFetch<{ success: boolean }>(`/whatsapp/senders/${senderId}`, {
+        method: "DELETE",
+      }),
+    generateLink: (payload: {
+      sender_id?: string;
+      lead_id?: string;
+      recipient_phone: string;
+      recipient_name?: string;
+      message: string;
+    }) =>
+      apiFetch<{
+        success: boolean;
+        recipient_phone: string;
+        wa_link: string;
+        web_link: string;
+        message_id: string;
+      }>("/whatsapp/generate-link", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    bulkGenerateLinks: (payload: {
+      sender_id?: string;
+      message_template: string;
+      lead_ids: string[];
+    }) =>
+      apiFetch<{
+        total: number;
+        items: Array<{
+          lead_id: string;
+          recipient_name: string;
+          recipient_phone: string;
+          message: string;
+          wa_link: string;
+          web_link: string;
+        }>;
+      }>("/whatsapp/bulk-generate-links", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    getHistory: () => apiFetch<WhatsAppMessageLog[]>("/whatsapp/history"),
   },
 };

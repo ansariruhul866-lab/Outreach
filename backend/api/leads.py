@@ -10,7 +10,8 @@ from core.auth import get_current_user, verify_token
 router = APIRouter(prefix="/leads", tags=["leads"])
 
 class AddLeadRequest(BaseModel):
-    email: EmailStr
+    email: str | None = None
+    phone: str | None = None
     first_name: str | None = None
     company: str | None = None
     website: str | None = None
@@ -27,7 +28,8 @@ class MoveLeadsRequest(BaseModel):
 class LeadResponse(BaseModel):
     id: str
     folder_id: str | None = None
-    email: str
+    email: str | None = None
+    phone: str | None = None
     first_name: str | None
     company: str | None
     website: str | None
@@ -60,6 +62,7 @@ def get_selectable_leads(
             "id": l.id,
             "folder_id": l.folder_id,
             "email": l.email,
+            "phone": l.phone or "",
             "company": l.company or "",
             "status": l.status,
             "campaign_id": l.campaign_id
@@ -90,7 +93,7 @@ def list_leads(
 
     if search:
         s = f"%{search.lower()}%"
-        query = query.filter((Lead.email.ilike(s)) | (Lead.company.ilike(s)))
+        query = query.filter((Lead.email.ilike(s)) | (Lead.company.ilike(s)) | (Lead.phone.ilike(s)))
 
     if status and status != "ALL":
         query = query.filter(Lead.status == status)
@@ -107,6 +110,7 @@ def list_leads(
                 id=l.id,
                 folder_id=l.folder_id,
                 email=l.email,
+                phone=l.phone,
                 first_name=l.first_name,
                 company=l.company,
                 website=l.website,
@@ -121,19 +125,26 @@ def list_leads(
 
 @router.post("")
 def create_lead(req: AddLeadRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    existing = db.query(Lead).filter(
-        Lead.user_id == current_user.id,
-        Lead.email == req.email.lower()
-    ).first()
+    if not req.email and not req.phone:
+        raise HTTPException(status_code=400, detail="Either email or phone number is required")
 
-    if existing:
-        raise HTTPException(status_code=400, detail="Lead with this email already exists")
+    clean_email = req.email.lower().strip() if req.email else None
+    clean_phone = req.phone.strip() if req.phone else None
+
+    if clean_email:
+        existing = db.query(Lead).filter(
+            Lead.user_id == current_user.id,
+            Lead.email == clean_email
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Lead with this email already exists")
 
     lead = Lead(
         user_id=current_user.id,
         campaign_id=req.campaign_id,
         folder_id=req.folder_id,
-        email=req.email.lower(),
+        email=clean_email or f"wa_{clean_phone}@outreachbot.local",
+        phone=clean_phone,
         first_name=req.first_name,
         company=req.company,
         website=req.website,
@@ -143,7 +154,7 @@ def create_lead(req: AddLeadRequest, current_user: User = Depends(get_current_us
     db.add(lead)
     db.commit()
     db.refresh(lead)
-    return {"id": lead.id, "email": lead.email}
+    return {"id": lead.id, "email": lead.email, "phone": lead.phone}
 
 @router.get("/export")
 def export_leads(

@@ -49,6 +49,7 @@ export default function LeadsPage() {
   // Add single lead modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
   const [newFirstName, setNewFirstName] = useState("");
   const [newCompany, setNewCompany] = useState("");
   const [newWebsite, setNewWebsite] = useState("");
@@ -130,12 +131,16 @@ export default function LeadsPage() {
 
   const handleCreateLead = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail.trim()) return;
+    if (!newEmail.trim() && !newPhone.trim()) {
+      alert("Please provide either an email or a phone number.");
+      return;
+    }
 
     setModalLoading(true);
     try {
       await api.leads.create({
-        email: newEmail.trim(),
+        email: newEmail.trim() || undefined,
+        phone: newPhone.trim() || undefined,
         first_name: newFirstName.trim() || undefined,
         company: newCompany.trim() || undefined,
         website: newWebsite.trim() || undefined,
@@ -143,6 +148,7 @@ export default function LeadsPage() {
       });
       setAddModalOpen(false);
       setNewEmail("");
+      setNewPhone("");
       setNewFirstName("");
       setNewCompany("");
       setNewWebsite("");
@@ -278,18 +284,21 @@ export default function LeadsPage() {
 
         const header = lines[0].toLowerCase().split(",").map((h) => h.trim());
         const emailIdx = header.findIndex((h) => h.includes("email"));
+        const phoneIdx = header.findIndex((h) => h.includes("phone") || h.includes("mobile") || h.includes("whatsapp") || h.includes("number"));
         const nameIdx = header.findIndex((h) => h.includes("name") || h.includes("first"));
         const companyIdx = header.findIndex((h) => h.includes("company"));
         const webIdx = header.findIndex((h) => h.includes("web") || h.includes("site") || h.includes("url"));
 
-        const payload: Array<{ email: string; first_name?: string; company?: string; website?: string }> = [];
+        const payload: Array<{ email?: string; phone?: string; first_name?: string; company?: string; website?: string }> = [];
 
         for (let i = 1; i < lines.length; i++) {
           const row = lines[i].split(",").map((c) => c.trim().replace(/^["']|["']$/g, ""));
-          const leadEmail = emailIdx !== -1 ? row[emailIdx] : row[0];
-          if (leadEmail && leadEmail.includes("@")) {
+          const leadEmail = emailIdx !== -1 ? row[emailIdx] : "";
+          const leadPhone = phoneIdx !== -1 ? row[phoneIdx] : "";
+          if ((leadEmail && leadEmail.includes("@")) || (leadPhone && leadPhone.length >= 7)) {
             payload.push({
-              email: leadEmail,
+              email: leadEmail || undefined,
+              phone: leadPhone || undefined,
               first_name: nameIdx !== -1 ? row[nameIdx] : undefined,
               company: companyIdx !== -1 ? row[companyIdx] : undefined,
               website: webIdx !== -1 ? row[webIdx] : undefined,
@@ -298,7 +307,7 @@ export default function LeadsPage() {
         }
 
         if (payload.length === 0) {
-          alert("No valid email rows found in CSV");
+          alert("No valid email or phone rows found in CSV");
           setImporting(false);
           return;
         }
@@ -320,7 +329,8 @@ export default function LeadsPage() {
   const filteredLeads = leads.filter((l) => {
     const term = search.toLowerCase();
     return (
-      l.email.toLowerCase().includes(term) ||
+      (l.email && l.email.toLowerCase().includes(term)) ||
+      (l.phone && l.phone.toLowerCase().includes(term)) ||
       (l.company && l.company.toLowerCase().includes(term)) ||
       (l.first_name && l.first_name.toLowerCase().includes(term))
     );
@@ -549,7 +559,7 @@ export default function LeadsPage() {
                       )}
                     </button>
                   </th>
-                  <th className="p-4">Email Address</th>
+                  <th className="p-4">Email / Phone</th>
                   <th className="p-4">Contact</th>
                   <th className="p-4">Company &amp; Website</th>
                   <th className="p-4">Folder</th>
@@ -582,7 +592,16 @@ export default function LeadsPage() {
                           )}
                         </button>
                       </td>
-                      <td className="p-4 font-mono text-white font-medium">{lead.email}</td>
+                      <td className="p-4">
+                        {lead.email && !lead.email.endsWith("@outreachbot.local") ? (
+                          <p className="font-mono text-white font-medium">{lead.email}</p>
+                        ) : null}
+                        {lead.phone ? (
+                          <p className="font-mono text-emerald-400 text-[11px] font-semibold flex items-center gap-1">
+                            <span>WA:</span> +{lead.phone}
+                          </p>
+                        ) : null}
+                      </td>
                       <td className="p-4 text-slate-300">{lead.first_name || "—"}</td>
                       <td className="p-4">
                         <p className="text-white font-semibold">{lead.company || "—"}</p>
@@ -786,18 +805,32 @@ export default function LeadsPage() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="contact@brand.com"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
-                />
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="contact@brand.com"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-emerald-400 mb-1">
+                    WhatsApp Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    placeholder="e.g. 919876543210"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none font-mono"
+                  />
+                </div>
               </div>
 
               <div>
