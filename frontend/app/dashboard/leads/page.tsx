@@ -556,34 +556,34 @@ export default function LeadsPage() {
       {/* Leads Table */}
       <div className="rounded-3xl glass-panel overflow-hidden border border-purple-500/20">
         {loading ? (
-          <div className="p-12 text-center text-slate-500 flex flex-col items-center gap-2">
-            <Loader2 className="w-6 h-6 animate-spin text-orange-400" />
+          <div className="p-12 text-center text-zinc-500 flex flex-col items-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
             <span className="text-xs">Loading prospects...</span>
           </div>
         ) : filteredLeads.length === 0 ? (
-          <div className="p-12 text-center text-slate-500">
-            <Users className="w-8 h-8 mx-auto mb-3 opacity-40" />
+          <div className="p-12 text-center text-zinc-500">
+            <Users className="w-8 h-8 mx-auto mb-3 text-purple-400/40" />
             <p className="font-bold text-white text-sm">No leads found in this folder</p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-zinc-400 mt-1">
               {search ? "No leads matching your search" : "Run the scraper or import a CSV to add prospects."}
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950/60 border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400">
+              <thead className="bg-black/60 border-b border-purple-500/20 text-[10px] uppercase font-bold text-zinc-400">
                 <tr>
                   <th className="p-4 w-10">
                     <button
                       type="button"
                       onClick={handleToggleSelectAll}
-                      className="text-slate-400 hover:text-white"
+                      className="text-zinc-400 hover:text-white cursor-pointer"
                       title="Select all on this page"
                     >
                       {selectedLeadIds.length === filteredLeads.length && filteredLeads.length > 0 ? (
-                        <CheckSquare className="w-4 h-4 text-orange-400" />
+                        <CheckSquare className="w-4 h-4 text-purple-400" />
                       ) : (
-                        <Square className="w-4 h-4 text-slate-500" />
+                        <Square className="w-4 h-4 text-zinc-600" />
                       )}
                     </button>
                   </th>
@@ -595,7 +595,7 @@ export default function LeadsPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-purple-500/10">
                 {filteredLeads.map((lead) => {
                   const isChecked = selectedLeadIds.includes(lead.id);
                   const folderObj = folders.find((f) => f.id === lead.folder_id);
@@ -603,20 +603,20 @@ export default function LeadsPage() {
                   return (
                     <tr
                       key={lead.id}
-                      className={`hover:bg-slate-850/30 transition-colors ${
-                        isChecked ? "bg-orange-500/5" : ""
+                      className={`hover:bg-purple-950/20 transition-colors ${
+                        isChecked ? "bg-purple-600/10" : ""
                       }`}
                     >
                       <td className="p-4">
                         <button
                           type="button"
                           onClick={() => handleToggleLead(lead.id)}
-                          className="text-slate-400 hover:text-white"
+                          className="text-zinc-400 hover:text-white cursor-pointer"
                         >
                           {isChecked ? (
-                            <CheckSquare className="w-4 h-4 text-orange-400" />
+                            <CheckSquare className="w-4 h-4 text-purple-400" />
                           ) : (
-                            <Square className="w-4 h-4 text-slate-600" />
+                            <Square className="w-4 h-4 text-zinc-600" />
                           )}
                         </button>
                       </td>
@@ -630,20 +630,20 @@ export default function LeadsPage() {
                           </p>
                         ) : null}
                       </td>
-                      <td className="p-4 text-slate-300">{lead.first_name || "—"}</td>
+                      <td className="p-4 text-zinc-300">{lead.first_name || "—"}</td>
                       <td className="p-4">
                         <p className="text-white font-semibold">{lead.company || "—"}</p>
                         {lead.website && (
-                          <p className="text-[11px] text-slate-500 truncate max-w-xs">{lead.website}</p>
+                          <p className="text-[11px] text-zinc-500 truncate max-w-xs">{lead.website}</p>
                         )}
                       </td>
                       <td className="p-4">
                         {folderObj ? (
-                          <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-[10px] text-slate-300 font-semibold border border-slate-700">
+                          <span className="px-2 py-0.5 rounded-lg bg-purple-950/40 text-[10px] text-purple-300 font-semibold border border-purple-500/30">
                             {folderObj.name}
                           </span>
                         ) : (
-                          <span className="text-[10px] text-slate-500">Unassigned</span>
+                          <span className="text-[10px] text-zinc-500">Unassigned</span>
                         )}
                       </td>
                       <td className="p-4">
@@ -654,9 +654,9 @@ export default function LeadsPage() {
                               : lead.status === "OPENED"
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                               : lead.status === "PENDING"
-                              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                              ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
                               : lead.status === "SKIPPED"
-                              ? "bg-slate-800 text-slate-400 border-slate-700"
+                              ? "bg-zinc-800 text-zinc-400 border-zinc-700"
                               : "bg-red-500/10 text-red-400 border-red-500/20"
                           }`}
                         >
@@ -683,21 +683,21 @@ export default function LeadsPage() {
 
       {/* Create Folder Modal */}
       {createFolderModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 bg-black/95 border border-purple-500/30 rounded-3xl shadow-2xl shadow-purple-950/50">
             <button
               onClick={() => setCreateFolderModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <h3 className="text-lg font-bold text-white mb-1">Create Prospect Folder</h3>
-            <p className="text-xs text-slate-400 mb-6">Group leads for targeted campaign segmentation</p>
+            <p className="text-xs text-zinc-400 mb-6">Group leads for targeted campaign segmentation</p>
 
             <form onSubmit={handleCreateFolder} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
                   Folder Name *
                 </label>
                 <input
@@ -706,12 +706,12 @@ export default function LeadsPage() {
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   placeholder="e.g. B2B SaaS Leads - Batch 1"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
                   Description (Optional)
                 </label>
                 <input
@@ -719,7 +719,7 @@ export default function LeadsPage() {
                   value={newFolderDesc}
                   onChange={(e) => setNewFolderDesc(e.target.value)}
                   placeholder="e.g. Scraped from TechCrunch top 50 SaaS list"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
@@ -727,13 +727,13 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setCreateFolderModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs"
+                  className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 cursor-pointer"
                 >
                   Create Folder
                 </button>
@@ -745,34 +745,34 @@ export default function LeadsPage() {
 
       {/* Move Selected Leads Modal */}
       {moveModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 bg-black/95 border border-purple-500/30 rounded-3xl shadow-2xl shadow-purple-950/50">
             <button
               onClick={() => setMoveModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <h3 className="text-lg font-bold text-white mb-1">Move Selected Leads</h3>
-            <p className="text-xs text-slate-400 mb-6">
+            <p className="text-xs text-zinc-400 mb-6">
               Moving {selectedLeadIds.length} prospects into a chosen folder
             </p>
 
             <form onSubmit={handleMoveSelected} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
                   Target Destination Folder
                 </label>
                 <select
                   value={targetMoveFolderId}
                   onChange={(e) => setTargetMoveFolderId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 >
-                  <option value="">Select a folder...</option>
-                  <option value="UNASSIGNED">Unassigned (Remove from folder)</option>
+                  <option value="" className="bg-black text-white">Select a folder...</option>
+                  <option value="UNASSIGNED" className="bg-black text-white">Unassigned (Remove from folder)</option>
                   {folders.map((f) => (
-                    <option key={f.id} value={f.id}>
+                    <option key={f.id} value={f.id} className="bg-black text-white">
                       {f.name} ({f.leads_count} leads)
                     </option>
                   ))}
@@ -783,14 +783,14 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setMoveModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs"
+                  className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading || !targetMoveFolderId}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 cursor-pointer"
                 >
                   Confirm Move
                 </button>
@@ -802,31 +802,31 @@ export default function LeadsPage() {
 
       {/* Add Lead Modal */}
       {addModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 bg-black/95 border border-purple-500/30 rounded-2xl sm:rounded-3xl shadow-2xl shadow-purple-950/50">
             <button
               onClick={() => setAddModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <h3 className="text-lg font-bold text-white mb-1">Add Single Lead</h3>
-            <p className="text-xs text-slate-400 mb-6">Manually input a prospect contact</p>
+            <p className="text-xs text-zinc-400 mb-6">Manually input a prospect contact</p>
 
             <form onSubmit={handleCreateLead} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
                   Folder Assignment
                 </label>
                 <select
                   value={newLeadFolderId}
                   onChange={(e) => setNewLeadFolderId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 >
-                  <option value="">Unassigned</option>
+                  <option value="" className="bg-black text-white">Unassigned</option>
                   {folders.map((f) => (
-                    <option key={f.id} value={f.id}>
+                    <option key={f.id} value={f.id} className="bg-black text-white">
                       {f.name}
                     </option>
                   ))}
@@ -835,7 +835,7 @@ export default function LeadsPage() {
 
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
                     Email Address
                   </label>
                   <input
@@ -843,7 +843,7 @@ export default function LeadsPage() {
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="contact@brand.com"
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
@@ -856,13 +856,13 @@ export default function LeadsPage() {
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
                     placeholder="e.g. 919876543210"
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none font-mono"
+                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-emerald-500 focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
                   First Name
                 </label>
                 <input
@@ -870,12 +870,12 @@ export default function LeadsPage() {
                   value={newFirstName}
                   onChange={(e) => setNewFirstName(e.target.value)}
                   placeholder="Rahul"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
                   Company Name
                 </label>
                 <input
@@ -883,12 +883,12 @@ export default function LeadsPage() {
                   value={newCompany}
                   onChange={(e) => setNewCompany(e.target.value)}
                   placeholder="Acme Inc"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1">
                   Website URL
                 </label>
                 <input
@@ -896,7 +896,7 @@ export default function LeadsPage() {
                   value={newWebsite}
                   onChange={(e) => setNewWebsite(e.target.value)}
                   placeholder="https://acme.com"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
@@ -904,14 +904,14 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setAddModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={modalLoading}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20 transition-all flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   {modalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save Lead"}
                 </button>

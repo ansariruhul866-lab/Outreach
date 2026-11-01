@@ -336,20 +336,20 @@ export default function CampaignsPage() {
       {/* Campaigns List */}
       <div className="space-y-4">
         {loading ? (
-          <div className="p-12 text-center text-slate-500 flex flex-col items-center gap-2">
-            <Loader2 className="w-6 h-6 animate-spin text-orange-400" />
+          <div className="p-12 text-center text-zinc-500 flex flex-col items-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
             <span className="text-xs">Loading campaigns...</span>
           </div>
         ) : campaigns.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 rounded-3xl bg-slate-900/50 border border-slate-800">
-            <Send className="w-8 h-8 mx-auto mb-3 opacity-40" />
+          <div className="p-12 text-center text-zinc-500 rounded-3xl glass-card border-purple-500/20">
+            <Send className="w-8 h-8 mx-auto mb-3 text-purple-400/50" />
             <p className="font-bold text-white text-sm">No campaigns yet</p>
-            <p className="text-xs text-slate-400 mt-1 mb-4">
+            <p className="text-xs text-zinc-400 mt-1 mb-4">
               Click &apos;New Campaign&apos; to set up your first personalized outreach sequence.
             </p>
             <button
               onClick={openCreateModal}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white text-xs font-bold"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-xs font-bold shadow-lg shadow-purple-900/40 cursor-pointer"
             >
               Create Campaign
             </button>
@@ -480,7 +480,7 @@ export default function CampaignsPage() {
                 {/* Name & Type */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
+                    <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
                       Campaign Name *
                     </label>
                     <input
@@ -489,24 +489,24 @@ export default function CampaignsPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Q4 SaaS Partnership Outreach"
-                      className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
+                    <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
                       Sending Mailbox *
                     </label>
                     <select
                       value={senderId}
                       onChange={(e) => setSenderId(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                     >
                       {senders.length === 0 ? (
                         <option value="">No mailboxes connected</option>
                       ) : (
                         senders.map((s) => (
-                          <option key={s.id} value={s.id}>
+                          <option key={s.id} value={s.id} className="bg-black text-white">
                             {s.display_name} ({s.email}) &bull; {s.provider}
                           </option>
                         ))
@@ -518,14 +518,14 @@ export default function CampaignsPage() {
                 {/* Templates Selector */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-orange-400" />
+                    <label className="text-[11px] font-bold uppercase text-zinc-400 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-purple-400" />
                       <span>Saved Email Templates Library</span>
                     </label>
                     <a
                       href="/dashboard/templates"
                       target="_blank"
-                      className="text-[10px] text-orange-400 hover:underline"
+                      className="text-[10px] text-purple-400 hover:text-purple-300 hover:underline"
                     >
                       + Manage Templates
                     </a>
@@ -533,11 +533,11 @@ export default function CampaignsPage() {
                   <select
                     value={selectedTemplateId}
                     onChange={(e) => handleTemplateSelect(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                   >
-                    <option value="">-- Select from your saved templates or choose preset below --</option>
+                    <option value="" className="bg-black text-white">-- Select from your saved templates or choose preset below --</option>
                     {templates.map((tpl) => (
-                      <option key={tpl.id} value={tpl.id}>
+                      <option key={tpl.id} value={tpl.id} className="bg-black text-white">
                         [{tpl.category}] {tpl.title} &mdash; &quot;{tpl.subject}&quot;
                       </option>
                     ))}
@@ -546,7 +546,7 @@ export default function CampaignsPage() {
 
                 {/* Template Presets */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-2">
+                  <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-2">
                     Or Quick Preset
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -555,10 +555,10 @@ export default function CampaignsPage() {
                         key={key}
                         type="button"
                         onClick={() => handlePresetChange(key)}
-                        className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
+                        className={`p-2.5 rounded-xl text-left border text-xs transition-all cursor-pointer ${
                           type === key && !selectedTemplateId
-                            ? "bg-orange-500/10 border-orange-500 text-orange-400 font-bold"
-                            : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
+                            ? "bg-purple-600/20 border-purple-500 text-purple-300 font-bold shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                            : "bg-black/60 border-purple-500/20 text-zinc-400 hover:border-purple-500/40 hover:text-white"
                         }`}
                       >
                         <p className="truncate">{PRESETS[key].name}</p>
@@ -569,7 +569,7 @@ export default function CampaignsPage() {
 
                 {/* Subject */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
+                  <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
                     Subject Line
                   </label>
                   <input
@@ -577,22 +577,22 @@ export default function CampaignsPage() {
                     required
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Body */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[11px] font-bold uppercase text-slate-400">
+                    <label className="text-[11px] font-bold uppercase text-zinc-400">
                       Email Body Template (HTML supported)
                     </label>
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 flex-wrap">
                       <span>Variables:</span>
-                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{firstName}}"}</span>
-                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{company}}"}</span>
-                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{website}}"}</span>
-                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{senderName}}"}</span>
+                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{firstName}}"}</span>
+                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{company}}"}</span>
+                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{website}}"}</span>
+                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{senderName}}"}</span>
                     </div>
                   </div>
                   <textarea
@@ -600,25 +600,25 @@ export default function CampaignsPage() {
                     required
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-white focus:border-orange-500 focus:outline-none"
+                    className="w-full p-4 bg-black/60 border border-purple-500/30 rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Attachments / References / Photos */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/20 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold text-white flex items-center gap-2">
-                        <Paperclip className="w-4 h-4 text-orange-400" />
+                        <Paperclip className="w-4 h-4 text-purple-400" />
                         <span>Email Attachments &amp; References ({attachments.length})</span>
                       </span>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-zinc-400">
                         Attach PDF decks, portfolio links, screenshots, proposal documents, or product photos (up to 5MB each)
                       </p>
                     </div>
 
-                    <label className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
-                      <Plus className="w-3.5 h-3.5 text-orange-400" />
+                    <label className="px-3 py-1.5 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 text-purple-200 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
+                      <Plus className="w-3.5 h-3.5 text-purple-400" />
                       <span>Add File</span>
                       <input
                         type="file"
@@ -636,18 +636,18 @@ export default function CampaignsPage() {
                         return (
                           <div
                             key={idx}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-xs text-purple-200"
                           >
                             {isImage ? (
-                              <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                              <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
                             ) : (
-                              <Paperclip className="w-3.5 h-3.5 text-orange-400" />
+                              <Paperclip className="w-3.5 h-3.5 text-purple-400" />
                             )}
                             <span className="max-w-[180px] truncate">{att.filename}</span>
                             <button
                               type="button"
                               onClick={() => removeAttachment(idx)}
-                              className="text-slate-500 hover:text-red-400 p-0.5 rounded transition-colors"
+                              className="text-zinc-400 hover:text-red-400 p-0.5 rounded transition-colors"
                               title="Remove attachment"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -660,21 +660,21 @@ export default function CampaignsPage() {
                 </div>
 
                 {/* Selective Leads Checklist */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/20 space-y-3">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <span className="text-xs font-bold text-white flex items-center gap-2">
-                        <Users className="w-4 h-4 text-orange-400" />
+                        <Users className="w-4 h-4 text-purple-400" />
                         <span>Select Target Leads ({selectedLeadIds.length} of {displayedLeads.length} selected)</span>
                       </span>
-                      <p className="text-[10px] text-slate-500">Choose exactly which prospects will receive this campaign</p>
+                      <p className="text-[10px] text-zinc-400">Choose exactly which prospects will receive this campaign</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {/* Filter by folder inside campaign modal */}
                       <select
                         value={selectedFolderFilter}
                         onChange={(e) => setSelectedFolderFilter(e.target.value)}
-                        className="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300 focus:outline-none"
+                        className="px-2.5 py-1 rounded bg-black/80 border border-purple-500/30 text-[10px] font-semibold text-zinc-300 focus:outline-none"
                       >
                         <option value="ALL">All Folders ({availableLeads.length})</option>
                         {folders.map((f) => (
@@ -686,25 +686,25 @@ export default function CampaignsPage() {
                       <button
                         type="button"
                         onClick={selectAllLeads}
-                        className="px-2 py-1 rounded bg-slate-800 text-[10px] font-semibold text-slate-300 hover:text-white"
+                        className="px-2 py-1 rounded bg-purple-950/40 border border-purple-500/30 text-[10px] font-semibold text-purple-300 hover:text-white cursor-pointer"
                       >
                         Select All
                       </button>
                       <button
                         type="button"
                         onClick={deselectAllLeads}
-                        className="px-2 py-1 rounded bg-slate-800 text-[10px] font-semibold text-slate-300 hover:text-white"
+                        className="px-2 py-1 rounded bg-purple-950/40 border border-purple-500/30 text-[10px] font-semibold text-purple-300 hover:text-white cursor-pointer"
                       >
                         Clear
                       </button>
                     </div>
                   </div>
 
-                  <div className="max-h-48 overflow-y-auto divide-y divide-slate-850/60 border border-slate-850 rounded-xl bg-slate-900/40 p-2 space-y-1">
+                  <div className="max-h-48 overflow-y-auto divide-y divide-purple-500/10 border border-purple-500/20 rounded-xl bg-black/40 p-2 space-y-1">
                     {leadLoading ? (
-                      <div className="p-4 text-center text-xs text-slate-500">Loading prospects...</div>
+                      <div className="p-4 text-center text-xs text-zinc-500">Loading prospects...</div>
                     ) : displayedLeads.length === 0 ? (
-                      <div className="p-4 text-center text-xs text-slate-500">
+                      <div className="p-4 text-center text-xs text-zinc-500">
                         No available leads in this selection. Run the scraper or import CSV first.
                       </div>
                     ) : (
@@ -713,17 +713,17 @@ export default function CampaignsPage() {
                         return (
                           <label
                             key={lead.id}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer text-xs"
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-purple-950/30 cursor-pointer text-xs"
                           >
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => toggleLead(lead.id)}
-                              className="rounded border-slate-700 text-orange-500 focus:ring-0"
+                              className="rounded border-purple-500/40 text-purple-600 focus:ring-0"
                             />
-                            <span className="font-mono text-slate-200">{lead.email}</span>
-                            {lead.company && <span className="text-slate-500">({lead.company})</span>}
-                            <span className="ml-auto text-[10px] uppercase font-bold text-slate-500">
+                            <span className="font-mono text-zinc-200">{lead.email}</span>
+                            {lead.company && <span className="text-zinc-500">({lead.company})</span>}
+                            <span className="ml-auto text-[10px] uppercase font-bold text-zinc-500">
                               {lead.status}
                             </span>
                           </label>
@@ -735,9 +735,9 @@ export default function CampaignsPage() {
 
                 {/* Anti-spam & Delivery Controls */}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                  <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/20 space-y-2">
                     <div className="flex items-center gap-2 text-xs font-bold text-white">
-                      <Clock className="w-4 h-4 text-amber-400" />
+                      <Clock className="w-4 h-4 text-purple-400" />
                       <span>Anti-Spam Human Delay</span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -747,16 +747,16 @@ export default function CampaignsPage() {
                         max={3600}
                         value={sendDelay}
                         onChange={(e) => setSendDelay(parseInt(e.target.value) || 45)}
-                        className="w-24 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                        className="w-24 px-3 py-2 bg-black/80 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                       />
-                      <span className="text-xs text-slate-400">sec base delay</span>
+                      <span className="text-xs text-zinc-400">sec base delay</span>
                     </div>
-                    <p className="text-[10px] text-amber-400/90 font-medium">
+                    <p className="text-[10px] text-purple-300 font-medium">
                       ⚡ Auto-adds random 0–120 seconds jitter after every email to mimic human pacing.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                  <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/20 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-white flex items-center gap-2">
                         <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -766,10 +766,10 @@ export default function CampaignsPage() {
                         type="checkbox"
                         checked={sendOnlyOnce}
                         onChange={(e) => setSendOnlyOnce(e.target.checked)}
-                        className="rounded border-slate-700 text-orange-500 focus:ring-0"
+                        className="rounded border-purple-500/40 text-purple-600 focus:ring-0"
                       />
                     </div>
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-zinc-400">
                       Guarantees prospects who have previously been sent an email or replied will be safely skipped.
                     </p>
                   </div>
@@ -777,25 +777,27 @@ export default function CampaignsPage() {
               </div>
 
               {/* Pinned Modal Actions */}
-              <div className="shrink-0 px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3 bg-slate-900/95 backdrop-blur-sm">
+              <div className="shrink-0 px-6 py-4 border-t border-purple-500/20 flex items-center justify-end gap-3 bg-black/90 backdrop-blur-md">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors"
+                  className="px-5 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20 transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {saving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <span>{editingId ? "Update Campaign" : "Save & Ready Campaign"}</span>
                   )}
-                </button>
+                </motion.button>
               </div>
             </form>
           </div>

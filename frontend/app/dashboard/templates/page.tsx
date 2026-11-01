@@ -230,15 +230,15 @@ export default function TemplatesPage() {
 
       {/* Templates Grid */}
       {loading ? (
-        <div className="p-16 text-center text-slate-500 flex flex-col items-center gap-2">
-          <Loader2 className="w-6 h-6 animate-spin text-orange-400" />
+        <div className="p-16 text-center text-zinc-500 flex flex-col items-center gap-2">
+          <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
           <span className="text-xs">Loading email templates...</span>
         </div>
       ) : filteredTemplates.length === 0 ? (
-        <div className="p-16 text-center rounded-3xl glass-card text-slate-500">
-          <FileText className="w-10 h-10 mx-auto mb-3 opacity-30 text-orange-400" />
+        <div className="p-16 text-center rounded-3xl glass-card text-zinc-500 border-purple-500/20">
+          <FileText className="w-10 h-10 mx-auto mb-3 opacity-30 text-purple-400" />
           <p className="font-bold text-white text-sm">No templates in this category</p>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-zinc-400 mt-1">
             Click &quot;New Template&quot; above to create one for your sequences.
           </p>
         </div>
@@ -248,13 +248,13 @@ export default function TemplatesPage() {
             const catInfo =
               CATEGORIES.find((c) => c.key === t.category) || {
                 label: t.category,
-                color: "text-slate-300 bg-slate-800 border-slate-700",
+                color: "text-zinc-300 bg-purple-950/40 border-purple-500/30",
               };
 
             return (
               <div
                 key={t.id}
-                className="p-6 rounded-3xl glass-panel hover:border-orange-500/40 transition-all duration-300 flex flex-col justify-between space-y-4 group hover:-translate-y-1"
+                className="p-6 rounded-3xl glass-panel hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between space-y-4 group hover:-translate-y-1 border border-purple-500/20"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
@@ -264,35 +264,35 @@ export default function TemplatesPage() {
                       {catInfo.label}
                     </span>
                     {t.is_default && (
-                      <span className="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-amber-400" />
+                      <span className="text-[10px] text-zinc-400 font-semibold flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-purple-400" />
                         Built-in
                       </span>
                     )}
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-white group-hover:text-orange-400 transition-colors">
+                    <h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
                       {t.title}
                     </h3>
-                    <p className="text-xs text-slate-400 font-mono mt-1 truncate">
+                    <p className="text-xs text-zinc-400 font-mono mt-1 truncate">
                       Subject: {t.subject}
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-850/60 text-[11px] text-slate-400 font-mono line-clamp-4 leading-relaxed whitespace-pre-wrap">
+                  <div className="p-3 rounded-xl bg-black/60 border border-purple-500/20 text-[11px] text-zinc-300 font-mono line-clamp-4 leading-relaxed whitespace-pre-wrap">
                     {t.body.replace(/<[^>]*>?/gm, "")}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-slate-800/60 text-xs">
-                  <span className="text-[10px] text-slate-500">
+                <div className="flex items-center justify-between pt-3 border-t border-purple-500/20 text-xs">
+                  <span className="text-[10px] text-zinc-500">
                     Updated {t.updated_at || t.created_at}
                   </span>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => openEditModal(t)}
-                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                      className="p-2 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 text-purple-300 hover:text-white transition-colors cursor-pointer"
                       title="Edit template"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -338,7 +338,7 @@ export default function TemplatesPage() {
               <div className="flex-1 overflow-y-auto p-6 space-y-5">
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
+                    <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
                       Template Title *
                     </label>
                     <input
@@ -347,29 +347,29 @@ export default function TemplatesPage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Q4 Growth Pitch, Follow-Up #1, Black Friday Discount"
-                      className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
+                    <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
                       Category
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                     >
-                      <option value="PITCH">Cold Pitch</option>
-                      <option value="FOLLOW_UP">Follow-Up (Bump)</option>
-                      <option value="OFFER">Offer &amp; Discount</option>
-                      <option value="CUSTOM">Custom</option>
+                      <option value="PITCH" className="bg-black text-white">Cold Pitch</option>
+                      <option value="FOLLOW_UP" className="bg-black text-white">Follow-Up (Bump)</option>
+                      <option value="OFFER" className="bg-black text-white">Offer &amp; Discount</option>
+                      <option value="CUSTOM" className="bg-black text-white">Custom</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">
+                  <label className="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">
                     Default Subject Line *
                   </label>
                   <input
@@ -378,21 +378,21 @@ export default function TemplatesPage() {
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="Quick question for {{company}}"
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
-                    <label className="text-[11px] font-bold uppercase text-slate-400">
+                    <label className="text-[11px] font-bold uppercase text-zinc-400">
                       Email Body Template (HTML supported) *
                     </label>
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 flex-wrap">
                       <span>Dynamic Tags:</span>
-                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{firstName}}"}</span>
-                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{company}}"}</span>
-                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{website}}"}</span>
-                      <span className="font-mono text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">{"{{senderName}}"}</span>
+                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{firstName}}"}</span>
+                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{company}}"}</span>
+                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{website}}"}</span>
+                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{senderName}}"}</span>
                     </div>
                   </div>
                   <textarea
@@ -400,25 +400,25 @@ export default function TemplatesPage() {
                     required
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-white focus:border-orange-500 focus:outline-none"
+                    className="w-full p-4 bg-black/60 border border-purple-500/30 rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Attachments / References / Photos */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/20 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold text-white flex items-center gap-2">
-                        <Paperclip className="w-4 h-4 text-orange-400" />
+                        <Paperclip className="w-4 h-4 text-purple-400" />
                         <span>Template Default Attachments &amp; References ({attachments.length})</span>
                       </span>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-zinc-400">
                         Include pitch decks, portfolio samples, brochures, or image references automatically whenever this template is selected
                       </p>
                     </div>
 
-                    <label className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
-                      <Plus className="w-3.5 h-3.5 text-orange-400" />
+                    <label className="px-3 py-1.5 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 text-purple-200 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
+                      <Plus className="w-3.5 h-3.5 text-purple-400" />
                       <span>Add File</span>
                       <input
                         type="file"
@@ -436,18 +436,18 @@ export default function TemplatesPage() {
                         return (
                           <div
                             key={idx}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-xs text-purple-200"
                           >
                             {isImage ? (
-                              <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                              <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
                             ) : (
-                              <Paperclip className="w-3.5 h-3.5 text-orange-400" />
+                              <Paperclip className="w-3.5 h-3.5 text-purple-400" />
                             )}
                             <span className="max-w-[180px] truncate">{att.filename}</span>
                             <button
                               type="button"
                               onClick={() => removeAttachment(idx)}
-                              className="text-slate-500 hover:text-red-400 p-0.5 rounded transition-colors"
+                              className="text-zinc-400 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
                               title="Remove attachment"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -460,18 +460,18 @@ export default function TemplatesPage() {
                 </div>
               </div>
 
-              <div className="shrink-0 px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3 bg-slate-900/95">
+              <div className="shrink-0 px-6 py-4 border-t border-purple-500/20 flex items-center justify-end gap-3 bg-black/90">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors"
+                  className="px-5 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20 transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {saving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

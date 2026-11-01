@@ -16,6 +16,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, User as UserIcon, X, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -144,26 +145,26 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
 
         {verificationSent ? (
           <div className="text-center py-4">
-            <div className="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
               <Mail className="w-8 h-8" />
             </div>
             <h3 className="text-2xl font-black text-white">Verify Your Email</h3>
-            <p className="text-sm text-slate-400 mt-2">
+            <p className="text-sm text-zinc-400 mt-2">
               We sent a verification link to:
               <span className="block font-bold text-white mt-1 break-all">{targetEmail}</span>
             </p>
 
-            <div className="p-4 my-6 text-left rounded-2xl bg-slate-950 border border-slate-800/80 text-xs text-slate-300 space-y-2.5">
+            <div className="p-4 my-6 text-left rounded-2xl bg-black/60 border border-purple-500/20 text-xs text-zinc-300 space-y-2.5">
               <div className="flex items-start gap-2">
-                <span className="text-orange-400 font-bold">1.</span>
+                <span className="text-purple-400 font-bold">1.</span>
                 <span>Open your email inbox (or spam folder).</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-orange-400 font-bold">2.</span>
+                <span className="text-purple-400 font-bold">2.</span>
                 <span>Click the confirmation link from Firebase.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-orange-400 font-bold">3.</span>
+                <span className="text-purple-400 font-bold">3.</span>
                 <span>Return here and log in to open your workspace.</span>
               </div>
             </div>
@@ -177,7 +178,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
             <div className="space-y-3">
               <button
                 onClick={handleResend}
-                className="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold transition-all text-slate-200"
+                className="w-full py-3 px-4 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-bold transition-all text-zinc-200 cursor-pointer"
               >
                 Resend Verification Email
               </button>
@@ -186,7 +187,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
                   setVerificationSent(false);
                   setMode("login");
                 }}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-xs font-bold text-white shadow-lg shadow-orange-600/25 hover:from-orange-600 hover:to-amber-700 transition-all"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-xs font-bold text-white shadow-lg shadow-purple-900/40 hover:from-purple-500 hover:to-fuchsia-500 transition-all cursor-pointer"
               >
                 I&apos;ve Verified My Email &rarr; Sign In
               </button>
@@ -195,13 +196,13 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
         ) : (
           <div>
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-black text-2xl shadow-lg shadow-orange-500/20 mx-auto mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-700 to-fuchsia-600 flex items-center justify-center font-black text-2xl shadow-lg shadow-purple-900/40 mx-auto mb-3 text-white">
                 ⚡
               </div>
               <h2 className="text-2xl font-extrabold text-white">
                 {mode === "signup" ? "Create an Account" : "Welcome Back"}
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-zinc-400 mt-1">
                 {mode === "signup"
                   ? "Start cold outreach with verified email & Gmail integration"
                   : "Sign in to access your outreach workspace"}
@@ -261,61 +262,63 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
             <form onSubmit={handleEmailAuth} className="space-y-4">
               {mode === "signup" && (
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
                     Full Name
                   </label>
                   <div className="relative">
-                    <UserIcon className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
+                    <UserIcon className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-500" />
                     <input
                       type="text"
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Rahul Sharma"
-                      className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-3 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
+                  <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-500" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@company.com"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-3 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
+                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-500" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min. 6 characters"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-3 bg-black/60 border border-purple-500/30 rounded-xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl shadow-lg shadow-orange-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3.5 text-xs font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white rounded-xl shadow-lg shadow-purple-900/40 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -325,10 +328,10 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
-              </button>
+              </motion.button>
             </form>
 
-            <div className="mt-6 text-center text-xs text-slate-500">
+            <div className="mt-6 text-center text-xs text-zinc-500">
               <span>{mode === "signup" ? "Already have an account?" : "Don't have an account?"}</span>
               <button
                 type="button"
@@ -337,7 +340,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
                   setNotice(null);
                   setMode(mode === "signup" ? "login" : "signup");
                 }}
-                className="ml-1 text-orange-400 font-bold hover:underline"
+                className="ml-1 text-purple-400 font-bold hover:underline cursor-pointer"
               >
                 {mode === "signup" ? "Sign In" : "Sign Up Free"}
               </button>

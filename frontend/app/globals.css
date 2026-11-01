@@ -5,6 +5,11 @@
   --foreground: #ffffff;
 }
 
+html.light {
+  --background: #f8fafc;
+  --foreground: #09090b;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,10 +17,11 @@
 }
 
 body {
-  background: #000000;
-  color: #ffffff;
+  background: var(--background);
+  color: var(--foreground);
   overflow-x: hidden;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Custom Ultra-Smooth Scrollbars */
@@ -24,29 +30,29 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.25);
+  background: rgba(168, 85, 247, 0.3);
   border-radius: 9999px;
   backdrop-filter: blur(10px);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.6);
+  background: rgba(168, 85, 247, 0.7);
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
 }
 
-/* Luxury Black + Purple + White Glassmorphism */
-.glass-panel {
-  background: rgba(10, 3, 20, 0.55);
+/* Dark Mode Glassmorphism */
+html.dark .glass-panel {
+  background: rgba(10, 3, 20, 0.65);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(168, 85, 247, 0.18);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-.glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(147, 51, 234, 0.03) 100%);
+html.dark .glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(147, 51, 234, 0.04) 100%);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -54,39 +60,122 @@ body {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-card:hover {
-  border-color: rgba(168, 85, 247, 0.45);
+html.dark .glass-card:hover {
+  border-color: rgba(168, 85, 247, 0.5);
   transform: translateY(-2px);
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 30px -5px rgba(168, 85, 247, 0.35);
 }
 
-.glass-card-purple {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(10, 3, 20, 0.4) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(168, 85, 247, 0.3);
-  box-shadow: 0 15px 35px -10px rgba(147, 51, 234, 0.2);
-}
-
-.glass-input {
-  background: rgba(5, 1, 10, 0.75);
+html.dark .glass-input {
+  background: rgba(5, 1, 10, 0.8);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: #ffffff;
   transition: all 0.25s ease;
 }
 
-.glass-input:focus {
-  border-color: rgba(168, 85, 247, 0.75);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2), 0 0 25px rgba(168, 85, 247, 0.2);
+html.dark .glass-input:focus {
+  border-color: rgba(168, 85, 247, 0.8);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25), 0 0 25px rgba(168, 85, 247, 0.25);
 }
 
-.glass-pill {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Light Mode Glassmorphism */
+html.light body {
+  background-color: #f8fafc;
+  color: #09090b;
+}
+
+html.light aside {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(147, 51, 234, 0.15) !important;
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .glass-panel {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(147, 51, 234, 0.2);
+  box-shadow: 0 12px 35px -5px rgba(147, 51, 234, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: #09090b;
+}
+
+html.light .glass-card {
+  background: #ffffff;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(147, 51, 234, 0.18);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  color: #09090b;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.light .glass-card:hover {
+  border-color: rgba(147, 51, 234, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -8px rgba(147, 51, 234, 0.15);
+}
+
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  border-color: rgba(147, 51, 234, 0.28) !important;
+  color: #09090b !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.light select option {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+}
+
+html.light table thead {
+  background-color: #f1f5f9 !important;
+  border-color: rgba(147, 51, 234, 0.15) !important;
+}
+
+html.light table thead th {
+  color: #475569 !important;
+}
+
+html.light table tbody tr:hover {
+  background-color: rgba(168, 85, 247, 0.06) !important;
+}
+
+/* Light mode text contrast overrides: keep white text on purple filled buttons */
+html.light h1:not([class*="text-transparent"]),
+html.light h2:not([class*="text-transparent"]),
+html.light h3:not([class*="text-transparent"]),
+html.light h4:not([class*="text-transparent"]) {
+  color: #09090b !important;
+}
+
+html.light p.text-white,
+html.light span.text-white:not(button span):not([class*="from-"]):not([class*="bg-purple-"]) {
+  color: #09090b;
+}
+
+html.light .text-zinc-400,
+html.light .text-slate-400 {
+  color: #475569 !important;
+}
+
+html.light .text-zinc-300,
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light button.text-white,
+html.light a.text-white[class*="from-purple-"],
+html.light button[class*="from-purple-"] *,
+html.light button[class*="bg-purple-"] * {
+  color: #ffffff !important;
 }
 
 /* Animations */
@@ -137,11 +226,11 @@ body {
 
 /* Pure Deep Purple Ambient Glow Orbs */
 .ambient-glow-purple-lg {
-  background: radial-gradient(circle, rgba(147, 51, 234, 0.22) 0%, rgba(147, 51, 234, 0.04) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(147, 51, 234, 0.25) 0%, rgba(147, 51, 234, 0.05) 50%, transparent 70%);
 }
 
 .ambient-glow-purple-accent {
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.28) 0%, rgba(192, 132, 252, 0.05) 55%, transparent 75%);
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(192, 132, 252, 0.06) 55%, transparent 75%);
 }
 
 .ambient-glow-white-subtle {
