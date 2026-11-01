@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { api, WhatsAppSender, Lead, WhatsAppMessageLog } from "@/lib/api";
 import {
   MessageSquare,
@@ -16,9 +16,25 @@ import {
   X,
   Smartphone,
   Layers,
-  ArrowRight,
   Sparkles,
+  Play,
+  Pause,
+  Clock,
+  Check,
+  RotateCcw,
+  ShieldAlert,
+  History,
 } from "lucide-react";
+
+interface QueueItem {
+  lead_id: string;
+  recipient_name: string;
+  recipient_phone: string;
+  message: string;
+  wa_link: string;
+  web_link: string;
+  sent?: boolean;
+}
 
 export default function WhatsAppPage() {
   const [senders, setSenders] = useState<WhatsAppSender[]>([]);
@@ -33,26 +49,41 @@ export default function WhatsAppPage() {
   const [newSenderName, setNewSenderName] = useState("");
   const [addingSender, setAddingSender] = useState(false);
 
-  // Single Quick Message
+  // Message Template
+  const [templateType, setTemplateType] = useState<"pitch" | "followup" | "custom">("pitch");
   const [directPhone, setDirectPhone] = useState("");
   const [directName, setDirectName] = useState("");
   const [directMessage, setDirectMessage] = useState(
-    "Hi {{firstName}},\n\nI came across your contact regarding {{company}} and wanted to reach out directly on WhatsApp.\n\nWould you be open to a quick chat?\n\nBest regards!"
+    "Hi {{firstName}},\n\nI came across your business {{company}} and wanted to connect directly regarding our high-growth outreach tools.\n\nAre you available for a quick chat this week?\n\nBest regards!"
   );
 
   // Bulk WA queue
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
-  const [bulkQueue, setBulkQueue] = useState<Array<{
-    lead_id: string;
-    recipient_name: string;
-    recipient_phone: string;
-    message: string;
-    wa_link: string;
-    web_link: string;
-  }>>([]);
+  const [bulkQueue, setBulkQueue] = useState<QueueItem[]>([]);
   const [generatingBulk, setGeneratingBulk] = useState(false);
 
+  // Auto-Runner State
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [delaySeconds, setDelaySeconds] = useState(15);
+  const [countdown, setCountdown] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [notice, setNotice] = useState<string | null>(null);
+
+  // Switch template presets
+  const handleTemplateSelect = (type: "pitch" | "followup" | "custom") => {
+    setTemplateType(type);
+    if (type === "pitch") {
+      setDirectMessage(
+        "Hi {{firstName}},\n\nI came across your business {{company}} and wanted to connect directly regarding our high-growth outreach tools.\n\nAre you available for a quick chat this week?\n\nBest regards!"
+      );
+    } else if (type === "followup") {
+      setDirectMessage(
+        "Hi {{firstName}},\n\nFollowing up on my previous note regarding {{company}}. Just wanted to see if you had a brief moment to explore how we can help you scale?\n\nLooking forward to hearing from you!"
+      );
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -83,6 +114,98 @@ export default function WhatsAppPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Auto-Runner countdown & dispatch effect
+  useEffect(() => {
+    if (!autoRunning) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    if (currentIndex >= bulkQueue.length) {
+      setAutoRunning(false);
+      setNotice("🎉 Bulk WhatsApp sequence completed!");
+      setTimeout(() => setNotice(null), 5000);
+      return;
+    }
+
+    // Start countdown
+    setCountdown(delaySeconds);
+
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          // Time to trigger send for currentIndex!
+          dispatchLead(currentIndex);
+          setCurrentIndex((idx) => idx + 1);
+          return delaySeconds;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [autoRunning, currentIndex, bulkQueue.length, delaySeconds]);
+
+  // Dispatch single lead from queue
+  const dispatchLead = async (idx: number) => {
+    const item = bulkQueue[idx];
+    if (!item) return;
+
+    // Open WhatsApp Web/Universal link in a new window/tab
+    window.open(item.web_link, "_blank");
+
+    // Mark as sent in state
+    setBulkQueue((prev) =>
+      prev.map((q, i) => (i === idx ? { ...q, sent: true } : q))
+    );
+
+    // Record in backend log
+    try {
+      await api.whatsapp.logSent({
+        lead_id: item.lead_id || undefined,
+        recipient_phone: item.recipient_phone,
+        recipient_name: item.recipient_name,
+        message: item.message,
+        sender_id: selectedSenderId || undefined,
+      });
+      // Refresh history silently
+      api.whatsapp.getHistory().then((h) => setHistory(h || [])).catch(() => {});
+    } catch (err) {
+      console.error("Failed to log message:", err);
+    }
+  };
+
+  const handleStartAutoRun = () => {
+    if (bulkQueue.length === 0) {
+      alert("Please generate a WhatsApp bulk queue first.");
+      return;
+    }
+    // Find next unsent index
+    const nextIdx = bulkQueue.findIndex((item) => !item.sent);
+    if (nextIdx === -1) {
+      if (confirm("All leads in the queue have been marked sent. Do you want to reset and start over?")) {
+        setBulkQueue((prev) => prev.map((q) => ({ ...q, sent: false })));
+        setCurrentIndex(0);
+        setAutoRunning(true);
+      }
+      return;
+    }
+    setCurrentIndex(nextIdx);
+    setAutoRunning(true);
+  };
+
+  const handlePauseAutoRun = () => {
+    setAutoRunning(false);
+  };
+
+  const handleResetQueue = () => {
+    setAutoRunning(false);
+    setCurrentIndex(0);
+    setBulkQueue((prev) => prev.map((q) => ({ ...q, sent: false })));
+  };
 
   const handleAddSender = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +263,6 @@ export default function WhatsAppPage() {
         message: rendered,
       });
 
-      // Open in WhatsApp Web / App
       window.open(res.wa_link, "_blank");
       setNotice(`✓ WhatsApp opened for +${res.recipient_phone}!`);
       loadData();
@@ -158,6 +280,7 @@ export default function WhatsAppPage() {
     }
 
     setGeneratingBulk(true);
+    setAutoRunning(false);
     try {
       const res = await api.whatsapp.bulkGenerateLinks({
         sender_id: selectedSenderId || undefined,
@@ -165,7 +288,13 @@ export default function WhatsAppPage() {
         lead_ids: selectedLeadIds,
       });
 
-      setBulkQueue(res.items || []);
+      const queueWithState = (res.items || []).map((item) => ({
+        ...item,
+        sent: false,
+      }));
+
+      setBulkQueue(queueWithState);
+      setCurrentIndex(0);
       setNotice(`✓ Generated 1-click WhatsApp queue for ${res.total} contacts!`);
       setTimeout(() => setNotice(null), 4000);
     } catch (err: unknown) {
@@ -181,6 +310,18 @@ export default function WhatsAppPage() {
     );
   };
 
+  const handleSelectAllLeads = () => {
+    if (selectedLeadIds.length === leadsWithPhone.length) {
+      setSelectedLeadIds([]);
+    } else {
+      setSelectedLeadIds(leadsWithPhone.map((l) => l.id));
+    }
+  };
+
+  const sentCount = bulkQueue.filter((q) => q.sent).length;
+  const progressPercent =
+    bulkQueue.length > 0 ? Math.round((sentCount / bulkQueue.length) * 100) : 0;
+
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
       {/* Header */}
@@ -191,7 +332,7 @@ export default function WhatsAppPage() {
             <span>Direct WhatsApp Outreach</span>
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Reach leads with phone numbers directly on WhatsApp &mdash; connect your numbers and dispatch personalized messages
+            Reach contacts with phone numbers directly on WhatsApp &mdash; multi-number senders, bulk queue generation, and automated human-paced dispatch.
           </p>
         </div>
 
@@ -220,7 +361,7 @@ export default function WhatsAppPage() {
               <span>Your Sender WhatsApp Numbers ({senders.length})</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Add your mobile/business WhatsApp numbers. You can switch between multiple numbers at any time.
+              Select which WhatsApp sender profile you want to send from. You can add personal or business numbers.
             </p>
           </div>
         </div>
@@ -286,22 +427,59 @@ export default function WhatsAppPage() {
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Send className="w-4 h-4 text-emerald-400" />
-                <span>Single Prospect Direct Message</span>
+                <span>Message Composer &amp; Quick Send</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Send to any business or individual WhatsApp number with 1 click
+                Send a 1-off message or configure the template used for the bulk queue below
               </p>
+            </div>
+
+            {/* Template Presets */}
+            <div className="flex items-center gap-2 pb-1 border-b border-slate-800/80">
+              <span className="text-[11px] uppercase font-bold text-slate-400 mr-1">Presets:</span>
+              <button
+                type="button"
+                onClick={() => handleTemplateSelect("pitch")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  templateType === "pitch"
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold"
+                    : "bg-slate-950 text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                Pitch &amp; Outreach
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTemplateSelect("followup")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  templateType === "followup"
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold"
+                    : "bg-slate-950 text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                Follow Up
+              </button>
+              <button
+                type="button"
+                onClick={() => setTemplateType("custom")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  templateType === "custom"
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold"
+                    : "bg-slate-950 text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                Custom
+              </button>
             </div>
 
             <form onSubmit={handleSendDirect} className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                    Phone Number (With Country Code) *
+                    Phone Number (With Country Code)
                   </label>
                   <input
                     type="text"
-                    required
                     value={directPhone}
                     onChange={(e) => setDirectPhone(e.target.value)}
                     placeholder="e.g. 919876543210 or +14155552671"
@@ -326,14 +504,14 @@ export default function WhatsAppPage() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold uppercase text-slate-400">
-                    Message Body
+                    Message Body Template
                   </label>
                   <span className="text-[10px] text-slate-500 font-mono">
-                    Tags: {"{{firstName}}"}, {"{{company}}"}
+                    Tags: {"{{firstName}}"}, {"{{company}}"}, {"{{website}}"}
                   </span>
                 </div>
                 <textarea
-                  rows={6}
+                  rows={5}
                   required
                   value={directMessage}
                   onChange={(e) => setDirectMessage(e.target.value)}
@@ -343,10 +521,11 @@ export default function WhatsAppPage() {
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all"
+                disabled={!directPhone.trim()}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>Launch WhatsApp &amp; Send Message</span>
+                <span>Launch Direct WhatsApp to Number</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </button>
             </form>
@@ -363,25 +542,37 @@ export default function WhatsAppPage() {
                   <span>Prospects with Phone Numbers ({leadsWithPhone.length})</span>
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Select prospects to generate 1-click WhatsApp outreach links
+                  Select prospects to generate 1-click WhatsApp outreach queue
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleGenerateBulk}
-                disabled={generatingBulk || leadsWithPhone.length === 0}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-xs flex items-center gap-1.5 transition-all"
-              >
-                {generatingBulk ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Generate Queue ({selectedLeadIds.length})</span>
-                  </>
+              <div className="flex items-center gap-2">
+                {leadsWithPhone.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSelectAllLeads}
+                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition-colors"
+                  >
+                    {selectedLeadIds.length === leadsWithPhone.length ? "Deselect All" : "Select All"}
+                  </button>
                 )}
-              </button>
+
+                <button
+                  type="button"
+                  onClick={handleGenerateBulk}
+                  disabled={generatingBulk || selectedLeadIds.length === 0}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-600/20"
+                >
+                  {generatingBulk ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Generate Bulk Queue ({selectedLeadIds.length})</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {leadsWithPhone.length === 0 ? (
@@ -389,11 +580,11 @@ export default function WhatsAppPage() {
                 <Smartphone className="w-8 h-8 mx-auto opacity-30 text-emerald-400" />
                 <p className="text-xs text-white font-semibold">No contacts with phone numbers found</p>
                 <p className="text-[11px] text-slate-400">
-                  Go to <a href="/dashboard/leads" className="text-orange-400 underline">Leads &amp; Folders</a> to add phone numbers manually or import contacts with phone columns.
+                  Go to <a href="/dashboard/leads" className="text-orange-400 underline">Leads &amp; Folders</a> to add phone numbers or import contacts via CSV.
                 </p>
               </div>
             ) : (
-              <div className="max-h-72 overflow-y-auto divide-y divide-slate-850 border border-slate-850 rounded-2xl bg-slate-950/80 p-2 space-y-1">
+              <div className="max-h-80 overflow-y-auto divide-y divide-slate-850 border border-slate-850 rounded-2xl bg-slate-950/80 p-2 space-y-1">
                 {leadsWithPhone.map((l) => {
                   const isChecked = selectedLeadIds.includes(l.id);
                   return (
@@ -412,7 +603,7 @@ export default function WhatsAppPage() {
                           +{l.phone}
                         </p>
                         <p className="text-[11px] text-slate-400 truncate">
-                          {l.first_name || l.email || "Contact"} {l.company ? `&bull; ${l.company}` : ""}
+                          {l.first_name || l.email || "Contact"} {l.company ? `• ${l.company}` : ""}
                         </p>
                       </div>
 
@@ -421,9 +612,19 @@ export default function WhatsAppPage() {
                           directMessage
                             .replace("{{firstName}}", l.first_name || "there")
                             .replace("{{company}}", l.company || "your business")
+                            .replace("{{website}}", l.website || "")
                         )}`}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={() => {
+                          api.whatsapp.logSent({
+                            lead_id: l.id,
+                            recipient_phone: l.phone || "",
+                            recipient_name: l.first_name || l.company || "",
+                            message: directMessage,
+                            sender_id: selectedSenderId || undefined,
+                          }).catch(() => {});
+                        }}
                         className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-1 transition-colors"
                         title="Send via WhatsApp"
                       >
@@ -439,32 +640,127 @@ export default function WhatsAppPage() {
         </div>
       </div>
 
-      {/* Bulk Click-to-Send Queue View */}
+      {/* Bulk Dispatch Queue & Automation Controls */}
       {bulkQueue.length > 0 && (
-        <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <Layers className="w-4 h-4 text-emerald-400" />
-                <span>1-Click WhatsApp Dispatch Queue ({bulkQueue.length})</span>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Layers className="w-5 h-5 text-emerald-400" />
+                <span>Bulk WhatsApp Dispatch Queue ({bulkQueue.length} Contacts)</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Click &quot;Open WhatsApp&quot; on each row to dispatch your personalized message seamlessly
+                Dispatch with safe pacing to avoid WhatsApp spam triggers, or send individually with 1 click.
               </p>
             </div>
-            <button
-              onClick={() => setBulkQueue([])}
-              className="text-xs text-slate-400 hover:text-white"
-            >
-              Clear Queue
-            </button>
+
+            {/* Automation Control Toolbar */}
+            <div className="flex items-center flex-wrap gap-3">
+              <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <span className="text-[11px] text-slate-400 font-semibold">Delay:</span>
+                <select
+                  value={delaySeconds}
+                  onChange={(e) => setDelaySeconds(Number(e.target.value))}
+                  disabled={autoRunning}
+                  className="bg-transparent text-xs text-emerald-400 font-bold focus:outline-none"
+                >
+                  <option value={5} className="bg-slate-900">5 seconds (Rapid)</option>
+                  <option value={10} className="bg-slate-900">10 seconds</option>
+                  <option value={15} className="bg-slate-900">15 seconds (Recommended)</option>
+                  <option value={25} className="bg-slate-900">25 seconds (Safe)</option>
+                  <option value={40} className="bg-slate-900">40 seconds (Ultra Safe)</option>
+                </select>
+              </div>
+
+              {!autoRunning ? (
+                <button
+                  type="button"
+                  onClick={handleStartAutoRun}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition-all"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Start Auto-Dispatch</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handlePauseAutoRun}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all"
+                >
+                  <Pause className="w-3.5 h-3.5 fill-current" />
+                  <span>Pause Sequence</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleResetQueue}
+                title="Reset all to unsent"
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setBulkQueue([])}
+                className="text-xs text-slate-400 hover:text-red-400 px-2 py-1"
+              >
+                Clear Queue
+              </button>
+            </div>
           </div>
 
+          {/* Rate Limit Protection Banner & Progress Bar */}
+          <div className="space-y-3">
+            <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between flex-wrap gap-2 text-xs">
+              <div className="flex items-center gap-2 text-emerald-400">
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>
+                  Anti-Spam Safety: Automatic delay pacing ensures safe sending without risking WhatsApp account suspensions.
+                </span>
+              </div>
+              {autoRunning && (
+                <span className="font-mono font-bold text-emerald-300 animate-pulse">
+                  Opening next contact in {countdown}s...
+                </span>
+              )}
+            </div>
+
+            {/* Progress */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs text-slate-400">
+                <span>
+                  Dispatched: <strong className="text-white">{sentCount}</strong> of <strong className="text-white">{bulkQueue.length}</strong> ({progressPercent}%)
+                </span>
+                {autoRunning && (
+                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Sequence Active (Lead {currentIndex + 1} of {bulkQueue.length})
+                  </span>
+                )}
+              </div>
+              <div className="w-full h-2.5 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Cards Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
             {bulkQueue.map((item, idx) => (
               <div
                 key={idx}
-                className="p-4 rounded-2xl bg-slate-950 border border-slate-850 space-y-3 flex flex-col justify-between"
+                className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
+                  item.sent
+                    ? "bg-slate-950/40 border-slate-800/40 opacity-70"
+                    : autoRunning && idx === currentIndex
+                    ? "bg-emerald-500/10 border-emerald-500 ring-2 ring-emerald-500/30"
+                    : "bg-slate-950 border-slate-850 hover:border-slate-700"
+                }`}
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -476,16 +772,65 @@ export default function WhatsAppPage() {
                   </p>
                 </div>
 
-                <a
-                  href={item.wa_link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/10 transition-all"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Open WhatsApp Chat</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => dispatchLead(idx)}
+                    className={`flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                      item.sent
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                        : "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-600/10"
+                    }`}
+                  >
+                    {item.sent ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Sent (Resend)</span>
+                      </>
+                    ) : (
+                      <>
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>Open WhatsApp</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Message Dispatch History */}
+      {history.length > 0 && (
+        <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-4">
+          <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            <History className="w-4 h-4 text-emerald-400" />
+            <span>Recent WhatsApp Dispatch Activity ({history.length})</span>
+          </h2>
+
+          <div className="divide-y divide-slate-800/80 rounded-2xl bg-slate-950 border border-slate-800/80 overflow-hidden">
+            {history.slice(0, 10).map((h) => (
+              <div key={h.id} className="p-3.5 flex items-center justify-between text-xs gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">
+                      {h.recipient_name || "Contact"} <span className="font-mono text-emerald-400 font-normal">+{h.recipient_phone}</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400 truncate max-w-md">{h.message}</p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+                    DISPATCHED
+                  </span>
+                  <p className="text-[10px] text-slate-500 mt-1">{h.created_at}</p>
+                </div>
               </div>
             ))}
           </div>

@@ -32,6 +32,13 @@ class QuickBulkRequest(BaseModel):
     message_template: str
     lead_ids: list[str]
 
+class LogSentRequest(BaseModel):
+    lead_id: str | None = None
+    recipient_phone: str
+    recipient_name: str | None = None
+    message: str
+    sender_id: str | None = None
+
 # ----------------- WhatsApp Senders (Numbers) -----------------
 
 @router.get("/senders")
@@ -175,6 +182,34 @@ def bulk_generate_whatsapp_links(
         })
 
     return {"total": len(results), "items": results}
+
+@router.post("/log-sent")
+def log_sent_message(
+    req: LogSentRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    clean_num = clean_phone_number(req.recipient_phone)
+    msg_record = WhatsAppMessage(
+        user_id=current_user.id,
+        sender_id=req.sender_id,
+        lead_id=req.lead_id,
+        recipient_phone=clean_num,
+        recipient_name=req.recipient_name,
+        message=req.message,
+        status="SENT",
+        sent_at=datetime.utcnow()
+    )
+    db.add(msg_record)
+    
+    # Also update lead status if applicable
+    if req.lead_id:
+        lead = db.query(Lead).filter(Lead.id == req.lead_id, Lead.user_id == current_user.id).first()
+        if lead and lead.status == "PENDING":
+            lead.status = "CONTACTED"
+            
+    db.commit()
+    return {"success": True, "message_id": msg_record.id}
 
 @router.get("/history")
 def list_history(
