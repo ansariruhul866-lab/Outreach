@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, token, isLoading } = useAuth();
@@ -35,20 +35,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user) return null;
 
   return (
-    <div className="min-h-screen flex bg-black text-white antialiased relative overflow-hidden select-none">
-      {/* Black & Purple Ambient Glow Mesh */}
-      <div className="fixed top-[-10%] right-[-5%] w-[700px] h-[700px] ambient-glow-purple-lg rounded-full blur-[140px] pointer-events-none opacity-60 animate-float" />
-      <div className="fixed bottom-[-15%] left-[15%] w-[750px] h-[750px] ambient-glow-purple-accent rounded-full blur-[160px] pointer-events-none opacity-40 animate-pulse-glow" />
-      <div className="fixed top-[35%] left-[45%] w-[500px] h-[500px] ambient-glow-white-subtle rounded-full blur-[120px] pointer-events-none opacity-20" />
+    <div className="min-h-screen flex bg-slate-50 dark:bg-black text-slate-900 dark:text-white antialiased relative overflow-hidden select-none transition-colors duration-200">
+      {/* Ambient Glow Mesh */}
+      <div className="fixed top-[-10%] right-[-5%] w-[700px] h-[700px] ambient-glow-purple-lg rounded-full blur-[140px] pointer-events-none opacity-30 dark:opacity-60 animate-float" />
+      <div className="fixed bottom-[-15%] left-[15%] w-[750px] h-[750px] ambient-glow-purple-accent rounded-full blur-[160px] pointer-events-none opacity-20 dark:opacity-40 animate-pulse-glow" />
+      <div className="fixed top-[35%] left-[45%] w-[500px] h-[500px] ambient-glow-white-subtle rounded-full blur-[120px] pointer-events-none opacity-10 dark:opacity-20" />
 
-      {/* Luxury Black & Purple Glass Sidebar */}
+      {/* Responsive Glass Sidebar */}
       <Sidebar />
 
-      {/* Main Content Area with Smooth Framer Motion Transition */}
+      {/* Main Content Area */}
       <motion.main
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         className="flex-1 flex flex-col min-w-0 overflow-y-auto max-h-screen relative z-10"
       >
         {children}
