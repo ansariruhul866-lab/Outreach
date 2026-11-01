@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 from core.database import get_db
-from core.models import User, Lead, ScrapeJob
+from core.models import User, Lead, ScrapeJob, LeadFolder
 from core.auth import get_current_user
 from api.filter import validate_emails, FilterRequest
 
@@ -97,12 +97,15 @@ class ScrapeRequest(BaseModel):
     target_url: str | None = None
     depth: int = 2
     campaign_id: str | None = None
+    folder_id: str | None = None
 
 class BulkScrapeRequest(BaseModel):
     urls: list[str] = Field(..., description="List of target website URLs or domains")
     depth: int = 2
     max_pages_per_site: int = 18
     campaign_id: str | None = None
+    folder_id: str | None = None
+    folder_name: str | None = None
 
 class SiteResult(BaseModel):
     url: str
@@ -448,6 +451,21 @@ async def crawl_single(
     filter_resp = await validate_emails(FilterRequest(emails=list(raw_emails)))
     clean_leads = [r.email for r in filter_resp.results if r.should_include]
 
+    # Auto-resolve or create target folder
+    target_folder_id = req.folder_id
+    if not target_folder_id and len(clean_leads) > 0:
+        # Create a folder for this single scrape
+        from datetime import datetime
+        folder = LeadFolder(
+            user_id=current_user.id,
+            name=f"{domain or 'Site'} ({datetime.utcnow().strftime('%b %d %H:%M')})",
+            source="SCRAPER"
+        )
+        db.add(folder)
+        db.commit()
+        db.refresh(folder)
+        target_folder_id = folder.id
+
     saved_count = 0
     for email in clean_leads:
         existing = db.query(Lead).filter(
@@ -459,6 +477,7 @@ async def crawl_single(
             lead = Lead(
                 user_id=current_user.id,
                 campaign_id=req.campaign_id,
+                folder_id=target_folder_id,
                 email=email,
                 company=company,
                 website=target,
@@ -469,6 +488,8 @@ async def crawl_single(
             )
             db.add(lead)
             saved_count += 1
+        elif target_folder_id and not existing.folder_id:
+            existing.folder_id = target_folder_id
 
     job.status = "COMPLETED" if not error else "FAILED"
     job.pages_visited = pages_visited
@@ -574,6 +595,27 @@ async def bulk_crawl(
     total_saved_leads = 0
     successful_sites = 0
 
+    from datetime import datetime
+    # Prepare batch folder chunking: create folders in blocks of 50 leads
+    batch_timestamp = datetime.utcnow().strftime('%b %d %H:%M')
+    base_folder_name = req.folder_name.strip() if req.folder_name and req.folder_name.strip() else f"Bulk Crawl {batch_timestamp}"
+    current_chunk_index = 1
+    leads_in_current_folder = 0
+
+    # If explicit folder_id was passed, use it; otherwise create auto-chunked folder
+    if req.folder_id:
+        active_folder_id = req.folder_id
+    else:
+        initial_folder = LeadFolder(
+            user_id=current_user.id,
+            name=f"{base_folder_name} (Part {current_chunk_index})",
+            source="SCRAPER"
+        )
+        db.add(initial_folder)
+        db.commit()
+        db.refresh(initial_folder)
+        active_folder_id = initial_folder.id
+
     for target, domain, company, pages_visited, raw_emails, error in results:
         total_pages_visited += pages_visited
         total_raw_emails += len(raw_emails)
@@ -589,9 +631,23 @@ async def bulk_crawl(
         else:
             successful_sites += 1
 
-        # Save to DB
+        # Save to DB into folders of up to 50 leads
         site_saved = 0
         for email in site_clean:
+            # If auto-chunking (no explicit folder_id) and we hit 50 leads in the folder, create part 2, 3, etc.
+            if not req.folder_id and leads_in_current_folder >= 50:
+                current_chunk_index += 1
+                new_folder = LeadFolder(
+                    user_id=current_user.id,
+                    name=f"{base_folder_name} (Part {current_chunk_index})",
+                    source="SCRAPER"
+                )
+                db.add(new_folder)
+                db.commit()
+                db.refresh(new_folder)
+                active_folder_id = new_folder.id
+                leads_in_current_folder = 0
+
             existing = db.query(Lead).filter(
                 Lead.user_id == current_user.id,
                 Lead.email == email
@@ -600,6 +656,7 @@ async def bulk_crawl(
             if not existing:
                 lead = Lead(
                     user_id=current_user.id,
+                    folder_id=active_folder_id,
                     campaign_id=req.campaign_id,
                     email=email,
                     company=company,
@@ -611,6 +668,10 @@ async def bulk_crawl(
                 )
                 db.add(lead)
                 site_saved += 1
+                leads_in_current_folder += 1
+            elif active_folder_id and not existing.folder_id:
+                existing.folder_id = active_folder_id
+                leads_in_current_folder += 1
 
         total_saved_leads += site_saved
 

@@ -10,6 +10,7 @@ import {
   Users,
   Send,
   Mail,
+  FileText,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -27,7 +28,8 @@ export function Sidebar() {
   const navItems = [
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { label: "Deep Scraper", href: "/dashboard/scraper", icon: Search },
-    { label: "Leads Database", href: "/dashboard/leads", icon: Users },
+    { label: "Leads & Folders", href: "/dashboard/leads", icon: Users },
+    { label: "Templates", href: "/dashboard/templates", icon: FileText },
     { label: "Campaigns", href: "/dashboard/campaigns", icon: Send },
     { label: "Mailboxes", href: "/dashboard/mailboxes", icon: Mail },
   ];

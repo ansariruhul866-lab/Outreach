@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { api, ScrapeJob } from "@/lib/api";
+import { api, ScrapeJob, LeadFolder } from "@/lib/api";
 import {
   Search,
   Globe,
@@ -14,6 +14,7 @@ import {
   Download,
   Users,
   Sparkles,
+  Folder,
 } from "lucide-react";
 
 export default function ScraperPage() {
@@ -21,6 +22,9 @@ export default function ScraperPage() {
   const [singleUrl, setSingleUrl] = useState("");
   const [bulkUrls, setBulkUrls] = useState("");
   const [depth, setDepth] = useState<number>(2);
+  const [folderName, setFolderName] = useState("");
+  const [targetFolderId, setTargetFolderId] = useState("");
+  const [folders, setFolders] = useState<LeadFolder[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +32,13 @@ export default function ScraperPage() {
 
   const [activeJob, setActiveJob] = useState<ScrapeJob | null>(null);
   const [extractedEmails, setExtractedEmails] = useState<string[]>([]);
+
+  useEffect(() => {
+    api.folders
+      .list()
+      .then((res) => setFolders(res.folders || []))
+      .catch(() => setFolders([]));
+  }, []);
 
   const sampleDomains = [
     "stripe.com",
@@ -51,10 +62,10 @@ export default function ScraperPage() {
         formattedUrl = `https://${formattedUrl}`;
       }
 
-      const job = await api.scraper.scrape(formattedUrl, depth);
+      const job = await api.scraper.scrape(formattedUrl, depth, targetFolderId || undefined);
       setActiveJob(job);
       setExtractedEmails(job.emails || []);
-      setSuccessMsg(`✓ Crawl finished! Visited ${job.pages_visited} pages and saved ${job.emails_found} verified leads.`);
+      setSuccessMsg(`✓ Crawl finished! Visited ${job.pages_visited} pages and saved ${job.emails_found} verified leads into your folders.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Scrape failed";
       setError(msg);
@@ -83,8 +94,13 @@ export default function ScraperPage() {
       const formatted = urls.map((u) =>
         u.startsWith("http://") || u.startsWith("https://") ? u : `https://${u}`
       );
-      const res = await api.scraper.bulkScrape(formatted, depth);
-      setSuccessMsg(`✓ Bulk crawl initiated for ${res.total_jobs} domains! Prospects are being parsed & verified.`);
+      const res = await api.scraper.bulkScrape(
+        formatted,
+        depth,
+        targetFolderId || undefined,
+        folderName || undefined
+      );
+      setSuccessMsg(`✓ Bulk crawl initiated for ${res.total_jobs} domains! Leads are automatically organized in folders of ~50 prospects.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Bulk scrape failed";
       setError(msg);
@@ -241,6 +257,36 @@ export default function ScraperPage() {
           </form>
         ) : (
           <form onSubmit={handleBulkScrape} className="space-y-6">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  Folder Name (Batch of ~50 leads per folder)
+                </label>
+                <input
+                  type="text"
+                  value={folderName}
+                  onChange={(e) => setFolderName(e.target.value)}
+                  placeholder="e.g. Fintech Founders Batch, SaaS Directories"
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-white placeholder-slate-600 focus:border-orange-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  Crawl Depth
+                </label>
+                <select
+                  value={depth}
+                  onChange={(e) => setDepth(parseInt(e.target.value))}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                >
+                  <option value={1}>1 Level (Homepage only)</option>
+                  <option value={2}>2 Levels (Homepage + /contact, /about - Recommended)</option>
+                  <option value={3}>3 Levels (Deep subpage discovery)</option>
+                </select>
+              </div>
+            </div>
+
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
                 Paste Multiple Domains / URLs (One per line)

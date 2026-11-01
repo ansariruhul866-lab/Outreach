@@ -29,10 +29,12 @@ export interface Sender {
 
 export interface Lead {
   id: string;
+  folder_id?: string | null;
   email: string;
   first_name?: string;
   company?: string;
   website?: string;
+  source_url?: string;
   spam_score?: number;
   is_verified: boolean;
   status: "PENDING" | "SENT" | "OPENED" | "REPLIED" | "FAILED" | "SKIPPED";
@@ -40,6 +42,32 @@ export interface Lead {
   sent_at?: string;
   opened_at?: string;
   created_at?: string;
+}
+
+export interface LeadFolder {
+  id: string;
+  name: string;
+  description?: string;
+  source: string;
+  leads_count: number;
+  created_at: string;
+}
+
+export interface FolderListResponse {
+  total_leads: number;
+  unassigned_leads: number;
+  folders: LeadFolder[];
+}
+
+export interface EmailTemplate {
+  id: string;
+  title: string;
+  category: "PITCH" | "FOLLOW_UP" | "OFFER" | "CUSTOM" | string;
+  subject: string;
+  body: string;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Campaign {
@@ -167,44 +195,96 @@ export const api = {
       }),
   },
   leads: {
-    list: async (skip = 0, limit = 100, status?: string) => {
+    list: async (skip = 0, limit = 200, status?: string, folderId?: string) => {
       let q = `/leads?page=1&limit=${limit}`;
       if (status && status !== "ALL") q += `&status=${status}`;
-      // Backend returns { total, page, limit, leads: [...] }
+      if (folderId && folderId !== "ALL") q += `&folder_id=${folderId}`;
       const res = await apiFetch<any>(q);
       if (Array.isArray(res)) return res as Lead[];
       if (res && Array.isArray(res.leads)) return res.leads as Lead[];
       return [] as Lead[];
     },
-    create: (lead: { email: string; first_name?: string; company?: string; website?: string; source_url?: string }) =>
+    create: (lead: { email: string; first_name?: string; company?: string; website?: string; source_url?: string; folder_id?: string }) =>
       apiFetch<Lead>("/leads", {
         method: "POST",
         body: JSON.stringify(lead),
       }),
-    selectable: (campaignId?: string) =>
-      apiFetch<{ id: string; email: string; company?: string; status: string; campaign_id?: string }[]>(
-        `/leads/selectable${campaignId ? `?campaign_id=${campaignId}` : ""}`
-      ),
+    selectable: (campaignId?: string, folderId?: string) => {
+      let q = "/leads/selectable";
+      const params: string[] = [];
+      if (campaignId) params.push(`campaign_id=${campaignId}`);
+      if (folderId && folderId !== "ALL") params.push(`folder_id=${folderId}`);
+      if (params.length) q += `?${params.join("&")}`;
+      return apiFetch<{ id: string; email: string; company?: string; status: string; campaign_id?: string; folder_id?: string }[]>(q);
+    },
     delete: (id: string) =>
       apiFetch<{ success: boolean; message: string }>(`/leads/${id}`, {
         method: "DELETE",
       }),
-    importCsv: (leads: Array<{ email: string; first_name?: string; company?: string; website?: string }>) =>
+    deleteAll: (folderId?: string) => {
+      const q = folderId && folderId !== "ALL" ? `/leads/all?folder_id=${folderId}` : "/leads/all";
+      return apiFetch<{ success: boolean; deleted: number }>(q, { method: "DELETE" });
+    },
+    batchDelete: (leadIds: string[]) =>
+      apiFetch<{ success: boolean; deleted: number }>("/leads/batch-delete", {
+        method: "POST",
+        body: JSON.stringify({ lead_ids: leadIds }),
+      }),
+    moveToFolder: (leadIds: string[], folderId: string | null) =>
+      apiFetch<{ success: boolean; updated: number }>("/leads/move", {
+        method: "POST",
+        body: JSON.stringify({ lead_ids: leadIds, folder_id: folderId }),
+      }),
+    importCsv: (leads: Array<{ email: string; first_name?: string; company?: string; website?: string }>, folderId?: string) =>
       apiFetch<{ success: boolean; imported: number; duplicates: number }>("/leads/import-csv", {
         method: "POST",
-        body: JSON.stringify({ leads }),
+        body: JSON.stringify({ leads, folder_id: folderId }),
+      }),
+  },
+  folders: {
+    list: () => apiFetch<FolderListResponse>("/folders"),
+    create: (payload: { name: string; description?: string }) =>
+      apiFetch<{ id: string; name: string }>("/folders", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    update: (id: string, payload: { name: string; description?: string }) =>
+      apiFetch<{ success: boolean; id: string; name: string }>(`/folders/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }),
+    delete: (id: string, deleteLeads: boolean = false) =>
+      apiFetch<{ success: boolean }>(`/folders/${id}?delete_leads=${deleteLeads}`, {
+        method: "DELETE",
+      }),
+  },
+  templates: {
+    list: () => apiFetch<EmailTemplate[]>("/templates"),
+    create: (payload: { title: string; category?: string; subject: string; body: string }) =>
+      apiFetch<{ id: string; title: string; category: string }>("/templates", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    update: (id: string, payload: { title?: string; category?: string; subject?: string; body?: string }) =>
+      apiFetch<{ success: boolean; id: string }>(`/templates/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }),
+    delete: (id: string) =>
+      apiFetch<{ success: boolean }>(`/templates/${id}`, {
+        method: "DELETE",
       }),
   },
   scraper: {
-    scrape: (targetUrl: string, depth = 2) =>
+    scrape: (targetUrl: string, depth = 2, folderId?: string) =>
       apiFetch<ScrapeJob>("/scraper/crawl", {
         method: "POST",
-        body: JSON.stringify({ url: targetUrl, depth }),
+        body: JSON.stringify({ url: targetUrl, depth, folder_id: folderId }),
       }),
-    bulkScrape: (urls: string[], depth = 2) =>
+    bulkScrape: (urls: string[], depth = 2, folderId?: string, folderName?: string) =>
       apiFetch<{ message: string; total_jobs: number; job_ids: string[] }>("/scraper/bulk-crawl", {
         method: "POST",
-        body: JSON.stringify({ urls, depth }),
+        body: JSON.stringify({ urls, depth, folder_id: folderId, folder_name: folderName }),
       }),
     getJob: (jobId: string) => apiFetch<ScrapeJob>(`/scraper/jobs/${jobId}`),
   },

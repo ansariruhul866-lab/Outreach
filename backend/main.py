@@ -24,6 +24,8 @@ from api.leads import router as leads_router
 from api.campaigns import router as campaigns_router
 from api.tracking import router as tracking_router
 from api.stats import router as stats_router
+from api.folders import router as folders_router
+from api.templates import router as templates_router
 
 app = FastAPI(title="OutreachBot SaaS Platform", version="2.0.0")
 
@@ -39,6 +41,8 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(senders_router, prefix="/api")
 app.include_router(scraper_router, prefix="/api")
 app.include_router(leads_router, prefix="/api")
+app.include_router(folders_router, prefix="/api")
+app.include_router(templates_router, prefix="/api")
 app.include_router(campaigns_router, prefix="/api")
 app.include_router(tracking_router, prefix="/api")
 app.include_router(stats_router, prefix="/api")

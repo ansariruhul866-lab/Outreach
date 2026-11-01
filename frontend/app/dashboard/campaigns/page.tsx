@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api, Campaign, Sender } from "@/lib/api";
+import { api, Campaign, Sender, EmailTemplate, LeadFolder } from "@/lib/api";
 import {
   Send,
   Plus,
@@ -18,6 +18,8 @@ import {
   Sparkles,
   Users,
   ShieldCheck,
+  Folder,
+  FileText,
 } from "lucide-react";
 
 const PRESETS = {
@@ -46,6 +48,8 @@ const PRESETS = {
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [senders, setSenders] = useState<Sender[]>([]);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [folders, setFolders] = useState<LeadFolder[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modal State
@@ -55,6 +59,8 @@ export default function CampaignsPage() {
   const [name, setName] = useState("");
   const [type, setType] = useState<keyof typeof PRESETS>("BACKLINK");
   const [senderId, setSenderId] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [selectedFolderFilter, setSelectedFolderFilter] = useState("ALL");
   const [subject, setSubject] = useState(PRESETS.BACKLINK.subject);
   const [body, setBody] = useState(PRESETS.BACKLINK.body);
   const [dailyLimit, setDailyLimit] = useState(50);
@@ -62,7 +68,7 @@ export default function CampaignsPage() {
   const [sendOnlyOnce, setSendOnlyOnce] = useState(true);
 
   // Selective Leads State
-  const [availableLeads, setAvailableLeads] = useState<Array<{ id: string; email: string; company?: string; status: string }>>([]);
+  const [availableLeads, setAvailableLeads] = useState<Array<{ id: string; email: string; company?: string; status: string; folder_id?: string }>>([]);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [leadLoading, setLeadLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -70,12 +76,16 @@ export default function CampaignsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [cList, sList] = await Promise.all([
+      const [cList, sList, tList, fList] = await Promise.all([
         api.campaigns.list().catch(() => []),
         api.senders.list().catch(() => []),
+        api.templates.list().catch(() => []),
+        api.folders.list().then((res) => res.folders || []).catch(() => []),
       ]);
       setCampaigns(Array.isArray(cList) ? cList : []);
       setSenders(Array.isArray(sList) ? sList : []);
+      setTemplates(Array.isArray(tList) ? tList : []);
+      setFolders(Array.isArray(fList) ? fList : []);
       if (Array.isArray(sList) && sList.length > 0 && !senderId) {
         setSenderId(sList[0].id);
       }
@@ -141,8 +151,18 @@ export default function CampaignsPage() {
     }
   };
 
+  const handleTemplateSelect = (tplId: string) => {
+    setSelectedTemplateId(tplId);
+    const found = templates.find((t) => t.id === tplId);
+    if (found) {
+      setSubject(found.subject);
+      setBody(found.body);
+    }
+  };
+
   const handlePresetChange = (presetKey: keyof typeof PRESETS) => {
     setType(presetKey);
+    setSelectedTemplateId("");
     setSubject(PRESETS[presetKey].subject);
     setBody(PRESETS[presetKey].body);
   };
@@ -212,6 +232,11 @@ export default function CampaignsPage() {
     }
   };
 
+  const displayedLeads = availableLeads.filter((l) => {
+    if (selectedFolderFilter === "ALL") return true;
+    return l.folder_id === selectedFolderFilter;
+  });
+
   const toggleLead = (leadId: string) => {
     setSelectedLeadIds((prev) =>
       prev.includes(leadId) ? prev.filter((id) => id !== leadId) : [...prev, leadId]
@@ -219,7 +244,7 @@ export default function CampaignsPage() {
   };
 
   const selectAllLeads = () => {
-    setSelectedLeadIds(availableLeads.map((l) => l.id));
+    setSelectedLeadIds(displayedLeads.map((l) => l.id));
   };
 
   const deselectAllLeads = () => {
@@ -412,10 +437,39 @@ export default function CampaignsPage() {
                   </div>
                 </div>
 
+                {/* Templates Selector */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-orange-400" />
+                      <span>Saved Email Templates Library</span>
+                    </label>
+                    <a
+                      href="/dashboard/templates"
+                      target="_blank"
+                      className="text-[10px] text-orange-400 hover:underline"
+                    >
+                      + Manage Templates
+                    </a>
+                  </div>
+                  <select
+                    value={selectedTemplateId}
+                    onChange={(e) => handleTemplateSelect(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                  >
+                    <option value="">-- Select from your saved templates or choose preset below --</option>
+                    {templates.map((tpl) => (
+                      <option key={tpl.id} value={tpl.id}>
+                        [{tpl.category}] {tpl.title} &mdash; &quot;{tpl.subject}&quot;
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Template Presets */}
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-slate-400 mb-2">
-                    Template Presets
+                    Or Quick Preset
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {(Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((key) => (
@@ -424,7 +478,7 @@ export default function CampaignsPage() {
                         type="button"
                         onClick={() => handlePresetChange(key)}
                         className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
-                          type === key
+                          type === key && !selectedTemplateId
                             ? "bg-orange-500/10 border-orange-500 text-orange-400 font-bold"
                             : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
                         }`}
@@ -478,11 +532,24 @@ export default function CampaignsPage() {
                     <div>
                       <span className="text-xs font-bold text-white flex items-center gap-2">
                         <Users className="w-4 h-4 text-orange-400" />
-                        <span>Select Target Leads ({selectedLeadIds.length} of {availableLeads.length} selected)</span>
+                        <span>Select Target Leads ({selectedLeadIds.length} of {displayedLeads.length} selected)</span>
                       </span>
                       <p className="text-[10px] text-slate-500">Choose exactly which prospects will receive this campaign</p>
                     </div>
                     <div className="flex items-center gap-2">
+                      {/* Filter by folder inside campaign modal */}
+                      <select
+                        value={selectedFolderFilter}
+                        onChange={(e) => setSelectedFolderFilter(e.target.value)}
+                        className="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300 focus:outline-none"
+                      >
+                        <option value="ALL">All Folders ({availableLeads.length})</option>
+                        {folders.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.name} ({f.leads_count})
+                          </option>
+                        ))}
+                      </select>
                       <button
                         type="button"
                         onClick={selectAllLeads}
@@ -503,12 +570,12 @@ export default function CampaignsPage() {
                   <div className="max-h-48 overflow-y-auto divide-y divide-slate-850/60 border border-slate-850 rounded-xl bg-slate-900/40 p-2 space-y-1">
                     {leadLoading ? (
                       <div className="p-4 text-center text-xs text-slate-500">Loading prospects...</div>
-                    ) : availableLeads.length === 0 ? (
+                    ) : displayedLeads.length === 0 ? (
                       <div className="p-4 text-center text-xs text-slate-500">
-                        No available leads. Run the scraper or import CSV first.
+                        No available leads in this selection. Run the scraper or import CSV first.
                       </div>
                     ) : (
-                      availableLeads.map((lead) => {
+                      displayedLeads.map((lead) => {
                         const isChecked = selectedLeadIds.includes(lead.id);
                         return (
                           <label

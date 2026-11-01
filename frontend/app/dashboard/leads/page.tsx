@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api, Lead } from "@/lib/api";
+import { api, Lead, LeadFolder, FolderListResponse } from "@/lib/api";
 import {
   Users,
   Search,
@@ -12,32 +12,70 @@ import {
   AlertCircle,
   Loader2,
   X,
-  FileSpreadsheet,
+  Folder,
+  FolderPlus,
+  FolderCheck,
+  CheckSquare,
+  Square,
+  ArrowRight,
+  Filter,
+  Layers,
 } from "lucide-react";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [folders, setFolders] = useState<LeadFolder[]>([]);
+  const [selectedFolderId, setSelectedFolderId] = useState<string>("ALL");
+  const [totalLeadsCount, setTotalLeadsCount] = useState(0);
+  const [unassignedCount, setUnassignedCount] = useState(0);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [loading, setLoading] = useState(true);
 
-  // Add lead modal state
+  // Multi-select state
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Create folder modal state
+  const [createFolderModalOpen, setCreateFolderModalOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newFolderDesc, setNewFolderDesc] = useState("");
+
+  // Move leads modal state
+  const [moveModalOpen, setMoveModalOpen] = useState(false);
+  const [targetMoveFolderId, setTargetMoveFolderId] = useState<string>("");
+
+  // Add single lead modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newFirstName, setNewFirstName] = useState("");
   const [newCompany, setNewCompany] = useState("");
   const [newWebsite, setNewWebsite] = useState("");
+  const [newLeadFolderId, setNewLeadFolderId] = useState("");
   const [modalLoading, setModalLoading] = useState(false);
 
   // CSV Import state
   const [importing, setImporting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
+  const loadFolders = async () => {
+    try {
+      const data: FolderListResponse = await api.folders.list();
+      setFolders(data.folders || []);
+      setTotalLeadsCount(data.total_leads || 0);
+      setUnassignedCount(data.unassigned_leads || 0);
+    } catch (e) {
+      console.error("Error loading folders", e);
+    }
+  };
+
   const loadLeads = async () => {
     try {
       setLoading(true);
-      const data = await api.leads.list(0, 200, statusFilter);
+      const data = await api.leads.list(0, 500, statusFilter, selectedFolderId);
       setLeads(Array.isArray(data) ? data : []);
+      setSelectedLeadIds([]);
     } catch (e) {
       console.error(e);
       setLeads([]);
@@ -47,8 +85,48 @@ export default function LeadsPage() {
   };
 
   useEffect(() => {
+    loadFolders();
+  }, []);
+
+  useEffect(() => {
     loadLeads();
-  }, [statusFilter]);
+  }, [statusFilter, selectedFolderId]);
+
+  const handleCreateFolder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFolderName.trim()) return;
+
+    try {
+      await api.folders.create({
+        name: newFolderName.trim(),
+        description: newFolderDesc.trim() || undefined,
+      });
+      setNewFolderName("");
+      setNewFolderDesc("");
+      setCreateFolderModalOpen(false);
+      setNotice("✓ Folder created successfully");
+      loadFolders();
+      setTimeout(() => setNotice(null), 3000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to create folder");
+    }
+  };
+
+  const handleDeleteFolder = async (folderId: string, folderName: string) => {
+    const deleteLeadsToo = confirm(
+      `Do you want to delete folder "${folderName}"?\n\nClick OK to also DELETE all leads inside it, or Cancel to only unassign them.`
+    );
+    try {
+      await api.folders.delete(folderId, deleteLeadsToo);
+      if (selectedFolderId === folderId) setSelectedFolderId("ALL");
+      setNotice(`✓ Folder "${folderName}" deleted`);
+      loadFolders();
+      loadLeads();
+      setTimeout(() => setNotice(null), 3000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Delete folder failed");
+    }
+  };
 
   const handleCreateLead = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,13 +139,17 @@ export default function LeadsPage() {
         first_name: newFirstName.trim() || undefined,
         company: newCompany.trim() || undefined,
         website: newWebsite.trim() || undefined,
+        folder_id: newLeadFolderId || undefined,
       });
       setAddModalOpen(false);
       setNewEmail("");
       setNewFirstName("");
       setNewCompany("");
       setNewWebsite("");
+      setNotice("✓ Lead saved");
       loadLeads();
+      loadFolders();
+      setTimeout(() => setNotice(null), 3000);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to add lead");
     } finally {
@@ -75,11 +157,106 @@ export default function LeadsPage() {
     }
   };
 
-  const handleDeleteLead = async (id: string) => {
+  // Selection handlers
+  const handleToggleSelectAll = () => {
+    if (selectedLeadIds.length === filteredLeads.length) {
+      setSelectedLeadIds([]);
+    } else {
+      setSelectedLeadIds(filteredLeads.map((l) => l.id));
+    }
+  };
+
+  const handleToggleLead = (id: string) => {
+    setSelectedLeadIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  // Delete selected leads
+  const handleDeleteSelected = async () => {
+    if (selectedLeadIds.length === 0) return;
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete the ${selectedLeadIds.length} selected leads?`
+      )
+    )
+      return;
+
+    setActionLoading(true);
+    try {
+      const res = await api.leads.batchDelete(selectedLeadIds);
+      setNotice(`✓ Deleted ${res.deleted} leads successfully`);
+      setSelectedLeadIds([]);
+      loadLeads();
+      loadFolders();
+      setTimeout(() => setNotice(null), 3000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Batch delete failed");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Delete all leads in view / folder
+  const handleDeleteAll = async () => {
+    const scopeName =
+      selectedFolderId === "ALL"
+        ? "ALL leads across the entire database"
+        : selectedFolderId === "UNASSIGNED"
+        ? "all unassigned leads"
+        : `all leads in this folder`;
+
+    if (
+      !confirm(
+        `⚠️ DANGER: Are you sure you want to delete ${scopeName}? This action CANNOT be undone.`
+      )
+    )
+      return;
+
+    setActionLoading(true);
+    try {
+      const res = await api.leads.deleteAll(selectedFolderId);
+      setNotice(`✓ Successfully deleted ${res.deleted} leads`);
+      setSelectedLeadIds([]);
+      loadLeads();
+      loadFolders();
+      setTimeout(() => setNotice(null), 4000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Delete all failed");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Move selected leads to folder
+  const handleMoveSelected = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedLeadIds.length === 0) return;
+
+    setActionLoading(true);
+    try {
+      const targetFolder = targetMoveFolderId === "UNASSIGNED" ? null : targetMoveFolderId;
+      await api.leads.moveToFolder(selectedLeadIds, targetFolder);
+      setNotice(`✓ Moved ${selectedLeadIds.length} leads to folder`);
+      setMoveModalOpen(false);
+      setSelectedLeadIds([]);
+      loadLeads();
+      loadFolders();
+      setTimeout(() => setNotice(null), 3000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to move leads");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteSingleLead = async (id: string) => {
     if (!confirm("Are you sure you want to remove this lead?")) return;
     try {
       await api.leads.delete(id);
       setLeads((prev) => prev.filter((l) => l.id !== id));
+      setSelectedLeadIds((prev) => prev.filter((itemId) => itemId !== id));
+      loadFolders();
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Delete failed");
     }
@@ -99,7 +276,6 @@ export default function LeadsPage() {
         const lines = text.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
         if (lines.length === 0) return;
 
-        // Parse header
         const header = lines[0].toLowerCase().split(",").map((h) => h.trim());
         const emailIdx = header.findIndex((h) => h.includes("email"));
         const nameIdx = header.findIndex((h) => h.includes("name") || h.includes("first"));
@@ -127,9 +303,11 @@ export default function LeadsPage() {
           return;
         }
 
-        const res = await api.leads.importCsv(payload);
+        const targetFolder = selectedFolderId !== "ALL" && selectedFolderId !== "UNASSIGNED" ? selectedFolderId : undefined;
+        const res = await api.leads.importCsv(payload, targetFolder);
         setNotice(`✓ Imported ${res.imported} leads (${res.duplicates} duplicates skipped)`);
         loadLeads();
+        loadFolders();
       } catch (err: unknown) {
         alert(err instanceof Error ? err.message : "Error parsing CSV");
       } finally {
@@ -153,16 +331,27 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Leads Database</h1>
+          <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
+            <Users className="w-6 h-6 text-orange-400" />
+            <span>Leads &amp; Folders</span>
+          </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Verified prospect contacts extracted from scraper or uploaded via CSV
+            Organize extracted prospects into folders of 50, batch select, delete, or export leads
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <label className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            onClick={() => setCreateFolderModalOpen(true)}
+            className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all"
+          >
+            <FolderPlus className="w-3.5 h-3.5 text-orange-400" />
+            <span>New Folder</span>
+          </button>
+
+          <label className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all">
             <Upload className="w-3.5 h-3.5 text-orange-400" />
-            <span>{importing ? "Importing CSV..." : "Import CSV"}</span>
+            <span>{importing ? "Importing..." : "Import CSV"}</span>
             <input
               type="file"
               accept=".csv"
@@ -189,33 +378,140 @@ export default function LeadsPage() {
         </div>
       )}
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search email, name, company..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none"
-          />
+      {/* Folders Bar */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <Folder className="w-4 h-4 text-orange-400" />
+            <span>Prospect Folders ({folders.length})</span>
+          </span>
+          <span className="text-[11px] text-slate-500">
+            Crawl jobs automatically segment every ~50 prospects into separate folders
+          </span>
         </div>
 
-        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
-          {["ALL", "PENDING", "SENT", "OPENED", "REPLIED", "SKIPPED", "FAILED"].map((s) => (
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-2">
+          <button
+            onClick={() => setSelectedFolderId("ALL")}
+            className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all border ${
+              selectedFolderId === "ALL"
+                ? "bg-orange-500 text-white border-orange-400 shadow-md shadow-orange-500/20"
+                : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800"
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>All Leads ({totalLeadsCount})</span>
+          </button>
+
+          {unassignedCount > 0 && (
             <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                statusFilter === s
-                  ? "bg-orange-500 text-white shadow-sm"
-                  : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800"
+              onClick={() => setSelectedFolderId("UNASSIGNED")}
+              className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all border ${
+                selectedFolderId === "UNASSIGNED"
+                  ? "bg-orange-500 text-white border-orange-400 shadow-md shadow-orange-500/20"
+                  : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800"
               }`}
             >
-              {s}
+              <Folder className="w-3.5 h-3.5 text-slate-400" />
+              <span>Unassigned ({unassignedCount})</span>
             </button>
+          )}
+
+          {folders.map((f) => (
+            <div
+              key={f.id}
+              className={`flex items-center rounded-2xl border transition-all shrink-0 ${
+                selectedFolderId === f.id
+                  ? "bg-orange-500/15 border-orange-500 text-orange-400"
+                  : "bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-300"
+              }`}
+            >
+              <button
+                onClick={() => setSelectedFolderId(f.id)}
+                className="px-3.5 py-2 text-xs font-bold flex items-center gap-2"
+              >
+                <Folder className="w-3.5 h-3.5 text-orange-400" />
+                <span className="max-w-[180px] truncate">{f.name}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-950/60 font-mono text-slate-400 border border-slate-800">
+                  {f.leads_count}
+                </span>
+              </button>
+              <button
+                onClick={() => handleDeleteFolder(f.id, f.name)}
+                className="p-2 pr-3 text-slate-500 hover:text-red-400 transition-colors"
+                title="Delete folder"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
           ))}
+        </div>
+      </div>
+
+      {/* Filter, Search, and Batch Actions Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search email, name, company..."
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto">
+            {["ALL", "PENDING", "SENT", "OPENED", "REPLIED", "SKIPPED", "FAILED"].map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                  statusFilter === s
+                    ? "bg-orange-500 text-white shadow-sm"
+                    : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Action buttons: Delete All or Batch Actions */}
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+          {selectedLeadIds.length > 0 && (
+            <>
+              <button
+                onClick={() => setMoveModalOpen(true)}
+                disabled={actionLoading}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              >
+                <Folder className="w-3.5 h-3.5 text-orange-400" />
+                <span>Move ({selectedLeadIds.length})</span>
+              </button>
+
+              <button
+                onClick={handleDeleteSelected}
+                disabled={actionLoading}
+                className="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-bold flex items-center gap-1.5 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Selected ({selectedLeadIds.length})</span>
+              </button>
+            </>
+          )}
+
+          <button
+            onClick={handleDeleteAll}
+            disabled={actionLoading || filteredLeads.length === 0}
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-red-500/10 hover:border-red-500/30 text-slate-400 hover:text-red-400 border border-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-all"
+            title="Delete all leads in current view"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete All ({filteredLeads.length})</span>
+          </button>
         </div>
       </div>
 
@@ -229,7 +525,7 @@ export default function LeadsPage() {
         ) : filteredLeads.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <Users className="w-8 h-8 mx-auto mb-3 opacity-40" />
-            <p className="font-bold text-white text-sm">No leads found</p>
+            <p className="font-bold text-white text-sm">No leads found in this folder</p>
             <p className="text-xs text-slate-400 mt-1">
               {search ? "No leads matching your search" : "Run the scraper or import a CSV to add prospects."}
             </p>
@@ -239,56 +535,223 @@ export default function LeadsPage() {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-950/60 border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400">
                 <tr>
-                  <th className="p-4">Email</th>
+                  <th className="p-4 w-10">
+                    <button
+                      type="button"
+                      onClick={handleToggleSelectAll}
+                      className="text-slate-400 hover:text-white"
+                      title="Select all on this page"
+                    >
+                      {selectedLeadIds.length === filteredLeads.length && filteredLeads.length > 0 ? (
+                        <CheckSquare className="w-4 h-4 text-orange-400" />
+                      ) : (
+                        <Square className="w-4 h-4 text-slate-500" />
+                      )}
+                    </button>
+                  </th>
+                  <th className="p-4">Email Address</th>
                   <th className="p-4">Contact</th>
                   <th className="p-4">Company &amp; Website</th>
+                  <th className="p-4">Folder</th>
                   <th className="p-4">Status</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {filteredLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-slate-850/30 transition-colors">
-                    <td className="p-4 font-mono text-white font-medium">{lead.email}</td>
-                    <td className="p-4 text-slate-300">{lead.first_name || "—"}</td>
-                    <td className="p-4">
-                      <p className="text-white font-semibold">{lead.company || "—"}</p>
-                      {lead.website && (
-                        <p className="text-[11px] text-slate-500 truncate max-w-xs">{lead.website}</p>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border ${
-                          lead.status === "SENT"
-                            ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                            : lead.status === "OPENED"
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : lead.status === "PENDING"
-                            ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                            : lead.status === "SKIPPED"
-                            ? "bg-slate-800 text-slate-400 border-slate-700"
-                            : "bg-red-500/10 text-red-400 border-red-500/20"
-                        }`}
-                      >
-                        {lead.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <button
-                        onClick={() => handleDeleteLead(lead.id)}
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {filteredLeads.map((lead) => {
+                  const isChecked = selectedLeadIds.includes(lead.id);
+                  const folderObj = folders.find((f) => f.id === lead.folder_id);
+
+                  return (
+                    <tr
+                      key={lead.id}
+                      className={`hover:bg-slate-850/30 transition-colors ${
+                        isChecked ? "bg-orange-500/5" : ""
+                      }`}
+                    >
+                      <td className="p-4">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleLead(lead.id)}
+                          className="text-slate-400 hover:text-white"
+                        >
+                          {isChecked ? (
+                            <CheckSquare className="w-4 h-4 text-orange-400" />
+                          ) : (
+                            <Square className="w-4 h-4 text-slate-600" />
+                          )}
+                        </button>
+                      </td>
+                      <td className="p-4 font-mono text-white font-medium">{lead.email}</td>
+                      <td className="p-4 text-slate-300">{lead.first_name || "—"}</td>
+                      <td className="p-4">
+                        <p className="text-white font-semibold">{lead.company || "—"}</p>
+                        {lead.website && (
+                          <p className="text-[11px] text-slate-500 truncate max-w-xs">{lead.website}</p>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        {folderObj ? (
+                          <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-[10px] text-slate-300 font-semibold border border-slate-700">
+                            {folderObj.name}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-500">Unassigned</span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border ${
+                            lead.status === "SENT"
+                              ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                              : lead.status === "OPENED"
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              : lead.status === "PENDING"
+                              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                              : lead.status === "SKIPPED"
+                              ? "bg-slate-800 text-slate-400 border-slate-700"
+                              : "bg-red-500/10 text-red-400 border-red-500/20"
+                          }`}
+                        >
+                          {lead.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <button
+                          onClick={() => handleDeleteSingleLead(lead.id)}
+                          className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                          title="Delete single lead"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {/* Create Folder Modal */}
+      {createFolderModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+            <button
+              onClick={() => setCreateFolderModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-bold text-white mb-1">Create Prospect Folder</h3>
+            <p className="text-xs text-slate-400 mb-6">Group leads for targeted campaign segmentation</p>
+
+            <form onSubmit={handleCreateFolder} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                  Folder Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  placeholder="e.g. B2B SaaS Leads - Batch 1"
+                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                  Description (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={newFolderDesc}
+                  onChange={(e) => setNewFolderDesc(e.target.value)}
+                  placeholder="e.g. Scraped from TechCrunch top 50 SaaS list"
+                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCreateFolderModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20"
+                >
+                  Create Folder
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Move Selected Leads Modal */}
+      {moveModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+            <button
+              onClick={() => setMoveModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-bold text-white mb-1">Move Selected Leads</h3>
+            <p className="text-xs text-slate-400 mb-6">
+              Moving {selectedLeadIds.length} prospects into a chosen folder
+            </p>
+
+            <form onSubmit={handleMoveSelected} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                  Target Destination Folder
+                </label>
+                <select
+                  value={targetMoveFolderId}
+                  onChange={(e) => setTargetMoveFolderId(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                >
+                  <option value="">Select a folder...</option>
+                  <option value="UNASSIGNED">Unassigned (Remove from folder)</option>
+                  {folders.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name} ({f.leads_count} leads)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setMoveModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading || !targetMoveFolderId}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-orange-600/20"
+                >
+                  Confirm Move
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add Lead Modal */}
       {addModalOpen && (
@@ -305,6 +768,24 @@ export default function LeadsPage() {
             <p className="text-xs text-slate-400 mb-6">Manually input a prospect contact</p>
 
             <form onSubmit={handleCreateLead} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+                  Folder Assignment
+                </label>
+                <select
+                  value={newLeadFolderId}
+                  onChange={(e) => setNewLeadFolderId(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-orange-500 focus:outline-none"
+                >
+                  <option value="">Unassigned</option>
+                  {folders.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
                   Email Address *

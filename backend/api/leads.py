@@ -15,9 +15,18 @@ class AddLeadRequest(BaseModel):
     company: str | None = None
     website: str | None = None
     campaign_id: str | None = None
+    folder_id: str | None = None
+
+class BatchDeleteRequest(BaseModel):
+    lead_ids: list[str]
+
+class MoveLeadsRequest(BaseModel):
+    lead_ids: list[str]
+    folder_id: str | None = None  # None removes from folder
 
 class LeadResponse(BaseModel):
     id: str
+    folder_id: str | None = None
     email: str
     first_name: str | None
     company: str | None
@@ -30,17 +39,26 @@ class LeadResponse(BaseModel):
 
 @router.get("/selectable")
 def get_selectable_leads(
+    folder_id: str | None = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    leads = db.query(Lead).filter(
+    query = db.query(Lead).filter(
         Lead.user_id == current_user.id,
         Lead.is_unsubscribed == False
-    ).order_by(Lead.created_at.desc()).all()
+    )
+    if folder_id:
+        if folder_id == "UNASSIGNED":
+            query = query.filter(Lead.folder_id == None)
+        else:
+            query = query.filter(Lead.folder_id == folder_id)
+
+    leads = query.order_by(Lead.created_at.desc()).all()
 
     return [
         {
             "id": l.id,
+            "folder_id": l.folder_id,
             "email": l.email,
             "company": l.company or "",
             "status": l.status,
@@ -53,6 +71,7 @@ def get_selectable_leads(
 def list_leads(
     search: str = "",
     status: str = "",
+    folder_id: str | None = None,
     page: int = 1,
     limit: int = 50,
     current_user: User = Depends(get_current_user),
@@ -63,11 +82,17 @@ def list_leads(
         Lead.is_unsubscribed == False
     )
 
+    if folder_id:
+        if folder_id == "UNASSIGNED":
+            query = query.filter(Lead.folder_id == None)
+        else:
+            query = query.filter(Lead.folder_id == folder_id)
+
     if search:
         s = f"%{search.lower()}%"
         query = query.filter((Lead.email.ilike(s)) | (Lead.company.ilike(s)))
 
-    if status:
+    if status and status != "ALL":
         query = query.filter(Lead.status == status)
 
     total = query.count()
@@ -80,6 +105,7 @@ def list_leads(
         "leads": [
             LeadResponse(
                 id=l.id,
+                folder_id=l.folder_id,
                 email=l.email,
                 first_name=l.first_name,
                 company=l.company,
@@ -106,6 +132,7 @@ def create_lead(req: AddLeadRequest, current_user: User = Depends(get_current_us
     lead = Lead(
         user_id=current_user.id,
         campaign_id=req.campaign_id,
+        folder_id=req.folder_id,
         email=req.email.lower(),
         first_name=req.first_name,
         company=req.company,
@@ -161,6 +188,57 @@ def export_leads(
             "Access-Control-Expose-Headers": "Content-Disposition"
         }
     )
+
+@router.delete("/all")
+def delete_all_leads(
+    folder_id: str | None = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Lead).filter(Lead.user_id == current_user.id)
+    if folder_id:
+        if folder_id == "UNASSIGNED":
+            query = query.filter(Lead.folder_id == None)
+        else:
+            query = query.filter(Lead.folder_id == folder_id)
+
+    deleted_count = query.delete(synchronize_session=False)
+    db.commit()
+    return {"success": True, "deleted": deleted_count}
+
+@router.post("/batch-delete")
+def batch_delete_leads(
+    req: BatchDeleteRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not req.lead_ids:
+        return {"success": True, "deleted": 0}
+
+    deleted_count = db.query(Lead).filter(
+        Lead.user_id == current_user.id,
+        Lead.id.in_(req.lead_ids)
+    ).delete(synchronize_session=False)
+
+    db.commit()
+    return {"success": True, "deleted": deleted_count}
+
+@router.post("/move")
+def move_leads_to_folder(
+    req: MoveLeadsRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not req.lead_ids:
+        return {"success": True, "updated": 0}
+
+    updated_count = db.query(Lead).filter(
+        Lead.user_id == current_user.id,
+        Lead.id.in_(req.lead_ids)
+    ).update({"folder_id": req.folder_id}, synchronize_session=False)
+
+    db.commit()
+    return {"success": True, "updated": updated_count}
 
 @router.delete("/{lead_id}")
 def delete_lead(lead_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

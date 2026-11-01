@@ -24,6 +24,8 @@ class User(Base):
     leads = relationship("Lead", back_populates="user", cascade="all, delete-orphan")
     campaigns = relationship("Campaign", back_populates="user", cascade="all, delete-orphan")
     scrape_jobs = relationship("ScrapeJob", back_populates="user", cascade="all, delete-orphan")
+    lead_folders = relationship("LeadFolder", back_populates="user", cascade="all, delete-orphan")
+    templates = relationship("EmailTemplate", back_populates="user", cascade="all, delete-orphan")
 
 class SenderEmail(Base):
     __tablename__ = "sender_emails"
@@ -49,11 +51,25 @@ class SenderEmail(Base):
     user = relationship("User", back_populates="senders")
     campaigns = relationship("Campaign", back_populates="sender")
 
+class LeadFolder(Base):
+    __tablename__ = "lead_folders"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    source = Column(String, default="SCRAPER")  # SCRAPER | MANUAL | CSV
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="lead_folders")
+    leads = relationship("Lead", back_populates="folder")
+
 class Lead(Base):
     __tablename__ = "leads"
 
     id = Column(String, primary_key=True, default=gen_uuid)
     user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    folder_id = Column(String, ForeignKey("lead_folders.id"), nullable=True, index=True)
     campaign_id = Column(String, ForeignKey("campaigns.id"), nullable=True, index=True)
     email = Column(String, nullable=False, index=True)
     first_name = Column(String, nullable=True)
@@ -72,6 +88,7 @@ class Lead(Base):
 
     user = relationship("User", back_populates="leads")
     campaign = relationship("Campaign", back_populates="leads")
+    folder = relationship("LeadFolder", back_populates="leads")
 
 class Campaign(Base):
     __tablename__ = "campaigns"
@@ -111,3 +128,18 @@ class ScrapeJob(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="scrape_jobs")
+
+class EmailTemplate(Base):
+    __tablename__ = "email_templates"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    category = Column(String, default="PITCH")  # PITCH | FOLLOW_UP | OFFER | CUSTOM
+    subject = Column(String, nullable=False)
+    body = Column(Text, nullable=False)
+    is_default = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="templates")
