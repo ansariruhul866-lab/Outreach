@@ -50,6 +50,15 @@ def run_migrations():
                     cur.execute("ALTER TABLE campaigns ADD COLUMN send_only_once BOOLEAN DEFAULT 1")
                 if "total_skipped" not in cols:
                     cur.execute("ALTER TABLE campaigns ADD COLUMN total_skipped INTEGER DEFAULT 0")
+                if "attachments" not in cols:
+                    cur.execute("ALTER TABLE campaigns ADD COLUMN attachments TEXT")
+                conn.commit()
+
+            # Email Templates migrations
+            tpl_cols = [c[1] for c in cur.execute("PRAGMA table_info(email_templates)").fetchall()]
+            if tpl_cols:
+                if "attachments" not in tpl_cols:
+                    cur.execute("ALTER TABLE email_templates ADD COLUMN attachments TEXT")
                 conn.commit()
 
             # Leads migrations for folders

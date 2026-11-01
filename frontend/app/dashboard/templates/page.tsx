@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api, EmailTemplate } from "@/lib/api";
+import { api, EmailTemplate, AttachmentItem } from "@/lib/api";
 import {
   FileText,
   Plus,
@@ -15,6 +15,8 @@ import {
   Tag,
   Copy,
   Info,
+  Paperclip,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const CATEGORIES = [
@@ -37,6 +39,7 @@ export default function TemplatesPage() {
   const [category, setCategory] = useState("PITCH");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -63,6 +66,7 @@ export default function TemplatesPage() {
     setCategory("PITCH");
     setSubject("Quick idea for {{company}}");
     setBody("<p>Hi {{firstName}},</p>\n<p>I noticed what you are doing at <strong>{{company}}</strong> and wanted to connect.</p>\n<p>Would you be open to exchanging ideas?</p>\n<p>Best,<br><strong>{{senderName}}</strong></p>");
+    setAttachments([]);
     setModalOpen(true);
   };
 
@@ -72,7 +76,41 @@ export default function TemplatesPage() {
     setCategory(t.category);
     setSubject(t.subject);
     setBody(t.body);
+    setAttachments(t.attachments || []);
     setModalOpen(true);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File ${file.name} is larger than 5MB limit.`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        if (!result) return;
+        const b64 = result.includes(",") ? result.split(",")[1] : result;
+        setAttachments((prev) => [
+          ...prev,
+          {
+            filename: file.name,
+            content_base64: b64,
+            mime_type: file.type || "application/octet-stream",
+            size: file.size,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -90,6 +128,7 @@ export default function TemplatesPage() {
           category,
           subject: subject.trim(),
           body,
+          attachments,
         });
         setNotice("✓ Template updated successfully");
       } else {
@@ -98,6 +137,7 @@ export default function TemplatesPage() {
           category,
           subject: subject.trim(),
           body,
+          attachments,
         });
         setNotice("✓ New template created");
       }
@@ -349,6 +389,61 @@ export default function TemplatesPage() {
                     onChange={(e) => setBody(e.target.value)}
                     className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-white focus:border-orange-500 focus:outline-none"
                   />
+                </div>
+
+                {/* Attachments / References / Photos */}
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-white flex items-center gap-2">
+                        <Paperclip className="w-4 h-4 text-orange-400" />
+                        <span>Template Default Attachments &amp; References ({attachments.length})</span>
+                      </span>
+                      <p className="text-[10px] text-slate-500">
+                        Include pitch decks, portfolio samples, brochures, or image references automatically whenever this template is selected
+                      </p>
+                    </div>
+
+                    <label className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
+                      <Plus className="w-3.5 h-3.5 text-orange-400" />
+                      <span>Add File</span>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {attachments.map((att, idx) => {
+                        const isImage = att.mime_type?.startsWith("image/");
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200"
+                          >
+                            {isImage ? (
+                              <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                            ) : (
+                              <Paperclip className="w-3.5 h-3.5 text-orange-400" />
+                            )}
+                            <span className="max-w-[180px] truncate">{att.filename}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeAttachment(idx)}
+                              className="text-slate-500 hover:text-red-400 p-0.5 rounded transition-colors"
+                              title="Remove attachment"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 

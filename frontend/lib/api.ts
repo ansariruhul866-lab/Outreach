@@ -59,12 +59,20 @@ export interface FolderListResponse {
   folders: LeadFolder[];
 }
 
+export interface AttachmentItem {
+  filename: string;
+  content_base64: string;
+  mime_type?: string;
+  size?: number;
+}
+
 export interface EmailTemplate {
   id: string;
   title: string;
   category: "PITCH" | "FOLLOW_UP" | "OFFER" | "CUSTOM" | string;
   subject: string;
   body: string;
+  attachments?: AttachmentItem[];
   is_default: boolean;
   created_at: string;
   updated_at: string;
@@ -88,6 +96,8 @@ export interface Campaign {
   daily_limit: number;
   send_only_once: boolean;
   total_skipped: number;
+  attachments_count?: number;
+  attachments?: AttachmentItem[];
   assigned_lead_ids?: string[];
   created_at?: string;
 }
@@ -260,12 +270,12 @@ export const api = {
   },
   templates: {
     list: () => apiFetch<EmailTemplate[]>("/templates"),
-    create: (payload: { title: string; category?: string; subject: string; body: string }) =>
+    create: (payload: { title: string; category?: string; subject: string; body: string; attachments?: AttachmentItem[] }) =>
       apiFetch<{ id: string; title: string; category: string }>("/templates", {
         method: "POST",
         body: JSON.stringify(payload),
       }),
-    update: (id: string, payload: { title?: string; category?: string; subject?: string; body?: string }) =>
+    update: (id: string, payload: { title?: string; category?: string; subject?: string; body?: string; attachments?: AttachmentItem[] }) =>
       apiFetch<{ success: boolean; id: string }>(`/templates/${id}`, {
         method: "PUT",
         body: JSON.stringify(payload),
@@ -301,6 +311,7 @@ export const api = {
       send_delay_seconds?: number;
       send_only_once?: boolean;
       lead_ids?: string[];
+      attachments?: AttachmentItem[];
     }) =>
       apiFetch<{ success: boolean; id: string; name: string }>("/campaigns", {
         method: "POST",
@@ -318,6 +329,7 @@ export const api = {
         send_delay_seconds?: number;
         send_only_once?: boolean;
         lead_ids?: string[];
+        attachments?: AttachmentItem[];
       }
     ) =>
       apiFetch<{ success: boolean; id: string; name: string }>(`/campaigns/${id}`, {

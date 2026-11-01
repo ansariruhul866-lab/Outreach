@@ -108,6 +108,7 @@ class Campaign(Base):
     total_replied = Column(Integer, default=0)
     send_only_once = Column(Boolean, default=True)
     total_skipped = Column(Integer, default=0)
+    attachments = Column(Text, nullable=True)  # JSON-encoded array: [{"filename": "...", "content_base64": "...", "mime_type": "..."}]
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="campaigns")
@@ -138,6 +139,7 @@ class EmailTemplate(Base):
     category = Column(String, default="PITCH")  # PITCH | FOLLOW_UP | OFFER | CUSTOM
     subject = Column(String, nullable=False)
     body = Column(Text, nullable=False)
+    attachments = Column(Text, nullable=True)  # JSON-encoded array
     is_default = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

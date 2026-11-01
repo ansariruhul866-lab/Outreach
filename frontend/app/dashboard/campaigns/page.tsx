@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api, Campaign, Sender, EmailTemplate, LeadFolder } from "@/lib/api";
+import { api, Campaign, Sender, EmailTemplate, LeadFolder, AttachmentItem } from "@/lib/api";
 import {
   Send,
   Plus,
@@ -20,6 +20,8 @@ import {
   ShieldCheck,
   Folder,
   FileText,
+  Paperclip,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const PRESETS = {
@@ -66,6 +68,7 @@ export default function CampaignsPage() {
   const [dailyLimit, setDailyLimit] = useState(50);
   const [sendDelay, setSendDelay] = useState(45);
   const [sendOnlyOnce, setSendOnlyOnce] = useState(true);
+  const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
 
   // Selective Leads State
   const [availableLeads, setAvailableLeads] = useState<Array<{ id: string; email: string; company?: string; status: string; folder_id?: string }>>([]);
@@ -111,6 +114,7 @@ export default function CampaignsPage() {
     setDailyLimit(50);
     setSendDelay(45);
     setSendOnlyOnce(true);
+    setAttachments([]);
 
     setModalOpen(true);
     setLeadLoading(true);
@@ -136,6 +140,7 @@ export default function CampaignsPage() {
     setDailyLimit(c.daily_limit || 50);
     setSendDelay(c.send_delay_seconds || 45);
     setSendOnlyOnce(c.send_only_once !== false);
+    setAttachments(c.attachments || []);
 
     setModalOpen(true);
     setLeadLoading(true);
@@ -144,6 +149,9 @@ export default function CampaignsPage() {
       const selectable = await api.leads.selectable(c.id);
       setAvailableLeads(selectable);
       setSelectedLeadIds(detail.assigned_lead_ids || []);
+      if (detail.attachments) {
+        setAttachments(detail.attachments);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -157,6 +165,9 @@ export default function CampaignsPage() {
     if (found) {
       setSubject(found.subject);
       setBody(found.body);
+      if (found.attachments && found.attachments.length > 0) {
+        setAttachments(found.attachments);
+      }
     }
   };
 
@@ -165,6 +176,42 @@ export default function CampaignsPage() {
     setSelectedTemplateId("");
     setSubject(PRESETS[presetKey].subject);
     setBody(PRESETS[presetKey].body);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      // 5MB limit check
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File ${file.name} is larger than 5MB. Please choose a smaller file.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        if (!result) return;
+        // Strip data:mime/type;base64,
+        const b64 = result.includes(",") ? result.split(",")[1] : result;
+        setAttachments((prev) => [
+          ...prev,
+          {
+            filename: file.name,
+            content_base64: b64,
+            mime_type: file.type || "application/octet-stream",
+            size: file.size,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSaveCampaign = async (e: React.FormEvent) => {
@@ -187,6 +234,7 @@ export default function CampaignsPage() {
         send_delay_seconds: sendDelay,
         send_only_once: sendOnlyOnce,
         lead_ids: selectedLeadIds,
+        attachments,
       };
 
       if (editingId) {
@@ -325,10 +373,16 @@ export default function CampaignsPage() {
                   <span>Anti-Spam Delay: <strong className="text-slate-200">{c.send_delay_seconds}s + [0-120s jitter]</strong></span>
                 </p>
 
-                <div className="flex items-center gap-4 text-xs font-semibold text-slate-300 pt-1">
+                <div className="flex items-center gap-4 text-xs font-semibold text-slate-300 pt-1 flex-wrap">
                   <span>🚀 {c.total_sent} sent</span>
                   <span>👀 {c.total_opened} opened</span>
                   <span>💬 {c.total_replied} replied</span>
+                  {(c.attachments_count ?? 0) > 0 && (
+                    <span className="text-orange-400 flex items-center gap-1 font-bold">
+                      <Paperclip className="w-3.5 h-3.5" />
+                      {c.attachments_count} attachments
+                    </span>
+                  )}
                   {c.total_skipped > 0 && <span className="text-slate-500">🚫 {c.total_skipped} skipped (Send-Once)</span>}
                 </div>
               </div>
@@ -524,6 +578,61 @@ export default function CampaignsPage() {
                     onChange={(e) => setBody(e.target.value)}
                     className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-white focus:border-orange-500 focus:outline-none"
                   />
+                </div>
+
+                {/* Attachments / References / Photos */}
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-white flex items-center gap-2">
+                        <Paperclip className="w-4 h-4 text-orange-400" />
+                        <span>Email Attachments &amp; References ({attachments.length})</span>
+                      </span>
+                      <p className="text-[10px] text-slate-500">
+                        Attach PDF decks, portfolio links, screenshots, proposal documents, or product photos (up to 5MB each)
+                      </p>
+                    </div>
+
+                    <label className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
+                      <Plus className="w-3.5 h-3.5 text-orange-400" />
+                      <span>Add File</span>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {attachments.map((att, idx) => {
+                        const isImage = att.mime_type?.startsWith("image/");
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200"
+                          >
+                            {isImage ? (
+                              <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                            ) : (
+                              <Paperclip className="w-3.5 h-3.5 text-orange-400" />
+                            )}
+                            <span className="max-w-[180px] truncate">{att.filename}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeAttachment(idx)}
+                              className="text-slate-500 hover:text-red-400 p-0.5 rounded transition-colors"
+                              title="Remove attachment"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Selective Leads Checklist */}

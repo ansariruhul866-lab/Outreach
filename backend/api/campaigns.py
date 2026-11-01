@@ -1,4 +1,6 @@
 import asyncio
+import json
+import base64
 import random
 import logging
 from datetime import datetime
@@ -8,6 +10,8 @@ from sqlalchemy.orm import Session
 import aiosmtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 from core.database import get_db, SessionLocal
 from core.models import User, Campaign, SenderEmail, Lead
 from core.auth import get_current_user
@@ -16,6 +20,11 @@ from core.gmail_api import send_via_gmail_api
 
 logger = logging.getLogger("outreachbot")
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
+
+class AttachmentItem(BaseModel):
+    filename: str
+    content_base64: str  # Base64 string without data:mime;base64, prefix
+    mime_type: str | None = "application/octet-stream"
 
 class CreateCampaignRequest(BaseModel):
     name: str
@@ -27,6 +36,7 @@ class CreateCampaignRequest(BaseModel):
     send_delay_seconds: int = 45
     send_only_once: bool = True
     lead_ids: list[str] | None = None
+    attachments: list[AttachmentItem] | None = None
 
 class UpdateCampaignRequest(BaseModel):
     name: str | None = None
@@ -38,6 +48,7 @@ class UpdateCampaignRequest(BaseModel):
     send_delay_seconds: int | None = None
     send_only_once: bool | None = None
     lead_ids: list[str] | None = None
+    attachments: list[AttachmentItem] | None = None
 
 class CampaignResponse(BaseModel):
     id: str
@@ -55,6 +66,7 @@ class CampaignResponse(BaseModel):
     daily_limit: int
     send_only_once: bool
     total_skipped: int
+    attachments_count: int = 0
     created_at: str
 
 class CampaignDetailResponse(BaseModel):
@@ -76,6 +88,16 @@ class CampaignDetailResponse(BaseModel):
     leads_count: int
     pending_count: int
     assigned_lead_ids: list[str]
+    attachments: list[dict] | None = None
+    created_at: str
+    send_only_once: bool
+    total_sent: int
+    total_opened: int
+    total_replied: int
+    total_skipped: int
+    leads_count: int
+    pending_count: int
+    assigned_lead_ids: list[str]
     created_at: str
 
 @router.get("")
@@ -87,6 +109,13 @@ def list_campaigns(current_user: User = Depends(get_current_user), db: Session =
         pending_count = db.query(Lead).filter(Lead.campaign_id == c.id, Lead.status == "PENDING", Lead.is_unsubscribed == False).count()
         sender_email = c.sender.email if c.sender else "None"
         sender_email_id = c.sender.id if c.sender else ""
+        att_count = 0
+        if c.attachments:
+            try:
+                parsed_att = json.loads(c.attachments)
+                att_count = len(parsed_att) if isinstance(parsed_att, list) else 0
+            except Exception:
+                pass
         results.append(CampaignResponse(
             id=c.id,
             name=c.name,
@@ -103,6 +132,7 @@ def list_campaigns(current_user: User = Depends(get_current_user), db: Session =
             daily_limit=c.daily_limit or 50,
             send_only_once=bool(c.send_only_once) if c.send_only_once is not None else True,
             total_skipped=c.total_skipped or 0,
+            attachments_count=att_count,
             created_at=c.created_at.strftime("%Y-%m-%d") if c.created_at else ""
         ))
     return results
@@ -125,6 +155,15 @@ def get_campaign_detail(
     leads_count = len(assigned_leads)
     pending_count = sum(1 for l in assigned_leads if l.status == "PENDING" and not l.is_unsubscribed)
 
+    att_list = []
+    if campaign.attachments:
+        try:
+            parsed = json.loads(campaign.attachments)
+            if isinstance(parsed, list):
+                att_list = parsed
+        except Exception:
+            pass
+
     return CampaignDetailResponse(
         id=campaign.id,
         name=campaign.name,
@@ -144,6 +183,7 @@ def get_campaign_detail(
         leads_count=leads_count,
         pending_count=pending_count,
         assigned_lead_ids=assigned_ids,
+        attachments=att_list,
         created_at=campaign.created_at.strftime("%Y-%m-%d %H:%M") if campaign.created_at else ""
     )
 
@@ -161,6 +201,10 @@ def create_campaign(
     if not sender:
         raise HTTPException(status_code=400, detail="Invalid sender email selected")
 
+    attachments_json = None
+    if req.attachments is not None:
+        attachments_json = json.dumps([a.dict() for a in req.attachments])
+
     campaign = Campaign(
         user_id=current_user.id,
         sender_email_id=sender.id,
@@ -172,6 +216,7 @@ def create_campaign(
         send_delay_seconds=req.send_delay_seconds,
         send_only_once=req.send_only_once,
         total_skipped=0,
+        attachments=attachments_json,
         status="DRAFT"
     )
     db.add(campaign)
@@ -245,6 +290,8 @@ def update_campaign(
         campaign.send_delay_seconds = req.send_delay_seconds
     if req.send_only_once is not None:
         campaign.send_only_once = req.send_only_once
+    if req.attachments is not None:
+        campaign.attachments = json.dumps([a.dict() for a in req.attachments])
 
     # Update assigned leads if provided
     if req.lead_ids is not None:
@@ -395,12 +442,46 @@ async def execute_send_batch(campaign_id: str, user_id: str):
             </div>
             """
 
-            msg = MIMEMultipart("alternative")
+            # Create mixed multipart message if attachments exist, otherwise alternative
+            has_attachments = False
+            raw_attachments = []
+            if campaign.attachments:
+                try:
+                    parsed_att = json.loads(campaign.attachments)
+                    if isinstance(parsed_att, list) and len(parsed_att) > 0:
+                        has_attachments = True
+                        raw_attachments = parsed_att
+                except Exception:
+                    pass
+
+            if has_attachments:
+                msg = MIMEMultipart("mixed")
+                body_part = MIMEMultipart("alternative")
+                body_part.attach(MIMEText(full_html, "html"))
+                msg.attach(body_part)
+
+                for att in raw_attachments:
+                    fname = att.get("filename", "attachment")
+                    b64_content = att.get("content_base64", "")
+                    mime = att.get("mime_type", "application/octet-stream") or "application/octet-stream"
+                    try:
+                        file_bytes = base64.b64decode(b64_content)
+                        maintype, subtype = mime.split("/", 1) if "/" in mime else ("application", "octet-stream")
+                        part = MIMEBase(maintype, subtype)
+                        part.set_payload(file_bytes)
+                        encoders.encode_base64(part)
+                        part.add_header("Content-Disposition", f'attachment; filename="{fname}"')
+                        msg.attach(part)
+                    except Exception as att_err:
+                        logger.error(f"Failed to attach file {fname}: {att_err}")
+            else:
+                msg = MIMEMultipart("alternative")
+                msg.attach(MIMEText(full_html, "html"))
+
             msg["Subject"] = subject
             msg["From"] = f"{sender.display_name} <{sender.email}>"
             msg["To"] = lead.email
             msg["List-Unsubscribe"] = f"<{unsub_url}>"
-            msg.attach(MIMEText(full_html, "html"))
 
             try:
                 if is_gmail_api:

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -29,17 +30,24 @@ DEFAULT_TEMPLATES = [
     },
 ]
 
+class AttachmentItem(BaseModel):
+    filename: str
+    content_base64: str
+    mime_type: str | None = "application/octet-stream"
+
 class CreateTemplateRequest(BaseModel):
     title: str
     category: str = "PITCH"  # PITCH | FOLLOW_UP | OFFER | CUSTOM
     subject: str
     body: str
+    attachments: list[AttachmentItem] | None = None
 
 class UpdateTemplateRequest(BaseModel):
     title: str | None = None
     category: str | None = None
     subject: str | None = None
     body: str | None = None
+    attachments: list[AttachmentItem] | None = None
 
 def seed_default_templates_if_empty(user_id: str, db: Session):
     count = db.query(EmailTemplate).filter(EmailTemplate.user_id == user_id).count()
@@ -66,19 +74,28 @@ def list_templates(
         EmailTemplate.user_id == current_user.id
     ).order_by(EmailTemplate.created_at.asc()).all()
 
-    return [
-        {
+    results = []
+    for t in templates:
+        att_list = []
+        if t.attachments:
+            try:
+                parsed = json.loads(t.attachments)
+                if isinstance(parsed, list):
+                    att_list = parsed
+            except Exception:
+                pass
+        results.append({
             "id": t.id,
             "title": t.title,
             "category": t.category,
             "subject": t.subject,
             "body": t.body,
+            "attachments": att_list,
             "is_default": t.is_default,
             "created_at": t.created_at.strftime("%Y-%m-%d %H:%M") if t.created_at else "",
             "updated_at": t.updated_at.strftime("%Y-%m-%d %H:%M") if t.updated_at else ""
-        }
-        for t in templates
-    ]
+        })
+    return results
 
 @router.post("")
 def create_template(
@@ -89,12 +106,17 @@ def create_template(
     if not req.title.strip() or not req.subject.strip() or not req.body.strip():
         raise HTTPException(status_code=400, detail="Title, subject, and body are required")
 
+    att_json = None
+    if req.attachments is not None:
+        att_json = json.dumps([a.dict() for a in req.attachments])
+
     tpl = EmailTemplate(
         user_id=current_user.id,
         title=req.title.strip(),
         category=req.category.strip().upper(),
         subject=req.subject.strip(),
         body=req.body,
+        attachments=att_json,
         is_default=False
     )
     db.add(tpl)
@@ -124,6 +146,8 @@ def update_template(
         tpl.subject = req.subject.strip()
     if req.body is not None:
         tpl.body = req.body
+    if req.attachments is not None:
+        tpl.attachments = json.dumps([a.dict() for a in req.attachments])
     tpl.updated_at = datetime.utcnow()
 
     db.commit()
