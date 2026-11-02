@@ -68,6 +68,7 @@ export default function MailboxesPage() {
   const handleGoogleConnect = async () => {
     setNotice(null);
     try {
+      googleProvider.setCustomParameters({ prompt: "select_account" });
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       const credential = GoogleAuthProvider.credentialFromResult(result);
@@ -77,8 +78,29 @@ export default function MailboxesPage() {
       await api.auth.firebaseLogin(idToken, user.displayName || undefined, googleAccessToken);
       setNotice("✓ Google Account connected and authorized for Gmail sending!");
       loadSenders();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to connect Google account");
+    } catch (err: any) {
+      console.error("handleGoogleConnect error details:", err);
+      let errorMsg = err?.message || "Failed to connect Google account";
+
+      if (err?.code === "auth/network-request-failed" || errorMsg.toLowerCase().includes("fetch") || errorMsg.toLowerCase().includes("network")) {
+        errorMsg =
+          "Google Sign-In Network Error ('Unable to fetch').\n\n" +
+          "Common Causes & Solutions:\n" +
+          "1. Browser Extension / Ad-blocker: Brave Shields or extensions like uBlock/Adblock often block Google Identity & Firebase scripts. Disable them or test in an Incognito window.\n" +
+          "2. Authorized Domains: In the Firebase Console (Authentication > Settings > Authorized Domains), ensure 'localhost' is listed.\n" +
+          "3. Google Sign-In Provider: Verify that 'Google' is enabled under Firebase Console > Authentication > Sign-in method.\n" +
+          "4. Instant Alternative: Click '+ Add SMTP Mailbox' to connect your Gmail with an App Password without needing OAuth test users or Google Cloud verification!";
+      } else if (err?.code === "auth/popup-blocked") {
+        errorMsg = "The Google sign-in popup was blocked by your browser. Please allow popups for localhost.";
+      } else if (err?.code === "auth/popup-closed-by-user") {
+        errorMsg = "Google sign-in popup was closed before completing.";
+      } else if (err?.code === "auth/unauthorized-domain") {
+        errorMsg = "This domain is not authorized in Firebase. Add 'localhost' in Firebase Console > Authentication > Settings > Authorized Domains.";
+      } else if (err?.code === "auth/operation-not-allowed") {
+        errorMsg = "Google Sign-in is not enabled in Firebase. Enable it in Firebase Console > Authentication > Sign-in method > Google.";
+      }
+
+      alert(errorMsg);
     }
   };
 

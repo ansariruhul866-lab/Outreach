@@ -44,18 +44,27 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
     setError(null);
     setLoading(true);
     try {
+      googleProvider.setCustomParameters({ prompt: "select_account" });
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const googleAccessToken = credential?.accessToken || null;
       const idToken = await user.getIdToken();
 
-      const res = await api.auth.firebaseLogin(idToken, user.displayName || undefined);
+      const res = await api.auth.firebaseLogin(idToken, user.displayName || undefined, googleAccessToken);
       login(res.access_token, res.user);
       onClose();
       window.location.href = "/dashboard";
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Google Sign-In failed";
+    } catch (err: any) {
+      console.error("handleGoogleSignIn error:", err);
+      let msg = err?.message || "Google Sign-In failed";
+      if (err?.code === "auth/network-request-failed" || msg.toLowerCase().includes("fetch") || msg.toLowerCase().includes("network")) {
+        msg = "Google Sign-In failed: Unable to fetch credentials. Please check if an ad-blocker or Brave Shields is blocking Google/Firebase, or if 'localhost' is listed in Firebase Authorized Domains.";
+      } else if (err?.code === "auth/unauthorized-domain") {
+        msg = "Domain not authorized in Firebase Console. Please add 'localhost' to Authorized Domains.";
+      } else if (err?.code === "auth/operation-not-allowed") {
+        msg = "Google Sign-in is not enabled in Firebase Console (Authentication > Sign-in method).";
+      }
       setError(msg);
     } finally {
       setLoading(false);

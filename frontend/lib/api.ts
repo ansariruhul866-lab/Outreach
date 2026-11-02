@@ -140,6 +140,20 @@ export interface ScrapeJob {
   emails: string[];
 }
 
+function getApiBase(): string {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    if (hostname === "127.0.0.1") {
+      return `${protocol}//127.0.0.1:8000/api`;
+    }
+    if (hostname !== "localhost" && process.env.NEXT_PUBLIC_API_URL?.includes("localhost")) {
+      return `${protocol}//${hostname}:8000/api`;
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+}
+
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("outreach_token");
@@ -157,10 +171,20 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   }
 
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const res = await fetch(`${API_BASE}${cleanEndpoint}`, {
-    ...options,
-    headers,
-  });
+  const base = getApiBase();
+
+  let res: Response;
+  try {
+    res = await fetch(`${base}${cleanEndpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch (netErr: any) {
+    console.error("apiFetch network failure:", netErr);
+    throw new Error(
+      `Unable to connect to backend server at ${base}. Please ensure the FastAPI backend is running on port 8000.`
+    );
+  }
 
   if (res.status === 401) {
     if (typeof window !== "undefined") {
@@ -171,7 +195,13 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     throw new Error("Unauthorized");
   }
 
-  const data = await res.json();
+  let data: any;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(`Server returned invalid response (${res.status} ${res.statusText})`);
+  }
+
   if (!res.ok) {
     throw new Error(data.detail || data.message || "Request failed");
   }
