@@ -487,7 +487,15 @@ async def execute_send_batch(campaign_id: str, user_id: str):
                 if is_gmail_api:
                     await send_via_gmail_api(oauth_token, msg)
                 else:
-                    async with aiosmtplib.SMTP(hostname=sender.smtp_host, port=sender.smtp_port, start_tls=True) as smtp:
+                    use_tls = (sender.smtp_port == 465)
+                    start_tls = not use_tls
+                    async with aiosmtplib.SMTP(
+                        hostname=sender.smtp_host,
+                        port=sender.smtp_port,
+                        use_tls=use_tls,
+                        start_tls=start_tls,
+                        timeout=20.0
+                    ) as smtp:
                         await smtp.login(sender.smtp_user, smtp_pass)
                         await smtp.send_message(msg)
 

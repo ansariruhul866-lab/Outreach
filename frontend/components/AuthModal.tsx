@@ -82,37 +82,46 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
         if (!name.trim()) throw new Error("Please enter your name");
         if (password.length < 6) throw new Error("Password must be at least 6 characters");
 
-        // 1. Create account in Firebase
+        // 1. Try direct backend signup for immediate, frictionless access
+        try {
+          const res = await api.auth.signup(name.trim(), email.trim(), password);
+          login(res.access_token, res.user);
+          onClose();
+          window.location.href = "/dashboard";
+          return;
+        } catch (backendErr: any) {
+          // If already exists or direct signup threw specific error, throw or fallback
+          if (backendErr?.message && !backendErr.message.includes("connect")) {
+            throw backendErr;
+          }
+        }
+
+        // 2. Firebase Fallback
         const userCred = await createUserWithEmailAndPassword(auth, email.trim(), password);
         const fbUser = userCred.user;
         setLastUser(fbUser);
-
-        // 2. Update display name
         await updateProfile(fbUser, { displayName: name.trim() });
-
-        // 3. Send official verification email
         await sendEmailVerification(fbUser);
-
-        // 4. Show Verification Sent screen
         setTargetEmail(email.trim());
         setVerificationSent(true);
       } else {
-        // LOGIN
-        const userCred = await signInWithEmailAndPassword(auth, email.trim(), password);
-        const fbUser = userCred.user;
-
-        // Strict email verification check
-        if (!fbUser.emailVerified) {
-          setLastUser(fbUser);
-          await signOut(auth); // Sign out unverified session
-          setError(
-            `Your email (${email}) has not been verified yet. Please check your inbox or click resend below.`
-          );
-          setLoading(false);
+        // LOGIN: 1. Try direct backend login first!
+        try {
+          const res = await api.auth.login(email.trim(), password);
+          login(res.access_token, res.user);
+          onClose();
+          window.location.href = "/dashboard";
           return;
+        } catch (backendErr: any) {
+          // If invalid credentials or user not found, throw immediately
+          if (backendErr?.message && !backendErr.message.includes("connect")) {
+            throw backendErr;
+          }
         }
 
-        // Verified! Exchange token with backend
+        // 2. Firebase Fallback
+        const userCred = await signInWithEmailAndPassword(auth, email.trim(), password);
+        const fbUser = userCred.user;
         const idToken = await fbUser.getIdToken();
         const res = await api.auth.firebaseLogin(idToken, fbUser.displayName || undefined);
         login(res.access_token, res.user);

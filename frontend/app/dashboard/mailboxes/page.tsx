@@ -165,14 +165,41 @@ export default function MailboxesPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              handleProviderSelect("GMAIL");
+              setModalOpen(true);
+            }}
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Connect Gmail (App Password)</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              handleProviderSelect("OUTLOOK");
+              setModalOpen(true);
+            }}
+            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white font-bold text-xs flex items-center gap-2 transition-all"
+          >
+            <Plus className="w-3.5 h-3.5 text-purple-400" />
+            <span>Add Outlook / Custom SMTP</span>
+          </motion.button>
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleGoogleConnect}
-            className="px-5 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-white font-bold text-xs flex items-center gap-2.5 transition-all shadow-lg"
+            className="px-3.5 py-2.5 rounded-2xl glass-card hover:border-purple-500/30 text-zinc-400 hover:text-zinc-200 font-medium text-[11px] flex items-center gap-2 transition-all"
+            title="Alternative: Connect via Google OAuth Popup (requires Google Cloud verification)"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 opacity-80" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -190,17 +217,7 @@ export default function MailboxesPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>Connect Google Account</span>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add SMTP Mailbox</span>
+            <span>Google OAuth</span>
           </motion.button>
         </div>
       </div>
@@ -212,7 +229,7 @@ export default function MailboxesPage() {
         </div>
       )}
 
-      {/* Gmail API Highlight Banner */}
+      {/* Highlight Banner */}
       <div className="p-6 rounded-3xl glass-panel border border-purple-500/30 flex items-start gap-4 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 ambient-glow-purple-accent opacity-25 blur-3xl pointer-events-none" />
         <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/35 text-purple-300 flex items-center justify-center shrink-0 shadow-inner">
@@ -220,11 +237,11 @@ export default function MailboxesPage() {
         </div>
         <div className="space-y-1 relative z-10">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <span>Recommended: 1-Click Gmail REST API</span>
-            <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-purple-500/25 text-purple-200 border border-purple-500/40">Official</span>
+            <span>Guaranteed Sending via Gmail App Passwords &amp; SMTP</span>
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-purple-500/25 text-purple-200 border border-purple-500/40">100% Reliable</span>
           </h3>
           <p className="text-xs text-zinc-300 leading-relaxed">
-            Logging in with Google automatically connects your mailbox. Emails dispatch over <strong>HTTPS (port 443)</strong>, eliminating all cloud firewall timeouts (Render, Vercel, Railway) and bypassing manual App Password setups.
+            Connect any Gmail or Google Workspace mailbox using a 16-character <strong>App Password</strong>. It connects in seconds, requires zero Google Cloud verification or test users, never expires, and dispatches your cold email campaigns with high inbox deliverability.
           </p>
         </div>
       </div>
@@ -303,8 +320,39 @@ export default function MailboxesPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-bold text-white mb-1">Connect SMTP Mailbox</h3>
-            <p className="text-xs text-zinc-400 mb-6">Enter your mail credentials &amp; test connection</p>
+            <h3 className="text-lg font-bold text-white mb-1">
+              {provider === "GMAIL" ? "Connect Gmail Mailbox" : "Connect Mailbox via SMTP"}
+            </h3>
+            <p className="text-xs text-zinc-400 mb-4">
+              {provider === "GMAIL"
+                ? "Uses standard 16-character Google App Password (no Google Cloud verification needed)"
+                : "Enter your mail server credentials and test connection"}
+            </p>
+
+            {provider === "GMAIL" && (
+              <div className="mb-4 p-3.5 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-xs text-zinc-300 space-y-2">
+                <div className="flex items-center justify-between font-bold text-purple-300">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <span>How to get your App Password:</span>
+                  </span>
+                  <a
+                    href="https://myaccount.google.com/apppasswords"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-400/40 font-semibold text-[10px] flex items-center gap-1 transition-colors"
+                  >
+                    Open Google Security ↗
+                  </a>
+                </div>
+                <ol className="list-decimal list-inside space-y-1 text-[11px] text-zinc-400">
+                  <li>Ensure <strong>2-Step Verification</strong> is enabled on your Google Account.</li>
+                  <li>Click <strong>Open Google Security ↗</strong> above to visit the App Passwords page.</li>
+                  <li>Type <strong className="text-white">OutreachBot</strong> as the app name and click <strong>Create</strong>.</li>
+                  <li>Copy the 16-character code (e.g. <span className="font-mono text-purple-300">abcd efgh ijkl mnop</span>) and paste it below.</li>
+                </ol>
+              </div>
+            )}
 
             <form onSubmit={handleConnectSmtp} className="space-y-4">
               <div>
@@ -316,9 +364,9 @@ export default function MailboxesPage() {
                   onChange={(e) => handleProviderSelect(e.target.value)}
                   className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
                 >
-                  <option value="GMAIL" className="bg-zinc-950 text-white">Gmail (App Password)</option>
+                  <option value="GMAIL" className="bg-zinc-950 text-white">Gmail (App Password - Recommended)</option>
                   <option value="OUTLOOK" className="bg-zinc-950 text-white">Outlook / Office 365</option>
-                  <option value="CUSTOM" className="bg-zinc-950 text-white">Custom SMTP Server</option>
+                  <option value="CUSTOM" className="bg-zinc-950 text-white">Custom SMTP Server (Zoho, Yahoo, etc.)</option>
                 </select>
               </div>
 
@@ -349,44 +397,46 @@ export default function MailboxesPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
-                    SMTP Host
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={host}
-                    onChange={(e) => setHost(e.target.value)}
-                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
-                  />
+              {provider !== "GMAIL" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                      SMTP Host
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={host}
+                      onChange={(e) => setHost(e.target.value)}
+                      className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                      SMTP Port
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={port}
+                      onChange={(e) => setPort(parseInt(e.target.value) || 587)}
+                      className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
-                    SMTP Port
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={port}
-                    onChange={(e) => setPort(parseInt(e.target.value) || 587)}
-                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+              )}
 
               <div>
                 <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
-                  App Password / SMTP Password *
+                  {provider === "GMAIL" ? "16-Character Gmail App Password *" : "App Password / SMTP Password *"}
                 </label>
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="16-character App Password"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  placeholder={provider === "GMAIL" ? "abcd efgh ijkl mnop" : "Password / App Password"}
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none font-mono tracking-wider"
                 />
               </div>
 

@@ -52,84 +52,69 @@ async def connect_sender(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    clean_password = req.smtp_password.replace(" ", "").strip()
+    clean_user = req.smtp_user.strip()
+    clean_email = str(req.email).lower().strip()
+
     # Test SMTP credentials live
+    use_tls = (req.smtp_port == 465)
+    start_tls = not use_tls
     try:
-        async with aiosmtplib.SMTP(hostname=req.smtp_host, port=req.smtp_port, start_tls=True) as smtp:
-            await smtp.login(req.smtp_user, req.smtp_password)
+        async with aiosmtplib.SMTP(
+            hostname=req.smtp_host.strip(),
+            port=req.smtp_port,
+            use_tls=use_tls,
+            start_tls=start_tls,
+            timeout=15.0
+        ) as smtp:
+            await smtp.login(clean_user, clean_password)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"SMTP authentication failed: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Mailbox authentication failed: {str(e)}. If using Gmail, make sure you use a 16-character App Password (not your normal Google account password) and that 2-Step Verification is turned on."
+        )
 
-    verify_token = str(uuid.uuid4())
-    pass_enc = encrypt_password(req.smtp_password, current_user.id)
+    pass_enc = encrypt_password(clean_password, current_user.id)
 
-    # Upsert sender email
+    # Upsert sender email directly as VERIFIED since live SMTP login succeeded!
     sender = db.query(SenderEmail).filter(
         SenderEmail.user_id == current_user.id,
-        SenderEmail.email == req.email.lower()
+        SenderEmail.email == clean_email
     ).first()
 
     if sender:
-        sender.display_name = req.display_name
+        sender.display_name = req.display_name.strip()
         sender.provider = req.provider
-        sender.smtp_host = req.smtp_host
+        sender.smtp_host = req.smtp_host.strip()
         sender.smtp_port = req.smtp_port
-        sender.smtp_user = req.smtp_user
+        sender.smtp_user = clean_user
         sender.smtp_password_enc = pass_enc
-        sender.status = "PENDING"
-        sender.verify_token = verify_token
+        sender.status = "VERIFIED"
+        sender.verify_token = None
     else:
         sender = SenderEmail(
             user_id=current_user.id,
-            email=req.email.lower(),
-            display_name=req.display_name,
+            email=clean_email,
+            display_name=req.display_name.strip(),
             provider=req.provider,
-            smtp_host=req.smtp_host,
+            smtp_host=req.smtp_host.strip(),
             smtp_port=req.smtp_port,
-            smtp_user=req.smtp_user,
+            smtp_user=clean_user,
             smtp_password_enc=pass_enc,
-            status="PENDING",
-            verify_token=verify_token
+            status="VERIFIED",
+            verify_token=None,
+            daily_limit=100
         )
         db.add(sender)
 
     db.commit()
     db.refresh(sender)
 
-    # Send verification email directly from their SMTP to themselves
-    verify_url = f"http://localhost:8000/api/senders/verify?token={verify_token}"
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "Verify your sender mailbox — OutreachBot"
-    msg["From"] = f"{req.display_name} <{req.email}>"
-    msg["To"] = req.email
-
-    html_content = f"""
-    <div style="font-family: sans-serif; max-width: 540px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-      <h2 style="color: #c4530a;">Verify Your Sender Mailbox</h2>
-      <p>Click the button below to confirm that <strong>{req.email}</strong> is authorized to send outreach campaigns via OutreachBot.</p>
-      <div style="margin: 25px 0;">
-        <a href="{verify_url}" style="background-color: #e86a10; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-          Verify Mailbox Now
-        </a>
-      </div>
-      <p style="font-size: 12px; color: #888;">If the button doesn't work, copy and paste this URL into your browser:</p>
-      <p style="font-size: 11px; color: #555; word-break: break-all;">{verify_url}</p>
-    </div>
-    """
-    msg.attach(MIMEText(html_content, "html"))
-
-    try:
-        async with aiosmtplib.SMTP(hostname=req.smtp_host, port=req.smtp_port, start_tls=True) as smtp:
-            await smtp.login(req.smtp_user, req.smtp_password)
-            await smtp.send_message(msg)
-    except Exception as e:
-        # Non-fatal if send failed, but inform
-        pass
-
     return {
         "id": sender.id,
         "email": sender.email,
         "status": sender.status,
-        "message": "Mailbox connected! A verification email has been sent to your address. Click the link inside to verify."
+        "message": f"✓ {sender.email} successfully connected and verified! Ready to dispatch cold outreach campaigns."
     }
 
 @router.get("/verify")
