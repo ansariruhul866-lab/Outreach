@@ -522,5 +522,5 @@ async def upload_and_extract_leads(
         "phones_count": phones_count,
         "imported": imported_count,
         "duplicates": duplicate_count,
-        "message": f"✓ Created folder '{folder.name}' with {imported_count} new leads ({emails_count} emails, {phones_count} phone numbers)."
+        "message": f"Created folder '{folder.name}' with {imported_count} new leads ({emails_count} emails, {phones_count} phone numbers)."
     }
