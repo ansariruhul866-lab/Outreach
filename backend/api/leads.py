@@ -1,10 +1,13 @@
 import io
 import csv
-from fastapi import APIRouter, Depends, HTTPException, Query, Header, Response
+import re
+import os
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, Header, Response, UploadFile, File, Form
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from core.database import get_db
-from core.models import User, Lead
+from core.models import User, Lead, LeadFolder
 from core.auth import get_current_user, verify_token
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -259,3 +262,265 @@ def delete_lead(lead_id: str, current_user: User = Depends(get_current_user), db
     db.delete(lead)
     db.commit()
     return {"success": True}
+
+EMAIL_REGEX = re.compile(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+')
+PHONE_REGEX = re.compile(r'(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}')
+
+def normalize_phone_number(raw: str) -> Optional[str]:
+    cleaned = re.sub(r'[^\d+]', '', raw)
+    digits = re.sub(r'\D', '', cleaned)
+    if 9 <= len(digits) <= 15:
+        if cleaned.startswith("+"):
+            return cleaned
+        return f"+{cleaned}" if len(digits) > 10 else cleaned
+    return None
+
+def extract_leads_from_file(filename: str, content: bytes) -> list[dict]:
+    ext = os.path.splitext(filename)[1].lower()
+    leads: list[dict] = []
+    seen = set()
+
+    def add_lead(email=None, phone=None, name=None, company=None, website=None):
+        clean_email = email.lower().strip() if email else None
+        clean_phone = normalize_phone_number(phone) if phone else None
+        if clean_email and not EMAIL_REGEX.match(clean_email):
+            clean_email = None
+        if not clean_email and not clean_phone:
+            return
+        key = (clean_email, clean_phone)
+        if key in seen:
+            return
+        seen.add(key)
+        leads.append({
+            "email": clean_email,
+            "phone": clean_phone,
+            "first_name": name.strip() if name else None,
+            "company": company.strip() if company else None,
+            "website": website.strip() if website else None,
+        })
+
+    # 1. EXCEL (.xlsx, .xlsm, .xltx)
+    if ext in [".xlsx", ".xlsm", ".xltx"]:
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
+        for sheet in wb.worksheets:
+            rows = list(sheet.iter_rows(values_only=True))
+            if not rows:
+                continue
+            header = [str(c or "").lower().strip() for c in rows[0]]
+            email_idx = next((i for i, h in enumerate(header) if "email" in h or "mail" in h), None)
+            phone_idx = next((i for i, h in enumerate(header) if any(k in h for k in ["phone", "mobile", "whatsapp", "contact", "number", "tel"])), None)
+            name_idx = next((i for i, h in enumerate(header) if "name" in h or "first" in h), None)
+            comp_idx = next((i for i, h in enumerate(header) if "comp" in h or "org" in h or "business" in h), None)
+            web_idx = next((i for i, h in enumerate(header) if "web" in h or "site" in h or "url" in h), None)
+
+            start_row = 1 if (email_idx is not None or phone_idx is not None) else 0
+            for r in rows[start_row:]:
+                r_str_list = [str(c).strip() if c is not None else "" for c in r]
+                row_text = " ".join(r_str_list)
+
+                r_email = r_str_list[email_idx] if email_idx is not None and email_idx < len(r_str_list) else None
+                r_phone = r_str_list[phone_idx] if phone_idx is not None and phone_idx < len(r_str_list) else None
+                r_name = r_str_list[name_idx] if name_idx is not None and name_idx < len(r_str_list) else None
+                r_comp = r_str_list[comp_idx] if comp_idx is not None and comp_idx < len(r_str_list) else None
+                r_web = r_str_list[web_idx] if web_idx is not None and web_idx < len(r_str_list) else None
+
+                found_emails = EMAIL_REGEX.findall(row_text)
+                found_phones = PHONE_REGEX.findall(row_text)
+
+                target_email = r_email or (found_emails[0] if found_emails else None)
+                target_phone = r_phone or (found_phones[0] if found_phones else None)
+
+                if target_email or target_phone:
+                    add_lead(email=target_email, phone=target_phone, name=r_name, company=r_comp, website=r_web)
+
+    # 2. WORD (.docx)
+    elif ext in [".docx"]:
+        import docx
+        doc = docx.Document(io.BytesIO(content))
+        full_text = []
+        for p in doc.paragraphs:
+            if p.text.strip():
+                full_text.append(p.text)
+        for table in doc.tables:
+            for row in table.rows:
+                row_str = " ".join(cell.text.strip() for cell in row.cells if cell.text.strip())
+                if row_str:
+                    full_text.append(row_str)
+
+        for line in full_text:
+            emails = EMAIL_REGEX.findall(line)
+            phones = PHONE_REGEX.findall(line)
+            if emails and phones:
+                add_lead(email=emails[0], phone=phones[0])
+            else:
+                for e in emails:
+                    add_lead(email=e)
+                for p in phones:
+                    add_lead(phone=p)
+
+    # 3. PDF (.pdf)
+    elif ext in [".pdf"]:
+        import pypdf
+        reader = pypdf.PdfReader(io.BytesIO(content))
+        pdf_lines = []
+        for page in reader.pages:
+            t = page.extract_text()
+            if t:
+                pdf_lines.extend(t.split("\n"))
+
+        for line in pdf_lines:
+            emails = EMAIL_REGEX.findall(line)
+            phones = PHONE_REGEX.findall(line)
+            if emails and phones:
+                add_lead(email=emails[0], phone=phones[0])
+            else:
+                for e in emails:
+                    add_lead(email=e)
+                for p in phones:
+                    add_lead(phone=p)
+
+    # 4. CSV, TXT, DOC, RTF, ETC.
+    else:
+        text = ""
+        for encoding in ["utf-8", "latin-1", "cp1252", "utf-16"]:
+            try:
+                text = content.decode(encoding)
+                break
+            except Exception:
+                continue
+
+        if not text:
+            text = content.decode("utf-8", errors="ignore")
+
+        lines = text.splitlines()
+        if ext == ".csv" and lines:
+            reader = csv.reader(lines)
+            row_list = list(reader)
+            if row_list:
+                header = [h.lower().strip() for h in row_list[0]]
+                email_idx = next((i for i, h in enumerate(header) if "email" in h or "mail" in h), None)
+                phone_idx = next((i for i, h in enumerate(header) if any(k in h for k in ["phone", "mobile", "whatsapp", "contact", "number", "tel"])), None)
+                name_idx = next((i for i, h in enumerate(header) if "name" in h or "first" in h), None)
+                comp_idx = next((i for i, h in enumerate(header) if "comp" in h or "org" in h), None)
+                web_idx = next((i for i, h in enumerate(header) if "web" in h or "site" in h or "url" in h), None)
+
+                start_idx = 1 if (email_idx is not None or phone_idx is not None) else 0
+                for r in row_list[start_idx:]:
+                    line_str = " ".join(r)
+                    r_email = r[email_idx] if email_idx is not None and email_idx < len(r) else None
+                    r_phone = r[phone_idx] if phone_idx is not None and phone_idx < len(r) else None
+                    r_name = r[name_idx] if name_idx is not None and name_idx < len(r) else None
+                    r_comp = r[comp_idx] if comp_idx is not None and comp_idx < len(r) else None
+                    r_web = r[web_idx] if web_idx is not None and web_idx < len(r) else None
+
+                    found_emails = EMAIL_REGEX.findall(line_str)
+                    found_phones = PHONE_REGEX.findall(line_str)
+                    add_lead(
+                        email=r_email or (found_emails[0] if found_emails else None),
+                        phone=r_phone or (found_phones[0] if found_phones else None),
+                        name=r_name,
+                        company=r_comp,
+                        website=r_web
+                    )
+                return leads
+
+        for line in lines:
+            emails = EMAIL_REGEX.findall(line)
+            phones = PHONE_REGEX.findall(line)
+            if emails and phones:
+                add_lead(email=emails[0], phone=phones[0])
+            else:
+                for e in emails:
+                    add_lead(email=e)
+                for p in phones:
+                    add_lead(phone=p)
+
+    return leads
+
+@router.post("/upload-extract")
+async def upload_and_extract_leads(
+    file: UploadFile = File(...),
+    folder_name: Optional[str] = Form(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    contents = await file.read()
+    if not contents:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+
+    filename = file.filename or "uploaded_leads"
+    extracted = extract_leads_from_file(filename, contents)
+
+    if not extracted:
+        raise HTTPException(
+            status_code=400,
+            detail=f"No valid emails or phone numbers found in '{filename}'. Please make sure the document contains contact details."
+        )
+
+    # 1. Automatically create a new folder for these leads
+    base_name = os.path.splitext(filename)[0].replace("_", " ").replace("-", " ").strip()
+    target_folder_name = (folder_name or f"Imported: {base_name}").strip()
+
+    folder = LeadFolder(
+        user_id=current_user.id,
+        name=target_folder_name,
+        description=f"Auto-extracted {len(extracted)} leads from '{filename}'",
+        source="FILE_UPLOAD"
+    )
+    db.add(folder)
+    db.commit()
+    db.refresh(folder)
+
+    # 2. Insert leads into the newly created folder
+    imported_count = 0
+    duplicate_count = 0
+
+    for item in extracted:
+        email = item.get("email")
+        phone = item.get("phone")
+
+        existing = None
+        if email:
+            existing = db.query(Lead).filter(Lead.user_id == current_user.id, Lead.email == email).first()
+        elif phone:
+            existing = db.query(Lead).filter(Lead.user_id == current_user.id, Lead.phone == phone).first()
+
+        if existing:
+            duplicate_count += 1
+            if not existing.folder_id:
+                existing.folder_id = folder.id
+            continue
+
+        lead = Lead(
+            user_id=current_user.id,
+            folder_id=folder.id,
+            email=email,
+            phone=phone,
+            first_name=item.get("first_name"),
+            company=item.get("company"),
+            website=item.get("website"),
+            source_url=filename,
+            status="PENDING",
+            is_verified=True,
+            spam_score=0.0
+        )
+        db.add(lead)
+        imported_count += 1
+
+    db.commit()
+
+    emails_count = sum(1 for x in extracted if x.get("email"))
+    phones_count = sum(1 for x in extracted if x.get("phone"))
+
+    return {
+        "success": True,
+        "folder_id": folder.id,
+        "folder_name": folder.name,
+        "total_extracted": len(extracted),
+        "emails_count": emails_count,
+        "phones_count": phones_count,
+        "imported": imported_count,
+        "duplicates": duplicate_count,
+        "message": f"✓ Created folder '{folder.name}' with {imported_count} new leads ({emails_count} emails, {phones_count} phone numbers)."
+    }

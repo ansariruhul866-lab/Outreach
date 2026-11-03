@@ -161,8 +161,9 @@ function getToken(): string | null {
 
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
+  const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(options.headers as Record<string, string> || {}),
   };
 
@@ -298,6 +299,25 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ leads, folder_id: folderId }),
       }),
+    uploadExtract: (file: File, folderName?: string) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (folderName) formData.append("folder_name", folderName);
+      return apiFetch<{
+        success: boolean;
+        folder_id: string;
+        folder_name: string;
+        total_extracted: number;
+        emails_count: number;
+        phones_count: number;
+        imported: number;
+        duplicates: number;
+        message: string;
+      }>("/leads/upload-extract", {
+        method: "POST",
+        body: formData,
+      });
+    },
   },
   folders: {
     list: () => apiFetch<FolderListResponse>("/folders"),

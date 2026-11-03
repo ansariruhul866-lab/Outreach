@@ -22,6 +22,11 @@ import {
   Filter,
   Layers,
   Sparkles,
+  FileSpreadsheet,
+  FileText,
+  FileUp,
+  Phone,
+  Mail,
 } from "lucide-react";
 
 export default function LeadsPage() {
@@ -61,6 +66,13 @@ export default function LeadsPage() {
   // CSV Import state
   const [importing, setImporting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+
+  // Smart Sheet / Doc File Extractor state
+  const [extractorModalOpen, setExtractorModalOpen] = useState(false);
+  const [extractorFile, setExtractorFile] = useState<File | null>(null);
+  const [extractorFolderName, setExtractorFolderName] = useState("");
+  const [extracting, setExtracting] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const loadFolders = async () => {
     try {
@@ -328,6 +340,29 @@ export default function LeadsPage() {
     reader.readAsText(file);
   };
 
+  const handleExtractFile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!extractorFile) return;
+
+    setExtracting(true);
+    setNotice(null);
+
+    try {
+      const res = await api.leads.uploadExtract(extractorFile, extractorFolderName.trim() || undefined);
+      setNotice(res.message);
+      setExtractorModalOpen(false);
+      setExtractorFile(null);
+      setExtractorFolderName("");
+      await loadFolders();
+      // Auto-select the newly created folder so user sees the extracted leads immediately!
+      setSelectedFolderId(res.folder_id);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to extract leads from file");
+    } finally {
+      setExtracting(false);
+    }
+  };
+
   const filteredLeads = leads.filter((l) => {
     const term = search.toLowerCase();
     return (
@@ -364,6 +399,16 @@ export default function LeadsPage() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => setExtractorModalOpen(true)}
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all"
+          >
+            <FileUp className="w-3.5 h-3.5" />
+            <span>Upload Sheet / Doc (Auto-Extract)</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setCreateFolderModalOpen(true)}
             className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md"
           >
@@ -371,29 +416,13 @@ export default function LeadsPage() {
             <span>New Folder</span>
           </motion.button>
 
-          <motion.label
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all shadow-md"
-          >
-            <Upload className="w-3.5 h-3.5 text-purple-400" />
-            <span>{importing ? "Importing..." : "Import CSV"}</span>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleCsvUpload}
-              disabled={importing}
-              className="hidden"
-            />
-          </motion.label>
-
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setAddModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all"
+            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-purple-400" />
             <span>Add Single Lead</span>
           </motion.button>
         </div>
@@ -916,6 +945,169 @@ export default function LeadsPage() {
                   className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-1.5"
                 >
                   {modalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : "Save Lead"}
+                </motion.button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Smart Sheet / Doc File Extractor Modal */}
+      {extractorModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
+          <div className="relative w-full max-w-lg p-6 glass-panel border border-purple-500/30 rounded-2xl sm:rounded-3xl shadow-2xl">
+            <button
+              onClick={() => {
+                setExtractorModalOpen(false);
+                setExtractorFile(null);
+              }}
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2 mb-1">
+              <span className="p-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                <FileSpreadsheet className="w-5 h-5" />
+              </span>
+              <h3 className="text-lg font-bold text-white">Smart Document &amp; Sheet Extractor</h3>
+            </div>
+            <p className="text-xs text-zinc-400 mb-6">
+              Upload any Spreadsheet or Document. We will automatically parse and extract all phone numbers &amp; emails, and organize them into a brand new folder.
+            </p>
+
+            <form onSubmit={handleExtractFile} className="space-y-4">
+              {/* Drag and Drop Zone */}
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragActive(true);
+                }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragActive(false);
+                  if (e.dataTransfer.files?.[0]) {
+                    const f = e.dataTransfer.files[0];
+                    setExtractorFile(f);
+                    if (!extractorFolderName) {
+                      const name = f.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+                      setExtractorFolderName(`Imported: ${name}`);
+                    }
+                  }
+                }}
+                className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
+                  dragActive
+                    ? "border-purple-400 bg-purple-500/10 scale-[1.01]"
+                    : extractorFile
+                    ? "border-purple-500/50 bg-purple-950/20"
+                    : "border-purple-500/25 hover:border-purple-500/40 bg-black/40"
+                }`}
+              >
+                <input
+                  type="file"
+                  id="sheetDocFileInput"
+                  accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.txt"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) {
+                      setExtractorFile(f);
+                      if (!extractorFolderName) {
+                        const name = f.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+                        setExtractorFolderName(`Imported: ${name}`);
+                      }
+                    }
+                  }}
+                  className="hidden"
+                />
+
+                {extractorFile ? (
+                  <div className="space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 text-purple-300 flex items-center justify-center mx-auto">
+                      <FileText className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white max-w-xs truncate mx-auto">{extractorFile.name}</p>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                        {(extractorFile.size / 1024).toFixed(1)} KB &bull; Ready to extract
+                      </p>
+                    </div>
+                    <label
+                      htmlFor="sheetDocFileInput"
+                      className="inline-block text-[11px] text-purple-400 hover:text-purple-300 underline cursor-pointer font-semibold"
+                    >
+                      Change file
+                    </label>
+                  </div>
+                ) : (
+                  <label htmlFor="sheetDocFileInput" className="cursor-pointer block space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 flex items-center justify-center mx-auto shadow-inner">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">
+                        Click to browse or drag &amp; drop your file here
+                      </p>
+                      <p className="text-[11px] text-zinc-400 mt-1">
+                        Supports <strong>Excel (.xlsx, .xls)</strong>, <strong>CSV (.csv)</strong>, <strong>Word (.docx)</strong>, <strong>PDF (.pdf)</strong>, or <strong>Text (.txt)</strong>
+                      </p>
+                    </div>
+                    <span className="inline-block px-3 py-1 rounded-xl glass-card text-[10px] font-semibold text-purple-300 border border-purple-500/30">
+                      Auto-detects emails &amp; phone numbers
+                    </span>
+                  </label>
+                )}
+              </div>
+
+              {/* Target Folder Name */}
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                  Destination Folder Name (Auto-created)
+                </label>
+                <div className="relative">
+                  <Folder className="absolute left-3.5 top-3 w-4 h-4 text-purple-400" />
+                  <input
+                    type="text"
+                    required
+                    value={extractorFolderName}
+                    onChange={(e) => setExtractorFolderName(e.target.value)}
+                    placeholder="e.g. Imported: SaaS Founders Sheet"
+                    className="w-full pl-10 pr-4 py-2.5 glass-input rounded-xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                  />
+                </div>
+                <p className="text-[10px] text-zinc-500 mt-1">
+                  All extracted leads will be grouped together into this folder.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExtractorModalOpen(false);
+                    setExtractorFile(null);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={extracting || !extractorFile}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                >
+                  {extracting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                      <span>Extracting Contacts...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Extract &amp; Create Folder</span>
+                    </>
+                  )}
                 </motion.button>
               </div>
             </form>
