@@ -77,6 +77,10 @@ export default function CampaignsPage() {
   const [leadLoading, setLeadLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Custom email input state
+  const [customEmailInput, setCustomEmailInput] = useState("");
+  const [addingCustomEmails, setAddingCustomEmails] = useState(false);
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -298,6 +302,56 @@ export default function CampaignsPage() {
 
   const deselectAllLeads = () => {
     setSelectedLeadIds([]);
+  };
+
+  const handleAddCustomEmails = async () => {
+    const raw = customEmailInput
+      .split(/[,;\n]+/)
+      .map((e) => e.trim().toLowerCase())
+      .filter((e) => e.length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+
+    if (raw.length === 0) return;
+
+    // Deduplicate against already-available leads
+    const existingEmails = new Set(availableLeads.map((l) => l.email.toLowerCase()));
+    const newEmails = raw.filter((e) => !existingEmails.has(e));
+    const alreadyExisting = raw.filter((e) => existingEmails.has(e));
+
+    // Select already-existing leads that were typed in
+    if (alreadyExisting.length > 0) {
+      const existingIds = availableLeads
+        .filter((l) => alreadyExisting.includes(l.email.toLowerCase()))
+        .map((l) => l.id);
+      setSelectedLeadIds((prev) => [...new Set([...prev, ...existingIds])]);
+    }
+
+    if (newEmails.length === 0) {
+      setCustomEmailInput("");
+      return;
+    }
+
+    setAddingCustomEmails(true);
+    try {
+      const createdLeads: Array<{ id: string; email: string; company?: string; status: string; folder_id?: string }> = [];
+      for (const email of newEmails) {
+        const lead = await api.leads.create({ email });
+        createdLeads.push({
+          id: lead.id,
+          email: lead.email || email,
+          company: lead.company,
+          status: lead.status || "PENDING",
+          folder_id: lead.folder_id || undefined,
+        });
+      }
+      // Add created leads to available leads and auto-select them
+      setAvailableLeads((prev) => [...prev, ...createdLeads]);
+      setSelectedLeadIds((prev) => [...new Set([...prev, ...createdLeads.map((l) => l.id)])]);
+      setCustomEmailInput("");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to add custom emails");
+    } finally {
+      setAddingCustomEmails(false);
+    }
   };
 
   return (
@@ -732,6 +786,44 @@ export default function CampaignsPage() {
                         );
                       })
                     )}
+                  </div>
+                </div>
+
+                {/* Custom Email Input — Add emails directly */}
+                <div className="p-4 rounded-2xl glass-card border border-purple-500/20 space-y-3">
+                  <div>
+                    <span className="text-xs font-bold text-white flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-purple-400" />
+                      <span>Add Custom Emails Directly</span>
+                    </span>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                      Type or paste email addresses (comma, semicolon, or newline separated). They will be created as leads and auto-selected.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <textarea
+                      rows={2}
+                      value={customEmailInput}
+                      onChange={(e) => setCustomEmailInput(e.target.value)}
+                      placeholder="john@example.com, jane@startup.co&#10;ceo@company.io"
+                      className="flex-1 p-3 glass-input rounded-xl text-xs font-mono text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none resize-none"
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.96 }}
+                      type="button"
+                      disabled={addingCustomEmails || !customEmailInput.trim()}
+                      onClick={handleAddCustomEmails}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white text-xs font-bold shadow-lg shadow-purple-900/30 flex items-center gap-1.5 transition-all disabled:opacity-40 self-end"
+                    >
+                      {addingCustomEmails ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="w-3.5 h-3.5" />
+                      )}
+                      <span>{addingCustomEmails ? "Adding..." : "Add & Select"}</span>
+                    </motion.button>
                   </div>
                 </div>
 
