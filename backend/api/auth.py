@@ -7,6 +7,7 @@ import os
 import urllib.parse
 import httpx
 import logging
+import uuid
 from core.database import get_db
 from core.models import User, SenderEmail
 from core.auth import verify_password, hash_password, create_access_token, get_current_user
@@ -66,6 +67,7 @@ async def firebase_login(req: FirebaseLoginRequest, db: Session = Depends(get_db
         user = User(
             name=name,
             email=email,
+            password_hash=hash_password(str(uuid.uuid4())),
             firebase_uid=uid,
             is_email_verified=True,
             plan="free"
@@ -273,6 +275,8 @@ async def google_callback(
     if user:
         if not user.name:
             user.name = name
+        if not user.password_hash:
+            user.password_hash = hash_password(str(uuid.uuid4()))
         if google_sub and not user.firebase_uid:
             user.firebase_uid = f"google_{google_sub}"
         user.is_email_verified = True
@@ -280,6 +284,7 @@ async def google_callback(
         user = User(
             name=name,
             email=email,
+            password_hash=hash_password(str(uuid.uuid4())),
             firebase_uid=f"google_{google_sub}" if google_sub else None,
             is_email_verified=True,
             plan="free"
