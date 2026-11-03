@@ -87,6 +87,11 @@ class Lead(Base):
     tracking_id = Column(String, unique=True, nullable=True, default=gen_uuid)
     sent_at = Column(DateTime, nullable=True)
     opened_at = Column(DateTime, nullable=True)
+    ai_pitch_subject = Column(String, nullable=True)
+    ai_pitch_body = Column(Text, nullable=True)
+    ai_pitch_whatsapp = Column(Text, nullable=True)
+    ai_pitch_strategy = Column(String, nullable=True)
+    ai_pitch_generated_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="leads")

@@ -27,6 +27,16 @@ import {
   FileUp,
   Phone,
   Mail,
+  Globe,
+  Bot,
+  Send,
+  Copy,
+  ExternalLink,
+  MessageSquare,
+  Settings2,
+  ArrowUpDown,
+  Flame,
+  Check,
 } from "lucide-react";
 
 export default function LeadsPage() {
@@ -38,7 +48,34 @@ export default function LeadsPage() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [segmentFilter, setSegmentFilter] = useState("ALL");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [loading, setLoading] = useState(true);
+
+  // Gemini AI Pitch State
+  const [pitchModalOpen, setPitchModalOpen] = useState(false);
+  const [pitchLead, setPitchLead] = useState<Lead | null>(null);
+  const [pitchLoading, setPitchLoading] = useState(false);
+  const [pitchData, setPitchData] = useState<{
+    strategy: string;
+    subject: string;
+    problem: string;
+    solution: string;
+    why_choose_me: string;
+    email_body: string;
+    whatsapp_message: string;
+    model_used?: string;
+  } | null>(null);
+  const [pitchTab, setPitchTab] = useState<"email" | "whatsapp">("email");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [geminiApiKey, setGeminiApiKey] = useState<string>("");
+  const [senderName, setSenderName] = useState<string>("Growth Specialist");
+  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
+
+  // Batch AI Pitch State
+  const [batchPitchModalOpen, setBatchPitchModalOpen] = useState(false);
+  const [batchPitching, setBatchPitching] = useState(false);
 
   // Multi-select state
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
@@ -88,7 +125,7 @@ export default function LeadsPage() {
   const loadLeads = async () => {
     try {
       setLoading(true);
-      const data = await api.leads.list(0, 500, statusFilter, selectedFolderId);
+      const data = await api.leads.list(0, 500, statusFilter, selectedFolderId, segmentFilter, sortBy, sortOrder);
       setLeads(Array.isArray(data) ? data : []);
       setSelectedLeadIds([]);
     } catch (e) {
@@ -100,12 +137,112 @@ export default function LeadsPage() {
   };
 
   useEffect(() => {
+    const savedKey = localStorage.getItem("outreach_gemini_api_key");
+    if (savedKey) setGeminiApiKey(savedKey);
+    const savedName = localStorage.getItem("outreach_sender_name");
+    if (savedName) setSenderName(savedName);
+  }, []);
+
+  useEffect(() => {
     loadFolders();
   }, []);
 
   useEffect(() => {
     loadLeads();
-  }, [statusFilter, selectedFolderId]);
+  }, [statusFilter, selectedFolderId, segmentFilter, sortBy, sortOrder]);
+
+  const handleOpenPitch = async (lead: Lead) => {
+    setPitchLead(lead);
+    setPitchModalOpen(true);
+    setPitchTab(lead.phone && !lead.email ? "whatsapp" : "email");
+
+    if (lead.ai_pitch_body && lead.ai_pitch_subject) {
+      setPitchData({
+        strategy: lead.ai_pitch_strategy || "NO_WEBSITE",
+        subject: lead.ai_pitch_subject,
+        problem: "Lead profile previously analyzed by Gemini AI",
+        solution: "High-converting web presence + automated marketing systems",
+        why_choose_me: "Direct execution, 7-day delivery, conversion-first architecture",
+        email_body: lead.ai_pitch_body,
+        whatsapp_message: lead.ai_pitch_whatsapp || "",
+      });
+      return;
+    }
+
+    await generatePitchForLead(lead);
+  };
+
+  const generatePitchForLead = async (lead: Lead) => {
+    setPitchLoading(true);
+    try {
+      const res = await api.leads.generatePitch(lead.id, {
+        sender_name: senderName,
+        api_key: geminiApiKey.trim() || undefined,
+      });
+      setPitchData({
+        strategy: res.strategy,
+        subject: res.subject,
+        problem: res.problem,
+        solution: res.solution,
+        why_choose_me: res.why_choose_me,
+        email_body: res.email_body,
+        whatsapp_message: res.whatsapp_message,
+        model_used: res.model_used,
+      });
+      setLeads((prev) =>
+        prev.map((l) =>
+          l.id === lead.id
+            ? {
+                ...l,
+                ai_pitch_subject: res.subject,
+                ai_pitch_body: res.email_body,
+                ai_pitch_whatsapp: res.whatsapp_message,
+                ai_pitch_strategy: res.strategy,
+              }
+            : l
+        )
+      );
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to generate pitch with Gemini");
+    } finally {
+      setPitchLoading(false);
+    }
+  };
+
+  const handleBatchGeneratePitches = async () => {
+    if (selectedLeadIds.length === 0) return;
+    setBatchPitching(true);
+    try {
+      const res = await api.leads.batchGeneratePitches({
+        lead_ids: selectedLeadIds,
+        sender_name: senderName,
+        api_key: geminiApiKey.trim() || undefined,
+      });
+      setNotice(res.message);
+      setBatchPitchModalOpen(false);
+      loadLeads();
+      setTimeout(() => setNotice(null), 5000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to batch generate pitches");
+    } finally {
+      setBatchPitching(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, fieldName: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldName);
+    setTimeout(() => setCopiedField(null), 2500);
+  };
+
+  const handleSaveApiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem("outreach_gemini_api_key", geminiApiKey.trim());
+    localStorage.setItem("outreach_sender_name", senderName.trim());
+    setApiKeyModalOpen(false);
+    setNotice("✓ Gemini API settings saved successfully");
+    setTimeout(() => setNotice(null), 3000);
+  };
 
   const handleCreateFolder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -509,6 +646,69 @@ export default function LeadsPage() {
         </div>
       </div>
 
+      {/* Smart Segments & Sorting Toolbar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 rounded-2xl glass-panel border border-purple-500/20 shadow-md">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+          {[
+            { id: "ALL", label: "All Leads" },
+            { id: "NO_WEBSITE", label: "🌐 No Website (Pitch Web+Mktg)", highlight: true },
+            { id: "HAS_WEBSITE", label: "⚡ Has Website" },
+            { id: "PHONE_ONLY", label: "📱 Phone / WA Only" },
+            { id: "EMAIL_ONLY", label: "📧 Email Only" },
+            { id: "FULL_CONTACT", label: "⭐ Full Contact" },
+          ].map((seg) => (
+            <button
+              key={seg.id}
+              onClick={() => setSegmentFilter(seg.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all ${
+                segmentFilter === seg.id
+                  ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-md shadow-purple-900/40 border border-purple-400/40"
+                  : seg.highlight
+                  ? "bg-purple-950/40 text-purple-300 border border-purple-500/30 hover:border-purple-400"
+                  : "glass-card text-zinc-400 hover:text-white"
+              }`}
+            >
+              <span>{seg.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Sorting */}
+          <div className="flex items-center gap-1.5 bg-black/40 border border-purple-500/20 rounded-xl px-2.5 py-1">
+            <span className="text-[10px] uppercase font-bold text-zinc-400">Sort:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-transparent text-xs text-white focus:outline-none cursor-pointer"
+            >
+              <option value="created_at" className="bg-zinc-950 text-white">Date Added</option>
+              <option value="phone" className="bg-zinc-950 text-white">Phone Number</option>
+              <option value="email" className="bg-zinc-950 text-white">Email Address</option>
+              <option value="website" className="bg-zinc-950 text-white">Website</option>
+              <option value="company" className="bg-zinc-950 text-white">Company Name</option>
+            </select>
+            <button
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              className="p-1 text-zinc-400 hover:text-purple-300 transition-colors"
+              title={`Order: ${sortOrder.toUpperCase()}`}
+            >
+              <ArrowUpDown className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Gemini AI Settings button */}
+          <button
+            onClick={() => setApiKeyModalOpen(true)}
+            className="px-2.5 py-1.5 rounded-xl glass-card hover:border-purple-500/50 text-purple-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+            title="Configure Gemini API Key & Sender Profile"
+          >
+            <Settings2 className="w-3.5 h-3.5 text-purple-400" />
+            <span className="hidden sm:inline">AI Settings</span>
+          </button>
+        </div>
+      </div>
+
       {/* Filter, Search, and Batch Actions Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -544,6 +744,16 @@ export default function LeadsPage() {
         <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
           {selectedLeadIds.length > 0 && (
             <>
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setBatchPitchModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-purple-900/40 transition-all"
+              >
+                <Bot className="w-3.5 h-3.5" />
+                <span>AI Pitch ({selectedLeadIds.length})</span>
+              </motion.button>
+
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
@@ -592,9 +802,9 @@ export default function LeadsPage() {
         ) : filteredLeads.length === 0 ? (
           <div className="p-12 text-center text-zinc-500">
             <Users className="w-8 h-8 mx-auto mb-3 text-purple-400/50" />
-            <p className="font-bold text-white text-sm">No leads found in this folder</p>
+            <p className="font-bold text-white text-sm">No leads found in this filter</p>
             <p className="text-xs text-zinc-400 mt-1">
-              {search ? "No leads matching your search" : "Run the scraper or import a CSV to add prospects."}
+              {search ? "No leads matching your search" : "Try selecting 'All Leads' or importing a new sheet/document."}
             </p>
           </div>
         ) : (
@@ -619,6 +829,7 @@ export default function LeadsPage() {
                   <th className="p-4">Email / Phone</th>
                   <th className="p-4">Contact</th>
                   <th className="p-4">Company &amp; Website</th>
+                  <th className="p-4">AI Proposal</th>
                   <th className="p-4">Folder</th>
                   <th className="p-4">Status</th>
                   <th className="p-4 text-right">Actions</th>
@@ -628,6 +839,11 @@ export default function LeadsPage() {
                 {filteredLeads.map((lead) => {
                   const isChecked = selectedLeadIds.includes(lead.id);
                   const folderObj = folders.find((f) => f.id === lead.folder_id);
+                  const hasWebsite = Boolean(
+                    lead.website &&
+                    lead.website.trim() &&
+                    !["none", "null", "n/a", "no website", "no"].includes(lead.website.trim().toLowerCase())
+                  );
 
                   return (
                     <tr
@@ -662,8 +878,40 @@ export default function LeadsPage() {
                       <td className="p-4 text-zinc-300">{lead.first_name || "—"}</td>
                       <td className="p-4">
                         <p className="text-white font-semibold">{lead.company || "—"}</p>
-                        {lead.website && (
-                          <p className="text-[11px] text-zinc-400 truncate max-w-xs">{lead.website}</p>
+                        {hasWebsite ? (
+                          <a
+                            href={lead.website!.startsWith("http") ? lead.website! : `https://${lead.website}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] text-zinc-400 hover:text-purple-300 flex items-center gap-1 truncate max-w-xs transition-colors mt-0.5"
+                          >
+                            <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                            <span className="truncate">{lead.website}</span>
+                          </a>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-md bg-purple-950/60 text-purple-300 border border-purple-500/30 text-[10px] font-semibold">
+                            <Globe className="w-2.5 h-2.5 text-purple-400" />
+                            No Website
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        {lead.ai_pitch_subject ? (
+                          <button
+                            onClick={() => handleOpenPitch(lead)}
+                            className="px-2.5 py-1 rounded-xl bg-purple-500/20 hover:bg-purple-500/35 border border-purple-400/40 text-purple-200 text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                          >
+                            <Sparkles className="w-3 h-3 text-purple-300" />
+                            <span>View Pitch</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleOpenPitch(lead)}
+                            className="px-2.5 py-1 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-[11px] font-semibold flex items-center gap-1.5 transition-all"
+                          >
+                            <Bot className="w-3 h-3 text-purple-400" />
+                            <span>Pitch</span>
+                          </button>
                         )}
                       </td>
                       <td className="p-4">
@@ -1109,6 +1357,422 @@ export default function LeadsPage() {
                     </>
                   )}
                 </motion.button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* AI Pitch Drawer / Modal */}
+      {pitchModalOpen && pitchLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-2xl animate-in fade-in">
+          <div className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 glass-panel border border-purple-500/40 rounded-3xl shadow-2xl shadow-purple-950/60">
+            <button
+              onClick={() => {
+                setPitchModalOpen(false);
+                setPitchData(null);
+              }}
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-purple-500/20 mb-5">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-1.5">
+                  <Bot className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Gemini AI Lead Intelligence</span>
+                </div>
+                <h3 className="text-xl font-black text-white flex items-center gap-2">
+                  <span>{pitchLead.company || "Business Proposal"}</span>
+                  {pitchLead.first_name && (
+                    <span className="text-xs font-normal text-zinc-400">({pitchLead.first_name})</span>
+                  )}
+                </h3>
+                <div className="flex items-center gap-3 text-xs text-zinc-400 mt-1">
+                  {pitchLead.email && <span>Email: {pitchLead.email}</span>}
+                  {pitchLead.phone && <span>WA: +{pitchLead.phone}</span>}
+                  {pitchLead.website ? (
+                    <span className="text-purple-300">Web: {pitchLead.website}</span>
+                  ) : (
+                    <span className="text-purple-400 font-semibold">No Website Detected</span>
+                  )}
+                </div>
+              </div>
+
+              {pitchData && (
+                <div className="self-start sm:self-center">
+                  <span className="px-3 py-1.5 rounded-xl bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-bold inline-flex items-center gap-1.5 shadow-md">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <span>
+                      {pitchData.strategy === "NO_WEBSITE"
+                        ? "🌐 Website First + Marketing Offer"
+                        : pitchData.strategy === "PHONE_ONLY"
+                        ? "📱 Phone & WhatsApp Direct Offer"
+                        : "⚡ Web Redesign & Marketing Offer"}
+                    </span>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {pitchLoading ? (
+              <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+                <p className="text-sm font-bold text-white">Analyzing credentials with Gemini AI...</p>
+                <p className="text-xs text-zinc-400 max-w-md">
+                  Formulating 3-pillar proposal: Identifying business pain points, designing the Website First + Marketing offer, and structuring competitive differentiators.
+                </p>
+              </div>
+            ) : pitchData ? (
+              <div className="space-y-6">
+                {/* 3 Pillar Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-red-500/20 text-xs">
+                    <span className="text-[10px] uppercase font-bold text-red-400 block mb-1">
+                      1. Problem Identified
+                    </span>
+                    <p className="text-zinc-300 text-[11px] leading-relaxed">{pitchData.problem}</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-emerald-500/20 text-xs">
+                    <span className="text-[10px] uppercase font-bold text-emerald-400 block mb-1">
+                      2. Proposed Solution
+                    </span>
+                    <p className="text-zinc-300 text-[11px] leading-relaxed">{pitchData.solution}</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-500/30 text-xs">
+                    <span className="text-[10px] uppercase font-bold text-purple-300 block mb-1">
+                      3. Why Choose Me
+                    </span>
+                    <p className="text-zinc-300 text-[11px] leading-relaxed">{pitchData.why_choose_me}</p>
+                  </div>
+                </div>
+
+                {/* Pitch Tabs */}
+                <div className="flex items-center gap-2 border-b border-purple-500/20 pb-3">
+                  <button
+                    onClick={() => setPitchTab("email")}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                      pitchTab === "email"
+                        ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                        : "glass-card text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Cold Email Proposal</span>
+                  </button>
+
+                  <button
+                    onClick={() => setPitchTab("whatsapp")}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                      pitchTab === "whatsapp"
+                        ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                        : "glass-card text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>WhatsApp / SMS Script</span>
+                  </button>
+                </div>
+
+                {/* Email Tab Content */}
+                {pitchTab === "email" && (
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[11px] font-bold uppercase text-purple-300">
+                          Subject Line
+                        </label>
+                        <button
+                          onClick={() => copyToClipboard(pitchData.subject, "subject")}
+                          className="text-[11px] text-zinc-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                        >
+                          {copiedField === "subject" ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-400" />
+                              <span className="text-emerald-400">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" />
+                              <span>Copy Subject</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={pitchData.subject}
+                        onChange={(e) => setPitchData({ ...pitchData, subject: e.target.value })}
+                        className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[11px] font-bold uppercase text-purple-300">
+                          Personalized Pitch Body
+                        </label>
+                        <button
+                          onClick={() => copyToClipboard(pitchData.email_body, "body")}
+                          className="text-[11px] text-zinc-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                        >
+                          {copiedField === "body" ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-400" />
+                              <span className="text-emerald-400">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" />
+                              <span>Copy Email</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <textarea
+                        rows={11}
+                        value={pitchData.email_body}
+                        onChange={(e) => setPitchData({ ...pitchData, email_body: e.target.value })}
+                        className="w-full p-4 glass-input rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none font-sans leading-relaxed"
+                      />
+                    </div>
+
+                    {/* Email Action Buttons */}
+                    <div className="flex items-center justify-between gap-3 pt-2">
+                      <button
+                        onClick={() => generatePitchForLead(pitchLead)}
+                        className="px-4 py-2.5 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Regenerate Pitch</span>
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        {pitchLead.email && (
+                          <a
+                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+                              pitchLead.email
+                            )}&su=${encodeURIComponent(pitchData.subject)}&body=${encodeURIComponent(
+                              pitchData.email_body
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 flex items-center gap-2 transition-all"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Send via Gmail</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* WhatsApp Tab Content */}
+                {pitchTab === "whatsapp" && (
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[11px] font-bold uppercase text-purple-300">
+                          Direct WhatsApp Script
+                        </label>
+                        <button
+                          onClick={() => copyToClipboard(pitchData.whatsapp_message, "wa")}
+                          className="text-[11px] text-zinc-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                        >
+                          {copiedField === "wa" ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-400" />
+                              <span className="text-emerald-400">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" />
+                              <span>Copy WhatsApp Script</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <textarea
+                        rows={10}
+                        value={pitchData.whatsapp_message}
+                        onChange={(e) =>
+                          setPitchData({ ...pitchData, whatsapp_message: e.target.value })
+                        }
+                        className="w-full p-4 glass-input rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none font-sans leading-relaxed"
+                      />
+                    </div>
+
+                    {/* WhatsApp Action Buttons */}
+                    <div className="flex items-center justify-between gap-3 pt-2">
+                      <button
+                        onClick={() => generatePitchForLead(pitchLead)}
+                        className="px-4 py-2.5 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Regenerate Pitch</span>
+                      </button>
+
+                      {pitchLead.phone && (
+                        <a
+                          href={`https://wa.me/${pitchLead.phone.replace(
+                            /\D/g,
+                            ""
+                          )}?text=${encodeURIComponent(pitchData.whatsapp_message)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold text-xs shadow-lg shadow-emerald-900/40 flex items-center gap-2 transition-all"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>Open in WhatsApp (+{pitchLead.phone})</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Batch AI Pitch Modal */}
+      {batchPitchModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 glass-panel border border-purple-500/30 rounded-3xl shadow-2xl">
+            <button
+              onClick={() => setBatchPitchModalOpen(false)}
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2">
+              <Bot className="w-3.5 h-3.5 text-purple-400" />
+              <span>Batch AI Pitch Generator</span>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-1">
+              Generate AI Pitches for {selectedLeadIds.length} Leads
+            </h3>
+            <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
+              Gemini AI will inspect each prospect&apos;s credentials, detect whether they lack a website or have phone only, and generate custom proposals following the Problem &rarr; Solution &rarr; Why Me framework.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                  Sender Identity Name
+                </label>
+                <input
+                  type="text"
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
+                  placeholder="e.g. Ruhul (Growth & Web Specialist)"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setBatchPitchModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleBatchGeneratePitches}
+                  disabled={batchPitching}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                >
+                  {batchPitching ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                      <span>Generating Pitches...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Generate {selectedLeadIds.length} Pitches</span>
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Gemini Settings Modal */}
+      {apiKeyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 glass-panel border border-purple-500/30 rounded-3xl shadow-2xl">
+            <button
+              onClick={() => setApiKeyModalOpen(false)}
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2">
+              <Settings2 className="w-3.5 h-3.5 text-purple-400" />
+              <span>Gemini AI Configuration</span>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-1">AI Pitch Engine Settings</h3>
+            <p className="text-xs text-zinc-400 mb-5">
+              Configure your Gemini API credentials and outreach signature
+            </p>
+
+            <form onSubmit={handleSaveApiKey} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                  Gemini API Key
+                </label>
+                <input
+                  type="password"
+                  value={geminiApiKey}
+                  onChange={(e) => setGeminiApiKey(e.target.value)}
+                  placeholder="Defaults to server's configured key if empty"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white font-mono focus:border-purple-500 focus:outline-none"
+                />
+                <p className="text-[10px] text-zinc-500 mt-1">
+                  Leave blank to use the pre-configured server environment key.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                  Your Name / Signature
+                </label>
+                <input
+                  type="text"
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
+                  placeholder="e.g. Ruhul"
+                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setApiKeyModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all"
+                >
+                  Save Settings
+                </button>
               </div>
             </form>
           </div>

@@ -68,6 +68,16 @@ def run_migrations():
                     cur.execute("ALTER TABLE leads ADD COLUMN folder_id TEXT")
                 if "phone" not in lead_cols:
                     cur.execute("ALTER TABLE leads ADD COLUMN phone TEXT")
+                if "ai_pitch_subject" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN ai_pitch_subject TEXT")
+                if "ai_pitch_body" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN ai_pitch_body TEXT")
+                if "ai_pitch_whatsapp" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN ai_pitch_whatsapp TEXT")
+                if "ai_pitch_strategy" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN ai_pitch_strategy TEXT")
+                if "ai_pitch_generated_at" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN ai_pitch_generated_at DATETIME")
                 conn.commit()
 
             # Users migrations for Firebase Auth

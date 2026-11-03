@@ -43,6 +43,11 @@ export interface Lead {
   sent_at?: string;
   opened_at?: string;
   created_at?: string;
+  ai_pitch_subject?: string;
+  ai_pitch_body?: string;
+  ai_pitch_whatsapp?: string;
+  ai_pitch_strategy?: string;
+  ai_pitch_generated_at?: string;
 }
 
 export interface WhatsAppSender {
@@ -254,15 +259,61 @@ export const api = {
       }),
   },
   leads: {
-    list: async (skip = 0, limit = 200, status?: string, folderId?: string) => {
+    list: async (
+      skip = 0,
+      limit = 200,
+      status?: string,
+      folderId?: string,
+      segment?: string,
+      sortBy?: string,
+      sortOrder?: string
+    ) => {
       let q = `/leads?page=1&limit=${limit}`;
       if (status && status !== "ALL") q += `&status=${status}`;
       if (folderId && folderId !== "ALL") q += `&folder_id=${folderId}`;
+      if (segment && segment !== "ALL") q += `&segment=${segment}`;
+      if (sortBy) q += `&sort_by=${sortBy}`;
+      if (sortOrder) q += `&sort_order=${sortOrder}`;
       const res = await apiFetch<any>(q);
       if (Array.isArray(res)) return res as Lead[];
       if (res && Array.isArray(res.leads)) return res.leads as Lead[];
       return [] as Lead[];
     },
+    generatePitch: (
+      leadId: string,
+      payload?: { sender_name?: string; agency_or_service?: string; api_key?: string }
+    ) =>
+      apiFetch<{
+        success: boolean;
+        lead_id: string;
+        strategy: string;
+        subject: string;
+        problem: string;
+        solution: string;
+        why_choose_me: string;
+        email_body: string;
+        whatsapp_message: string;
+        model_used?: string;
+      }>(`/leads/${leadId}/generate-pitch`, {
+        method: "POST",
+        body: JSON.stringify(payload || {}),
+      }),
+    batchGeneratePitches: (payload: {
+      lead_ids: string[];
+      sender_name?: string;
+      agency_or_service?: string;
+      api_key?: string;
+    }) =>
+      apiFetch<{
+        success: boolean;
+        total: number;
+        generated: number;
+        errors: Array<{ lead_id: string; company?: string; error: string }>;
+        message: string;
+      }>("/leads/batch-generate-pitches", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
     create: (lead: { email?: string; phone?: string; first_name?: string; company?: string; website?: string; source_url?: string; folder_id?: string }) =>
       apiFetch<Lead>("/leads", {
         method: "POST",

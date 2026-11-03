@@ -3,12 +3,14 @@ import csv
 import re
 import os
 from typing import Optional
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Header, Response, UploadFile, File, Form
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from core.database import get_db
 from core.models import User, Lead, LeadFolder
 from core.auth import get_current_user, verify_token
+from core.gemini_service import generate_lead_pitch
 
 router = APIRouter(prefix="/leads", tags=["leads"])
 
@@ -41,6 +43,22 @@ class LeadResponse(BaseModel):
     spam_score: float
     is_verified: bool
     created_at: str
+    ai_pitch_subject: str | None = None
+    ai_pitch_body: str | None = None
+    ai_pitch_whatsapp: str | None = None
+    ai_pitch_strategy: str | None = None
+    ai_pitch_generated_at: str | None = None
+
+class GeneratePitchRequest(BaseModel):
+    sender_name: Optional[str] = None
+    agency_or_service: Optional[str] = None
+    api_key: Optional[str] = None
+
+class BatchPitchRequest(BaseModel):
+    lead_ids: list[str]
+    sender_name: Optional[str] = None
+    agency_or_service: Optional[str] = None
+    api_key: Optional[str] = None
 
 @router.get("/selectable")
 def get_selectable_leads(
@@ -77,6 +95,9 @@ def get_selectable_leads(
 def list_leads(
     search: str = "",
     status: str = "",
+    segment: str = "ALL",  # ALL | NO_WEBSITE | HAS_WEBSITE | PHONE_ONLY | EMAIL_ONLY | FULL_CONTACT
+    sort_by: str = "created_at",  # created_at | phone | email | website | company
+    sort_order: str = "desc",  # asc | desc
     folder_id: str | None = None,
     page: int = 1,
     limit: int = 50,
@@ -101,8 +122,63 @@ def list_leads(
     if status and status != "ALL":
         query = query.filter(Lead.status == status)
 
+    # Smart Segment Filtering
+    if segment == "NO_WEBSITE":
+        query = query.filter(
+            (Lead.website == None) | 
+            (Lead.website == "") | 
+            (Lead.website.ilike("none")) | 
+            (Lead.website.ilike("n/a")) |
+            (Lead.website.ilike("no website"))
+        )
+    elif segment == "HAS_WEBSITE":
+        query = query.filter(
+            Lead.website != None,
+            Lead.website != "",
+            ~Lead.website.ilike("none"),
+            ~Lead.website.ilike("n/a"),
+            ~Lead.website.ilike("no website")
+        )
+    elif segment == "PHONE_ONLY":
+        query = query.filter(
+            Lead.phone != None,
+            Lead.phone != "",
+            (Lead.email == None) | (Lead.email == "") | (Lead.email.like("%@outreachbot.local"))
+        )
+    elif segment == "EMAIL_ONLY":
+        query = query.filter(
+            Lead.email != None,
+            Lead.email != "",
+            ~Lead.email.like("%@outreachbot.local"),
+            (Lead.phone == None) | (Lead.phone == "")
+        )
+    elif segment == "FULL_CONTACT":
+        query = query.filter(
+            Lead.email != None,
+            Lead.email != "",
+            ~Lead.email.like("%@outreachbot.local"),
+            Lead.phone != None,
+            Lead.phone != ""
+        )
+
+    # Dynamic Sorting
+    sort_col = Lead.created_at
+    if sort_by == "phone":
+        sort_col = Lead.phone
+    elif sort_by == "email":
+        sort_col = Lead.email
+    elif sort_by == "website":
+        sort_col = Lead.website
+    elif sort_by == "company":
+        sort_col = Lead.company
+
+    if sort_order.lower() == "asc":
+        query = query.order_by(sort_col.asc().nulls_last())
+    else:
+        query = query.order_by(sort_col.desc().nulls_last())
+
     total = query.count()
-    leads = query.order_by(Lead.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+    leads = query.offset((page - 1) * limit).limit(limit).all()
 
     return {
         "total": total,
@@ -121,7 +197,12 @@ def list_leads(
                 status=l.status,
                 spam_score=l.spam_score,
                 is_verified=l.is_verified,
-                created_at=l.created_at.strftime("%Y-%m-%d") if l.created_at else ""
+                created_at=l.created_at.strftime("%Y-%m-%d") if l.created_at else "",
+                ai_pitch_subject=l.ai_pitch_subject,
+                ai_pitch_body=l.ai_pitch_body,
+                ai_pitch_whatsapp=l.ai_pitch_whatsapp,
+                ai_pitch_strategy=l.ai_pitch_strategy,
+                ai_pitch_generated_at=l.ai_pitch_generated_at.strftime("%Y-%m-%d %H:%M") if l.ai_pitch_generated_at else None
             ) for l in leads
         ]
     }
@@ -524,3 +605,115 @@ async def upload_and_extract_leads(
         "duplicates": duplicate_count,
         "message": f"Created folder '{folder.name}' with {imported_count} new leads ({emails_count} emails, {phones_count} phone numbers)."
     }
+
+@router.post("/{lead_id}/generate-pitch")
+def generate_single_lead_pitch(
+    lead_id: str,
+    req: GeneratePitchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    lead = db.query(Lead).filter(Lead.id == lead_id, Lead.user_id == current_user.id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    sender = req.sender_name or current_user.name or "Growth Specialist"
+    service = req.agency_or_service or "Web Development & Marketing Systems"
+
+    lead_data = {
+        "company": lead.company,
+        "first_name": lead.first_name,
+        "email": lead.email,
+        "phone": lead.phone,
+        "website": lead.website
+    }
+
+    try:
+        result = generate_lead_pitch(
+            lead_data=lead_data,
+            sender_name=sender,
+            agency_or_service=service,
+            custom_api_key=req.api_key
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gemini AI error: {str(e)}")
+
+    lead.ai_pitch_subject = result.get("subject")
+    lead.ai_pitch_body = result.get("email_body")
+    lead.ai_pitch_whatsapp = result.get("whatsapp_message")
+    lead.ai_pitch_strategy = result.get("strategy")
+    lead.ai_pitch_generated_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(lead)
+
+    return {
+        "success": True,
+        "lead_id": lead.id,
+        "strategy": result.get("strategy"),
+        "subject": result.get("subject"),
+        "problem": result.get("problem"),
+        "solution": result.get("solution"),
+        "why_choose_me": result.get("why_choose_me"),
+        "email_body": result.get("email_body"),
+        "whatsapp_message": result.get("whatsapp_message"),
+        "model_used": result.get("model_used")
+    }
+
+@router.post("/batch-generate-pitches")
+def batch_generate_pitches(
+    req: BatchPitchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not req.lead_ids:
+        raise HTTPException(status_code=400, detail="No lead IDs provided")
+
+    leads = db.query(Lead).filter(
+        Lead.id.in_(req.lead_ids),
+        Lead.user_id == current_user.id
+    ).all()
+
+    if not leads:
+        raise HTTPException(status_code=404, detail="No matching leads found")
+
+    sender = req.sender_name or current_user.name or "Growth Specialist"
+    service = req.agency_or_service or "Web Development & Marketing Systems"
+
+    generated_count = 0
+    errors = []
+
+    for l in leads:
+        lead_data = {
+            "company": l.company,
+            "first_name": l.first_name,
+            "email": l.email,
+            "phone": l.phone,
+            "website": l.website
+        }
+        try:
+            result = generate_lead_pitch(
+                lead_data=lead_data,
+                sender_name=sender,
+                agency_or_service=service,
+                custom_api_key=req.api_key
+            )
+            l.ai_pitch_subject = result.get("subject")
+            l.ai_pitch_body = result.get("email_body")
+            l.ai_pitch_whatsapp = result.get("whatsapp_message")
+            l.ai_pitch_strategy = result.get("strategy")
+            l.ai_pitch_generated_at = datetime.utcnow()
+            generated_count += 1
+        except Exception as e:
+            errors.append({"lead_id": l.id, "company": l.company, "error": str(e)})
+
+    db.commit()
+
+    return {
+        "success": True,
+        "total": len(leads),
+        "generated": generated_count,
+        "errors": errors,
+        "message": f"Successfully generated personalized AI proposals for {generated_count} out of {len(leads)} leads."
+    }
+
