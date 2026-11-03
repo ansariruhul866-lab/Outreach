@@ -87,6 +87,9 @@ async def firebase_login(req: FirebaseLoginRequest, db: Session = Depends(get_db
 
         if sender:
             sender.provider = "GMAIL_API"
+            sender.smtp_user = email
+            if not sender.smtp_password_enc:
+                sender.smtp_password_enc = encrypted_oauth
             sender.oauth_token_enc = encrypted_oauth
             sender.status = "VERIFIED"
             sender.display_name = user.name
@@ -96,6 +99,10 @@ async def firebase_login(req: FirebaseLoginRequest, db: Session = Depends(get_db
                 email=email,
                 display_name=user.name,
                 provider="GMAIL_API",
+                smtp_host="smtp.gmail.com",
+                smtp_port=587,
+                smtp_user=email,
+                smtp_password_enc=encrypted_oauth,
                 oauth_token_enc=encrypted_oauth,
                 status="VERIFIED",
                 daily_limit=100
@@ -305,6 +312,9 @@ async def google_callback(
 
     if sender:
         sender.provider = "GMAIL_API"
+        sender.smtp_user = email
+        if not sender.smtp_password_enc:
+            sender.smtp_password_enc = encrypted_access
         sender.oauth_token_enc = encrypted_access
         if encrypted_refresh:
             sender.oauth_refresh_token_enc = encrypted_refresh
@@ -316,6 +326,10 @@ async def google_callback(
             email=email,
             display_name=name,
             provider="GMAIL_API",
+            smtp_host="smtp.gmail.com",
+            smtp_port=587,
+            smtp_user=email,
+            smtp_password_enc=encrypted_access,
             oauth_token_enc=encrypted_access,
             oauth_refresh_token_enc=encrypted_refresh,
             status="VERIFIED",

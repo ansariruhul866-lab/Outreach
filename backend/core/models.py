@@ -13,7 +13,7 @@ class User(Base):
     id = Column(String, primary_key=True, default=gen_uuid)
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
-    password_hash = Column(String, nullable=True)
+    password_hash = Column(String, default="", nullable=True)
     firebase_uid = Column(String, unique=True, index=True, nullable=True)
     is_email_verified = Column(Boolean, default=False)
     plan = Column(String, default="free")  # free | pro | agency
@@ -39,8 +39,8 @@ class SenderEmail(Base):
     provider = Column(String, default="GMAIL")  # GMAIL | OUTLOOK | CUSTOM | GMAIL_API
     smtp_host = Column(String, default="smtp.gmail.com", nullable=True)
     smtp_port = Column(Integer, default=587, nullable=True)
-    smtp_user = Column(String, nullable=True)
-    smtp_password_enc = Column(Text, nullable=True)
+    smtp_user = Column(String, default="", nullable=True)
+    smtp_password_enc = Column(Text, default="", nullable=True)
     oauth_token_enc = Column(Text, nullable=True)
     oauth_refresh_token_enc = Column(Text, nullable=True)
     status = Column(String, default="PENDING")  # PENDING | VERIFIED | FAILED

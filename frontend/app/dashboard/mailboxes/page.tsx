@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { api, Sender } from "@/lib/api";
-import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
