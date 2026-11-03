@@ -1,9 +1,29 @@
 import base64
 import httpx
 import logging
+import os
 from email.mime.multipart import MIMEMultipart
 
 logger = logging.getLogger("outreachbot.gmail")
+
+async def refresh_google_access_token(refresh_token: str, client_id: str, client_secret: str) -> str:
+    """
+    Exchanges a permanent Google OAuth Refresh Token for a fresh short-lived access token.
+    """
+    token_url = "https://oauth2.googleapis.com/token"
+    payload = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "refresh_token": refresh_token,
+        "grant_type": "refresh_token",
+    }
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        resp = await client.post(token_url, data=payload)
+        if resp.status_code != 200:
+            logger.error(f"Failed to refresh Google access token: {resp.text}")
+            raise Exception(f"Failed to refresh Google token: {resp.text}")
+        data = resp.json()
+        return data["access_token"]
 
 async def send_via_gmail_api(access_token: str, message: MIMEMultipart) -> dict:
     """

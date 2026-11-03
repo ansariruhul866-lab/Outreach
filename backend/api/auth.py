@@ -1,13 +1,19 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
+import os
+import urllib.parse
+import httpx
+import logging
 from core.database import get_db
 from core.models import User, SenderEmail
 from core.auth import verify_password, hash_password, create_access_token, get_current_user
 from core.firebase_auth import verify_firebase_id_token
 from core.encryption import encrypt_password
 
+logger = logging.getLogger("outreachbot.auth")
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 class FirebaseLoginRequest(BaseModel):
@@ -165,3 +171,158 @@ def get_profile(current_user: User = Depends(get_current_user)):
         plan=current_user.plan,
         is_email_verified=bool(getattr(current_user, 'is_email_verified', True))
     )
+
+@router.get("/google/login")
+def google_login(return_url: Optional[str] = None):
+    """
+    Direct Server-Side Google OAuth 2.0.
+    Requests offline access and prompt=consent to ensure a permanent Refresh Token is granted
+    with permissions to send emails via Gmail REST API.
+    """
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/api/auth/google/callback")
+
+    if not client_id:
+        raise HTTPException(status_code=500, detail="GOOGLE_CLIENT_ID is not configured in backend/.env")
+
+    scopes = [
+        "openid",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/gmail.send",
+    ]
+
+    state = return_url or "/dashboard"
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": " ".join(scopes),
+        "access_type": "offline",
+        "prompt": "consent",
+        "include_granted_scopes": "true",
+        "state": state
+    }
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+    return RedirectResponse(url=auth_url)
+
+@router.get("/google/callback")
+async def google_callback(
+    code: Optional[str] = Query(None),
+    error: Optional[str] = Query(None),
+    state: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    """
+    Handles Google OAuth redirect:
+    1. Exchanges authorization code for permanent refresh_token + access_token
+    2. Fetches user identity from Google
+    3. Auto-provisions User account and authenticates them
+    4. Auto-connects and VERIFIES their Gmail mailbox for cold outreach
+    5. Redirects back to OutreachBot frontend dashboard
+    """
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    if error:
+        logger.error(f"Google OAuth returned error: {error}")
+        return RedirectResponse(url=f"{frontend_url}/?error={urllib.parse.quote(error)}")
+
+    if not code:
+        raise HTTPException(status_code=400, detail="Missing authorization code from Google")
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/api/auth/google/callback")
+
+    # 1. Exchange authorization code for tokens
+    token_url = "https://oauth2.googleapis.com/token"
+    token_payload = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "code": code,
+        "grant_type": "authorization_code",
+        "redirect_uri": redirect_uri,
+    }
+
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        token_resp = await client.post(token_url, data=token_payload)
+        if token_resp.status_code != 200:
+            logger.error(f"Google token exchange failed: {token_resp.text}")
+            return RedirectResponse(url=f"{frontend_url}/?error=google_token_exchange_failed")
+        tokens = token_resp.json()
+
+    access_token = tokens.get("access_token")
+    refresh_token = tokens.get("refresh_token")
+
+    # 2. Get user profile from Google
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        userinfo_resp = await client.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+        if userinfo_resp.status_code != 200:
+            logger.error(f"Google userinfo lookup failed: {userinfo_resp.text}")
+            return RedirectResponse(url=f"{frontend_url}/?error=google_userinfo_failed")
+        user_info = userinfo_resp.json()
+
+    email = user_info["email"].lower().strip()
+    name = (user_info.get("name") or email.split("@")[0]).strip()
+    google_sub = user_info.get("id")
+
+    # 3. Provision or update User in database
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        if not user.name:
+            user.name = name
+        if google_sub and not user.firebase_uid:
+            user.firebase_uid = f"google_{google_sub}"
+        user.is_email_verified = True
+    else:
+        user = User(
+            name=name,
+            email=email,
+            firebase_uid=f"google_{google_sub}" if google_sub else None,
+            is_email_verified=True,
+            plan="free"
+        )
+        db.add(user)
+
+    db.commit()
+    db.refresh(user)
+
+    # 4. Auto-provision and VERIFY the Gmail Mailbox with permanent Refresh Token!
+    sender = db.query(SenderEmail).filter(
+        SenderEmail.user_id == user.id,
+        SenderEmail.email == email
+    ).first()
+
+    encrypted_access = encrypt_password(access_token, user.id)
+    encrypted_refresh = encrypt_password(refresh_token, user.id) if refresh_token else None
+
+    if sender:
+        sender.provider = "GMAIL_API"
+        sender.oauth_token_enc = encrypted_access
+        if encrypted_refresh:
+            sender.oauth_refresh_token_enc = encrypted_refresh
+        sender.status = "VERIFIED"
+        sender.display_name = name
+    else:
+        sender = SenderEmail(
+            user_id=user.id,
+            email=email,
+            display_name=name,
+            provider="GMAIL_API",
+            oauth_token_enc=encrypted_access,
+            oauth_refresh_token_enc=encrypted_refresh,
+            status="VERIFIED",
+            daily_limit=150
+        )
+        db.add(sender)
+
+    db.commit()
+
+    # 5. Generate OutreachBot JWT access token and redirect to dashboard
+    token = create_access_token(user.id, user.email)
+    
+    target_path = state if state and state.startswith("/dashboard") else "/dashboard"
+    redirect_destination = f"{frontend_url}{target_path}?token={token}&email={urllib.parse.quote(user.email)}&name={urllib.parse.quote(user.name)}&connected=gmail"
+    return RedirectResponse(url=redirect_destination)

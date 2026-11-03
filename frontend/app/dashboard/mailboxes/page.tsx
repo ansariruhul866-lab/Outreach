@@ -65,43 +65,10 @@ export default function MailboxesPage() {
     }
   };
 
-  const handleGoogleConnect = async () => {
-    setNotice(null);
-    try {
-      googleProvider.setCustomParameters({ prompt: "select_account" });
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const googleAccessToken = credential?.accessToken || null;
-      const idToken = await user.getIdToken();
-
-      await api.auth.firebaseLogin(idToken, user.displayName || undefined, googleAccessToken);
-      setNotice("✓ Google Account connected and authorized for Gmail sending!");
-      loadSenders();
-    } catch (err: any) {
-      console.error("handleGoogleConnect error details:", err);
-      let errorMsg = err?.message || "Failed to connect Google account";
-
-      if (err?.code === "auth/network-request-failed" || errorMsg.toLowerCase().includes("fetch") || errorMsg.toLowerCase().includes("network")) {
-        errorMsg =
-          "Google Sign-In Network Error ('Unable to fetch').\n\n" +
-          "Common Causes & Solutions:\n" +
-          "1. Browser Extension / Ad-blocker: Brave Shields or extensions like uBlock/Adblock often block Google Identity & Firebase scripts. Disable them or test in an Incognito window.\n" +
-          "2. Authorized Domains: In the Firebase Console (Authentication > Settings > Authorized Domains), ensure 'localhost' is listed.\n" +
-          "3. Google Sign-In Provider: Verify that 'Google' is enabled under Firebase Console > Authentication > Sign-in method.\n" +
-          "4. Instant Alternative: Click '+ Add SMTP Mailbox' to connect your Gmail with an App Password without needing OAuth test users or Google Cloud verification!";
-      } else if (err?.code === "auth/popup-blocked") {
-        errorMsg = "The Google sign-in popup was blocked by your browser. Please allow popups for localhost.";
-      } else if (err?.code === "auth/popup-closed-by-user") {
-        errorMsg = "Google sign-in popup was closed before completing.";
-      } else if (err?.code === "auth/unauthorized-domain") {
-        errorMsg = "This domain is not authorized in Firebase. Add 'localhost' in Firebase Console > Authentication > Settings > Authorized Domains.";
-      } else if (err?.code === "auth/operation-not-allowed") {
-        errorMsg = "Google Sign-in is not enabled in Firebase. Enable it in Firebase Console > Authentication > Sign-in method > Google.";
-      }
-
-      alert(errorMsg);
-    }
+  const handleGoogleConnect = () => {
+    // Direct Server-Side Google OAuth 2.0 with permanent Gmail sending permissions
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+    window.location.href = `${apiUrl}/auth/google/login?return_url=/dashboard/mailboxes`;
   };
 
   const handleConnectSmtp = async (e: React.FormEvent) => {
@@ -169,37 +136,10 @@ export default function MailboxesPage() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              handleProviderSelect("GMAIL");
-              setModalOpen(true);
-            }}
+            onClick={handleGoogleConnect}
             className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Connect Gmail (App Password)</span>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              handleProviderSelect("OUTLOOK");
-              setModalOpen(true);
-            }}
-            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white font-bold text-xs flex items-center gap-2 transition-all"
-          >
-            <Plus className="w-3.5 h-3.5 text-purple-400" />
-            <span>Add Outlook / Custom SMTP</span>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleGoogleConnect}
-            className="px-3.5 py-2.5 rounded-2xl glass-card hover:border-purple-500/30 text-zinc-400 hover:text-zinc-200 font-medium text-[11px] flex items-center gap-2 transition-all"
-            title="Alternative: Connect via Google OAuth Popup (requires Google Cloud verification)"
-          >
-            <svg className="w-3.5 h-3.5 opacity-80" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -217,7 +157,33 @@ export default function MailboxesPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>Google OAuth</span>
+            <span>1-Click Connect Google (Instant)</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              handleProviderSelect("GMAIL");
+              setModalOpen(true);
+            }}
+            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white font-bold text-xs flex items-center gap-2 transition-all"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Connect via App Password</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              handleProviderSelect("OUTLOOK");
+              setModalOpen(true);
+            }}
+            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white font-semibold text-xs flex items-center gap-2 transition-all"
+          >
+            <Plus className="w-3.5 h-3.5 text-purple-400" />
+            <span>Outlook / SMTP</span>
           </motion.button>
         </div>
       </div>

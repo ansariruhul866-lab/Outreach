@@ -15,8 +15,9 @@ from email import encoders
 from core.database import get_db, SessionLocal
 from core.models import User, Campaign, SenderEmail, Lead
 from core.auth import get_current_user
-from core.encryption import decrypt_password
-from core.gmail_api import send_via_gmail_api
+from core.encryption import decrypt_password, encrypt_password
+from core.gmail_api import send_via_gmail_api, refresh_google_access_token
+import os
 
 logger = logging.getLogger("outreachbot")
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
@@ -362,13 +363,17 @@ async def execute_send_batch(campaign_id: str, user_id: str):
         smtp_pass = None
         oauth_token = None
 
+        refresh_token = None
         if is_gmail_api:
-            if not sender.oauth_token_enc:
-                logger.error(f"Sender {sender.id} is GMAIL_API but missing oauth_token_enc")
+            if not sender.oauth_token_enc and not sender.oauth_refresh_token_enc:
+                logger.error(f"Sender {sender.id} is GMAIL_API but missing oauth tokens")
                 campaign.status = "PAUSED"
                 db.commit()
                 return
-            oauth_token = decrypt_password(sender.oauth_token_enc, user_id)
+            if sender.oauth_token_enc:
+                oauth_token = decrypt_password(sender.oauth_token_enc, user_id)
+            if sender.oauth_refresh_token_enc:
+                refresh_token = decrypt_password(sender.oauth_refresh_token_enc, user_id)
         else:
             if not sender.smtp_password_enc:
                 logger.error(f"Sender {sender.id} missing SMTP password")
@@ -485,7 +490,23 @@ async def execute_send_batch(campaign_id: str, user_id: str):
 
             try:
                 if is_gmail_api:
-                    await send_via_gmail_api(oauth_token, msg)
+                    try:
+                        await send_via_gmail_api(oauth_token, msg)
+                    except Exception as ge:
+                        err_str = str(ge).lower()
+                        if ("expired" in err_str or "401" in err_str or "invalid" in err_str) and refresh_token:
+                            client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+                            client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
+                            if client_id and client_secret:
+                                logger.info(f"Auto-refreshing expired Google token for sender {sender.email}...")
+                                oauth_token = await refresh_google_access_token(refresh_token, client_id, client_secret)
+                                sender.oauth_token_enc = encrypt_password(oauth_token, user_id)
+                                db.commit()
+                                await send_via_gmail_api(oauth_token, msg)
+                            else:
+                                raise ge
+                        else:
+                            raise ge
                 else:
                     use_tls = (sender.smtp_port == 465)
                     start_tls = not use_tls

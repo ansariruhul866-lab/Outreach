@@ -30,6 +30,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
+      // 1. Check if returning from Server-Side Google OAuth redirect with ?token=...
+      if (typeof window !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryToken = urlParams.get("token");
+        const queryEmail = urlParams.get("email");
+        const queryName = urlParams.get("name");
+
+        if (queryToken && queryEmail) {
+          const newUser: User = {
+            id: "",
+            name: queryName || queryEmail.split("@")[0],
+            email: queryEmail,
+            plan: "free",
+            is_email_verified: true,
+          };
+          login(queryToken, newUser);
+
+          // Clean URL query params without page reload
+          urlParams.delete("token");
+          urlParams.delete("email");
+          urlParams.delete("name");
+          urlParams.delete("connected");
+          const remainingQuery = urlParams.toString();
+          const cleanUrl = window.location.pathname + (remainingQuery ? `?${remainingQuery}` : "");
+          window.history.replaceState({}, document.title, cleanUrl);
+
+          api.auth
+            .getMe()
+            .then((freshUser) => {
+              setUser(freshUser);
+              localStorage.setItem("outreach_user", JSON.stringify(freshUser));
+            })
+            .catch(() => {})
+            .finally(() => setIsLoading(false));
+          return;
+        }
+      }
+
       const storedToken = localStorage.getItem("outreach_token");
       const storedUser = localStorage.getItem("outreach_user");
 
