@@ -516,17 +516,39 @@ async def execute_send_batch(campaign_id: str, user_id: str):
                         else:
                             raise ge
                 else:
-                    use_tls = (sender.smtp_port == 465)
-                    start_tls = not use_tls
-                    async with aiosmtplib.SMTP(
-                        hostname=sender.smtp_host,
-                        port=sender.smtp_port,
-                        use_tls=use_tls,
-                        start_tls=start_tls,
-                        timeout=20.0
-                    ) as smtp:
-                        await smtp.login(sender.smtp_user, smtp_pass)
-                        await smtp.send_message(msg)
+                    # Smart SMTP dispatch with automatic fallback between 587 (STARTTLS) and 465 (SSL)
+                    ports_to_try = [sender.smtp_port]
+                    if sender.smtp_port == 587 and 465 not in ports_to_try:
+                        ports_to_try.append(465)
+                    elif sender.smtp_port == 465 and 587 not in ports_to_try:
+                        ports_to_try.append(587)
+
+                    dispatched = False
+                    last_dispatch_err = None
+                    for try_port in ports_to_try:
+                        use_tls = (try_port == 465)
+                        start_tls = not use_tls
+                        try:
+                            async with aiosmtplib.SMTP(
+                                hostname=sender.smtp_host,
+                                port=try_port,
+                                use_tls=use_tls,
+                                start_tls=start_tls,
+                                timeout=20.0
+                            ) as smtp:
+                                await smtp.login(sender.smtp_user, smtp_pass)
+                                await smtp.send_message(msg)
+                            dispatched = True
+                            if try_port != sender.smtp_port:
+                                sender.smtp_port = try_port
+                                db.commit()
+                            break
+                        except Exception as send_err:
+                            last_dispatch_err = send_err
+                            logger.warning(f"SMTP send via port {try_port} failed: {send_err}. Trying fallback port if available...")
+
+                    if not dispatched:
+                        raise last_dispatch_err
 
                 lead.status = "SENT"
                 lead.sent_at = datetime.utcnow()

@@ -186,10 +186,19 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
       headers,
     });
   } catch (netErr: any) {
-    console.error("apiFetch network failure:", netErr);
-    throw new Error(
-      `Unable to connect to backend server at ${base}. Please ensure the FastAPI backend is running on port 8000.`
-    );
+    // Quick retry after 800ms in case backend was briefly restarting
+    try {
+      await new Promise((r) => setTimeout(r, 800));
+      res = await fetch(`${base}${cleanEndpoint}`, {
+        ...options,
+        headers,
+      });
+    } catch (retryErr: any) {
+      console.error("apiFetch network failure:", retryErr);
+      throw new Error(
+        `Unable to connect to backend server at ${base}. Please ensure the FastAPI backend is running on port 8000.`
+      );
+    }
   }
 
   if (res.status === 401) {

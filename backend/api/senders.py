@@ -56,22 +56,39 @@ async def connect_sender(
     clean_user = req.smtp_user.strip()
     clean_email = str(req.email).lower().strip()
 
-    # Test SMTP credentials live
-    use_tls = (req.smtp_port == 465)
-    start_tls = not use_tls
-    try:
-        async with aiosmtplib.SMTP(
-            hostname=req.smtp_host.strip(),
-            port=req.smtp_port,
-            use_tls=use_tls,
-            start_tls=start_tls,
-            timeout=15.0
-        ) as smtp:
-            await smtp.login(clean_user, clean_password)
-    except Exception as e:
+    # Test SMTP credentials live with automatic port fallback (587 STARTTLS <-> 465 SSL)
+    test_ports = [req.smtp_port]
+    if req.smtp_port == 587 and 465 not in test_ports:
+        test_ports.append(465)
+    elif req.smtp_port == 465 and 587 not in test_ports:
+        test_ports.append(587)
+
+    connected = False
+    effective_port = req.smtp_port
+    last_err = None
+
+    for port_to_test in test_ports:
+        use_tls = (port_to_test == 465)
+        start_tls = not use_tls
+        try:
+            async with aiosmtplib.SMTP(
+                hostname=req.smtp_host.strip(),
+                port=port_to_test,
+                use_tls=use_tls,
+                start_tls=start_tls,
+                timeout=12.0
+            ) as smtp:
+                await smtp.login(clean_user, clean_password)
+            connected = True
+            effective_port = port_to_test
+            break
+        except Exception as e:
+            last_err = e
+
+    if not connected:
         raise HTTPException(
             status_code=400,
-            detail=f"Mailbox authentication failed: {str(e)}. If using Gmail, make sure you use a 16-character App Password (not your normal Google account password) and that 2-Step Verification is turned on."
+            detail=f"Mailbox authentication failed: {str(last_err)}. If using Gmail, make sure you use a 16-character App Password (not your normal Google account password) and that 2-Step Verification is turned on."
         )
 
     pass_enc = encrypt_password(clean_password, current_user.id)
@@ -86,7 +103,7 @@ async def connect_sender(
         sender.display_name = req.display_name.strip()
         sender.provider = req.provider
         sender.smtp_host = req.smtp_host.strip()
-        sender.smtp_port = req.smtp_port
+        sender.smtp_port = effective_port
         sender.smtp_user = clean_user
         sender.smtp_password_enc = pass_enc
         sender.status = "VERIFIED"
@@ -98,7 +115,7 @@ async def connect_sender(
             display_name=req.display_name.strip(),
             provider=req.provider,
             smtp_host=req.smtp_host.strip(),
-            smtp_port=req.smtp_port,
+            smtp_port=effective_port,
             smtp_user=clean_user,
             smtp_password_enc=pass_enc,
             status="VERIFIED",
