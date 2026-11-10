@@ -209,7 +209,13 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   }
 
   if (!res.ok) {
-    throw new Error(data.detail || data.message || "Request failed");
+    const msg =
+      typeof data.detail === "string"
+        ? data.detail
+        : Array.isArray(data.detail)
+        ? data.detail.map((e: any) => e.msg || JSON.stringify(e)).join(", ")
+        : data.message || "Request failed";
+    throw new Error(msg);
   }
 
   return data as T;

@@ -60,9 +60,16 @@ async def global_exception_handler(request: Request, exc: Exception):
     import traceback
     tb = traceback.format_exc()
     logger.error(f"Global exception on {request.method} {request.url.path}: {exc}\n{tb}")
+    origin = request.headers.get("origin") or "http://localhost:3000"
     return JSONResponse(
         status_code=500,
-        content={"detail": str(exc), "traceback": tb}
+        content={"detail": str(exc), "traceback": tb},
+        headers={
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
     )
 
 @app.on_event("startup")

@@ -242,12 +242,15 @@ def create_campaign(
         already_sent_emails = set(
             e[0].lower().strip() for e in db.query(Lead.email).filter(
                 Lead.user_id == current_user.id,
-                Lead.status.in_(["SENT", "OPENED", "REPLIED"])
-            ).all()
+                Lead.status.in_(["SENT", "OPENED", "REPLIED"]),
+                Lead.email != None
+            ).all() if e and e[0]
         )
 
     assigned_in_this_campaign = set()
     for l in target_leads:
+        if not l.email or not l.email.strip() or l.email.endswith("@outreachbot.local"):
+            continue
         clean_email = l.email.lower().strip()
         if req.send_only_once and (clean_email in already_sent_emails or clean_email in assigned_in_this_campaign):
             l.status = "SKIPPED"
@@ -405,6 +408,11 @@ async def execute_send_batch(campaign_id: str, user_id: str):
             if campaign.status in ("PAUSED", "STOPPED", "DRAFT"):
                 logger.info(f"Campaign {campaign.id} paused/stopped by user. Halting send loop.")
                 break
+
+            if not lead.email or not lead.email.strip() or lead.email.endswith("@outreachbot.local"):
+                lead.status = "SKIPPED"
+                db.commit()
+                continue
 
             clean_email = lead.email.lower().strip()
 
