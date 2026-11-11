@@ -66,12 +66,12 @@ export function Sidebar() {
             </div>
           </div>
           <div>
-            <h1 className="font-extrabold text-sm tracking-tight text-white flex items-center gap-1.5">
-              <span>OutreachBot</span>
+            <h1 className="font-black text-sm tracking-tight text-white flex items-center gap-1.5">
+              <span>RankReach AI</span>
               <Sparkles className="w-3.5 h-3.5 text-purple-400" />
             </h1>
             <p className="text-[10px] bg-gradient-to-r from-purple-400 via-fuchsia-300 to-white bg-clip-text text-transparent font-black uppercase tracking-widest animate-gradient-text">
-              Black &amp; Purple Pro
+              SERP &amp; OUTREACH OS
             </p>
           </div>
         </Link>

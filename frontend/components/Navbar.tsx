@@ -76,10 +76,10 @@ export function Navbar() {
             </div>
             <div>
               <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-zinc-100 to-purple-300 bg-clip-text text-transparent">
-                OutreachBot
+                RankReach
               </span>
               <span className="ml-2 text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/40">
-                Pro
+                AI PRO
               </span>
             </div>
           </Link>

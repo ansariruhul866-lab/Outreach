@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { createPortal } from "react-dom";
 import { api, Sender } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
@@ -241,7 +242,8 @@ function FormattedArticleRenderer({ markdown }: { markdown: string }) {
   );
 }
 
-export default function SerpDiscoveryPage() {
+function SerpDiscoveryContent() {
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("best custom clothing store");
   const [purpose, setPurpose] = useState("KEYWORD");
@@ -286,7 +288,25 @@ export default function SerpDiscoveryPage() {
   useEffect(() => {
     setMounted(true);
     loadSendersAndReplies();
-  }, []);
+
+    // Read URL query params from landing page search
+    const paramQ = searchParams?.get("q");
+    const paramP = searchParams?.get("purpose") || searchParams?.get("p");
+    const paramR = searchParams?.get("region") || searchParams?.get("r");
+    const autoRun = searchParams?.get("auto");
+
+    const effectiveP = paramP || "KEYWORD";
+    const effectiveR = paramR || "in-en";
+
+    if (paramP) setPurpose(paramP);
+    if (paramR) setRegion(paramR);
+    if (paramQ) {
+      setQuery(paramQ);
+      if (autoRun === "1" || autoRun === "true") {
+        executeSearch(paramQ, effectiveP, effectiveR);
+      }
+    }
+  }, [searchParams]);
 
   const loadSendersAndReplies = async () => {
     try {
@@ -304,9 +324,8 @@ export default function SerpDiscoveryPage() {
     }
   };
 
-  const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!query.trim()) return;
+  const executeSearch = async (targetQuery: string, targetPurpose: string, targetRegion: string) => {
+    if (!targetQuery.trim()) return;
 
     setSearching(true);
     setSerpResults([]);
@@ -318,9 +337,9 @@ export default function SerpDiscoveryPage() {
 
     try {
       const res = await api.discovery.getSerp({
-        query: query.trim(),
-        purpose,
-        region,
+        query: targetQuery.trim(),
+        purpose: targetPurpose,
+        region: targetRegion,
         num_results: 20,
       });
 
@@ -329,10 +348,10 @@ export default function SerpDiscoveryPage() {
       setSelectedRanks(items.map((r) => r.rank));
 
       // Auto-trigger intent-based analysis
-      if (purpose === "KEYWORD" && items.length > 0) {
-        triggerKeywordPlan(items);
-      } else if (purpose === "COMPETITOR" && items.length > 0) {
-        triggerCompetitorStrategy(items);
+      if (targetPurpose === "KEYWORD" && items.length > 0) {
+        triggerKeywordPlan(items, targetQuery);
+      } else if (targetPurpose === "COMPETITOR" && items.length > 0) {
+        triggerCompetitorStrategy(items, targetQuery);
       }
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to crawl SERP");
@@ -341,14 +360,20 @@ export default function SerpDiscoveryPage() {
     }
   };
 
-  const triggerKeywordPlan = async (sites?: SerpItem[]) => {
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    executeSearch(query, purpose, region);
+  };
+
+  const triggerKeywordPlan = async (sites?: SerpItem[], customQuery?: string) => {
+    const targetQuery = (customQuery || query).trim();
     const targetSites = sites || serpResults.slice(0, 5);
-    if (!query.trim() || targetSites.length === 0) return;
+    if (!targetQuery || targetSites.length === 0) return;
 
     setLoadingKeywordPlan(true);
     try {
       const plan = await api.discovery.getKeywordPlan({
-        query: query.trim(),
+        query: targetQuery,
         region,
         top_sites: targetSites,
       });
@@ -360,14 +385,15 @@ export default function SerpDiscoveryPage() {
     }
   };
 
-  const triggerCompetitorStrategy = async (sites?: SerpItem[]) => {
+  const triggerCompetitorStrategy = async (sites?: SerpItem[], customQuery?: string) => {
+    const targetQuery = (customQuery || query).trim();
     const targetSites = sites || serpResults.slice(0, 6);
-    if (!query.trim() || targetSites.length === 0) return;
+    if (!targetQuery || targetSites.length === 0) return;
 
     setLoadingCompetitorStrategy(true);
     try {
       const strat = await api.discovery.getCompetitorStrategy({
-        query: query.trim(),
+        query: targetQuery,
         region,
         selected_competitors: targetSites,
       });
@@ -1917,5 +1943,19 @@ export default function SerpDiscoveryPage() {
         document.body
       )}
     </div>
+  );
+}
+
+export default function SerpDiscoveryPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center text-purple-300">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      }
+    >
+      <SerpDiscoveryContent />
+    </Suspense>
   );
 }

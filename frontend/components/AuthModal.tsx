@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { auth, googleProvider } from "@/lib/firebase";
 import {
   signInWithPopup,
@@ -37,8 +38,13 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
 
   const { login } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleGoogleSignIn = () => {
     setError(null);
@@ -64,7 +70,9 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
           const res = await api.auth.signup(name.trim(), email.trim(), password);
           login(res.access_token, res.user);
           onClose();
-          window.location.href = "/dashboard";
+          const redirect = (typeof window !== "undefined" && sessionStorage.getItem("pending_search")) || "/dashboard";
+          if (typeof window !== "undefined") sessionStorage.removeItem("pending_search");
+          window.location.href = redirect;
           return;
         } catch (backendErr: any) {
           // If already exists or direct signup threw specific error, throw or fallback
@@ -87,7 +95,9 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
           const res = await api.auth.login(email.trim(), password);
           login(res.access_token, res.user);
           onClose();
-          window.location.href = "/dashboard";
+          const redirect = (typeof window !== "undefined" && sessionStorage.getItem("pending_search")) || "/dashboard";
+          if (typeof window !== "undefined") sessionStorage.removeItem("pending_search");
+          window.location.href = redirect;
           return;
         } catch (backendErr: any) {
           // If invalid credentials or user not found, throw immediately
@@ -127,12 +137,12 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-8 bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl text-slate-100">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-8 bg-zinc-950 border border-purple-500/40 rounded-3xl shadow-[0_0_60px_rgba(168,85,247,0.35)] text-white">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
+          className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -343,6 +353,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
