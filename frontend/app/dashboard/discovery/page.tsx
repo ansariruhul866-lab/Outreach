@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { api, Sender } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -102,7 +103,71 @@ const PRESET_QUERIES = [
   "digital marketing agency in india",
 ];
 
+function FormattedArticleRenderer({ markdown }: { markdown: string }) {
+  const blocks = markdown.split("\n\n");
+
+  return (
+    <div className="space-y-4 max-w-4xl mx-auto py-2">
+      {blocks.map((block, bIdx) => {
+        const trimmed = block.trim();
+        if (!trimmed) return null;
+
+        // Heading 1
+        if (trimmed.startsWith("# ")) {
+          return (
+            <h1 key={bIdx} className="text-2xl sm:text-3xl font-black text-white mt-8 mb-4 tracking-tight border-b border-purple-500/20 pb-3">
+              {trimmed.replace(/^#\s+/, "")}
+            </h1>
+          );
+        }
+
+        // Heading 2
+        if (trimmed.startsWith("## ")) {
+          return (
+            <h2 key={bIdx} className="text-xl font-black text-purple-200 mt-7 mb-3 flex items-center gap-2">
+              <span className="w-1.5 h-5 rounded-full bg-gradient-to-b from-purple-500 to-fuchsia-500" />
+              <span>{trimmed.replace(/^##\s+/, "")}</span>
+            </h2>
+          );
+        }
+
+        // Heading 3
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h3 key={bIdx} className="text-base font-bold text-white mt-5 mb-2 pl-3 border-l-2 border-purple-400">
+              {trimmed.replace(/^###\s+/, "")}
+            </h3>
+          );
+        }
+
+        // Bullet lists
+        if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+          const items = trimmed.split("\n");
+          return (
+            <ul key={bIdx} className="space-y-1.5 my-2 pl-2">
+              {items.map((item, iIdx) => (
+                <li key={iIdx} className="flex items-start gap-2 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                  <span className="text-purple-400 font-bold mt-1 text-xs">•</span>
+                  <span>{item.replace(/^[-*]\s+/, "")}</span>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
+        // Regular paragraph
+        return (
+          <p key={bIdx} className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+            {trimmed}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function SerpDiscoveryPage() {
+  const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("best custom clothing store");
   const [purpose, setPurpose] = useState("EDITORIAL");
   const [region, setRegion] = useState("in-en");
@@ -136,6 +201,7 @@ export default function SerpDiscoveryPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     loadSendersAndReplies();
   }, []);
 
@@ -889,365 +955,385 @@ export default function SerpDiscoveryPage() {
         )}
       </div>
 
-      {/* AI Copywriter Humanized Blog Drafter Modal */}
-      <AnimatePresence>
-        {blogModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-5xl max-h-[92vh] rounded-3xl glass-card border border-purple-500/40 bg-zinc-950 flex flex-col shadow-2xl overflow-hidden"
-            >
-              {/* Modal Header */}
-              <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between gap-4 bg-gradient-to-r from-purple-950/40 via-black to-zinc-950">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-purple-900/50">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                      <span>Humanized AI Blog &amp; Schema Generator</span>
-                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
-                        98% Human Authenticity
+      {/* AI Copywriter Humanized Blog Drafter Modal (Portaled directly to document.body for highest z-index) */}
+      {mounted && blogModalOpen && createPortal(
+        <div
+          onClick={() => setBlogModalOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 md:p-8 bg-black/90 backdrop-blur-xl overflow-y-auto"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 15 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-5xl max-h-[90vh] rounded-3xl glass-card border border-purple-500/40 bg-zinc-950 flex flex-col shadow-[0_0_60px_rgba(168,85,247,0.3)] overflow-hidden my-auto"
+          >
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between gap-4 bg-gradient-to-r from-purple-950/60 via-black to-zinc-950 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-purple-900/50">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                    <span>Humanized AI Blog &amp; Schema Generator</span>
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+                      98% Human Authenticity
+                    </span>
+                  </h2>
+                  <p className="text-xs text-zinc-400">
+                    Trained in lifestyle publication copywriting voice • 0 AI fluff • Valid Google Rich Results Schema
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setBlogModalOpen(false)}
+                className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                title="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body / Loading State */}
+            {draftingBlog ? (
+              <div className="py-28 text-center space-y-4">
+                <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto" />
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-white">AI Copywriter Crafting Humanized Post...</h3>
+                  <p className="text-xs text-zinc-400 max-w-md mx-auto">
+                    Reverse-engineering competitor headings, targeting secondary keywords, and applying burstiness filters to eliminate generic robotic patterns.
+                  </p>
+                </div>
+              </div>
+            ) : draftedBlog ? (
+              <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                {/* Top Info Bar: Headline & Actions */}
+                <div className="p-5 border-b border-white/5 bg-black/50 space-y-3 shrink-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300">
+                        HEADLINE (H1):
                       </span>
-                    </h2>
-                    <p className="text-xs text-zinc-400">
-                      Trained in lifestyle publication copywriting voice • 0 AI fluff • Valid Google Rich Results Schema
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setBlogModalOpen(false)}
-                  className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Modal Body / Loading State */}
-              {draftingBlog ? (
-                <div className="py-24 text-center space-y-4">
-                  <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto" />
-                  <div className="space-y-1">
-                    <h3 className="text-base font-bold text-white">AI Copywriter Crafting Humanized Post...</h3>
-                    <p className="text-xs text-zinc-400 max-w-md mx-auto">
-                      Reverse-engineering competitor headings, targeting secondary keywords, and applying burstiness filters to eliminate generic robotic patterns.
-                    </p>
-                  </div>
-                </div>
-              ) : draftedBlog ? (
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  {/* Top Bar: Title, Meta & Quality Metrics */}
-                  <div className="p-5 border-b border-white/5 bg-black/40 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300">
-                          Target Headline (H1):
-                        </span>
-                        <h3 className="text-sm sm:text-base font-black text-white">
-                          {draftedBlog.title}
-                        </h3>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => copyToClipboard(draftedBlog.humanized_blog_markdown, "all_md")}
-                          className="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500 text-white text-xs font-bold transition-all flex items-center gap-1.5"
-                        >
-                          {copiedKey === "all_md" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{copiedKey === "all_md" ? "Copied!" : "Copy Markdown"}</span>
-                        </button>
-
-                        <button
-                          onClick={() => downloadTextFile(draftedBlog.humanized_blog_markdown, `${query.replace(/\s+/g, '_')}_blog.md`, "text/markdown")}
-                          className="p-1.5 rounded-xl border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
-                          title="Download Markdown File"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <h3 className="text-sm sm:text-base font-black text-white truncate">
+                        {draftedBlog.title}
+                      </h3>
                     </div>
 
-                    {/* Meta Description & Primary Keywords */}
-                    <div className="grid sm:grid-cols-3 gap-3 pt-1">
-                      <div className="sm:col-span-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-zinc-400">
-                            SEO Meta Description (155 Chars):
-                          </span>
-                          <button
-                            onClick={() => copyToClipboard(draftedBlog.meta_description || "", "meta")}
-                            className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1"
-                          >
-                            <Copy className="w-3 h-3" />
-                            <span>{copiedKey === "meta" ? "Copied" : "Copy"}</span>
-                          </button>
-                        </div>
-                        <p className="text-xs text-zinc-300 leading-relaxed">
-                          {draftedBlog.meta_description}
-                        </p>
-                      </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => copyToClipboard(draftedBlog.humanized_blog_markdown, "all_md")}
+                        className="px-3.5 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500 text-white text-xs font-bold transition-all flex items-center gap-1.5"
+                      >
+                        {copiedKey === "all_md" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedKey === "all_md" ? "Copied!" : "Copy Markdown"}</span>
+                      </button>
 
-                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <button
+                        onClick={() => downloadTextFile(draftedBlog.humanized_blog_markdown, `${query.replace(/\s+/g, '_')}_blog.md`, "text/markdown")}
+                        className="p-1.5 rounded-xl border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
+                        title="Download Markdown File"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Meta Description & Primary Keywords */}
+                  <div className="grid sm:grid-cols-3 gap-3 pt-1">
+                    <div className="sm:col-span-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <div className="flex items-center justify-between">
                         <span className="text-[9px] font-black uppercase tracking-wider text-zinc-400">
-                          Focus Keywords:
+                          META DESCRIPTION (155 CHARS):
                         </span>
-                        <div className="flex flex-wrap gap-1">
-                          {draftedBlog.secondary_keywords?.slice(0, 4).map((kw, i) => (
-                            <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-200 border border-purple-500/20 font-medium">
-                              #{kw}
-                            </span>
-                          ))}
-                        </div>
+                        <button
+                          onClick={() => copyToClipboard(draftedBlog.meta_description || "", "meta")}
+                          className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>{copiedKey === "meta" ? "Copied" : "Copy"}</span>
+                        </button>
                       </div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        {draftedBlog.meta_description}
+                      </p>
                     </div>
 
-                    {/* Navigation Tabs */}
-                    <div className="flex items-center gap-2 pt-2 border-t border-white/5">
-                      <button
-                        onClick={() => setBlogActiveTab("preview")}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                          blogActiveTab === "preview"
-                            ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        <span>Formatted Article</span>
-                      </button>
-
-                      <button
-                        onClick={() => setBlogActiveTab("markdown")}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                          blogActiveTab === "markdown"
-                            ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>Markdown</span>
-                      </button>
-
-                      <button
-                        onClick={() => setBlogActiveTab("html")}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                          blogActiveTab === "html"
-                            ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        <Code className="w-3.5 h-3.5" />
-                        <span>Semantic HTML</span>
-                      </button>
-
-                      <button
-                        onClick={() => setBlogActiveTab("schema")}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                          blogActiveTab === "schema"
-                            ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        <Layers className="w-3.5 h-3.5" />
-                        <span>JSON-LD Schema</span>
-                      </button>
-
-                      <button
-                        onClick={() => setBlogActiveTab("seo")}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                          blogActiveTab === "seo"
-                            ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>Quality &amp; SEO Notes</span>
-                      </button>
+                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-zinc-400">
+                        FOCUS KEYWORDS:
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {draftedBlog.secondary_keywords?.slice(0, 4).map((kw, i) => (
+                          <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-200 border border-purple-500/20 font-medium">
+                            #{kw}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Tab Panes */}
-                  <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                    {blogActiveTab === "preview" && (
-                      <div className="prose prose-invert max-w-none space-y-4 text-zinc-200 text-sm leading-relaxed">
-                        <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 text-xs text-purple-200">
-                          💡 <strong>Copywriter Humanization Applied:</strong> Burstiness pacing applied, sensory fabric drapes &amp; measurement details included, 0 robotic clichés. Ready for direct publication.
-                        </div>
+                  {/* Navigation Tabs */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-white/5 overflow-x-auto">
+                    <button
+                      onClick={() => setBlogActiveTab("preview")}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                        blogActiveTab === "preview"
+                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
+                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>Formatted Article</span>
+                    </button>
 
-                        <div className="p-6 rounded-2xl bg-black/60 border border-white/5 whitespace-pre-wrap font-sans space-y-3 leading-relaxed text-zinc-100">
-                          {draftedBlog.humanized_blog_markdown}
-                        </div>
-                      </div>
-                    )}
+                    <button
+                      onClick={() => setBlogActiveTab("markdown")}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                        blogActiveTab === "markdown"
+                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
+                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Markdown</span>
+                    </button>
 
-                    {blogActiveTab === "markdown" && (
-                      <div className="space-y-3">
-                        <div className="flex justify-end">
-                          <button
-                            onClick={() => copyToClipboard(draftedBlog.humanized_blog_markdown, "raw_md")}
-                            className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>{copiedKey === "raw_md" ? "Copied Markdown!" : "Copy Raw Markdown"}</span>
-                          </button>
-                        </div>
-                        <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-zinc-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
-                          {draftedBlog.humanized_blog_markdown}
-                        </pre>
-                      </div>
-                    )}
+                    <button
+                      onClick={() => setBlogActiveTab("html")}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                        blogActiveTab === "html"
+                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
+                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <Code className="w-3.5 h-3.5" />
+                      <span>Semantic HTML</span>
+                    </button>
 
-                    {blogActiveTab === "html" && (
-                      <div className="space-y-3">
-                        <div className="flex justify-end">
-                          <button
-                            onClick={() => copyToClipboard(draftedBlog.clean_html || "", "clean_html")}
-                            className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>{copiedKey === "clean_html" ? "Copied HTML!" : "Copy Clean HTML"}</span>
-                          </button>
-                        </div>
-                        <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-purple-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
-                          {draftedBlog.clean_html || "<p>HTML conversion generated</p>"}
-                        </pre>
-                      </div>
-                    )}
+                    <button
+                      onClick={() => setBlogActiveTab("schema")}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                        blogActiveTab === "schema"
+                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
+                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>JSON-LD Schema</span>
+                    </button>
 
-                    {blogActiveTab === "schema" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="text-xs text-zinc-400">
-                            Valid <code className="text-purple-300">schema.org</code> JSON-LD script (Article + FAQPage). Paste directly into your site's <code className="text-purple-300">&lt;head&gt;</code>.
-                          </div>
-                          <button
-                            onClick={() => copyToClipboard(draftedBlog.schema_json_ld || "", "schema")}
-                            className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>{copiedKey === "schema" ? "Copied Schema!" : "Copy JSON-LD"}</span>
-                          </button>
-                        </div>
-                        <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-emerald-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
-                          {draftedBlog.schema_json_ld || '{"@context": "https://schema.org"}'}
-                        </pre>
-                      </div>
-                    )}
-
-                    {blogActiveTab === "seo" && (
-                      <div className="space-y-4">
-                        <div className="grid sm:grid-cols-3 gap-4">
-                          <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
-                            <span className="text-[10px] font-bold uppercase text-purple-300">Human Authenticity:</span>
-                            <div className="text-2xl font-black text-white">98%</div>
-                            <p className="text-[10px] text-zinc-400">Evaluated against 15+ robotic AI phrase triggers.</p>
-                          </div>
-
-                          <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
-                            <span className="text-[10px] font-bold uppercase text-purple-300">Target SERP:</span>
-                            <div className="text-2xl font-black text-white">{query}</div>
-                            <p className="text-[10px] text-zinc-400">Optimized for regional Google search rank.</p>
-                          </div>
-
-                          <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
-                            <span className="text-[10px] font-bold uppercase text-purple-300">Schema Validation:</span>
-                            <div className="text-2xl font-black text-emerald-400">Valid ✓</div>
-                            <p className="text-[10px] text-zinc-400">Article &amp; FAQPage Rich Results ready.</p>
-                          </div>
-                        </div>
-
-                        {draftedBlog.copywriter_insights && (
-                          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-                            <span className="text-[10px] font-bold uppercase text-purple-300">Copywriter Strategy Note:</span>
-                            <p className="text-xs text-zinc-200 leading-relaxed">
-                              {draftedBlog.copywriter_insights}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    <button
+                      onClick={() => setBlogActiveTab("seo")}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                        blogActiveTab === "seo"
+                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
+                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>Quality &amp; SEO Notes</span>
+                    </button>
                   </div>
                 </div>
-              ) : null}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
-      {/* Reply Review & Approval Modal */}
-      <AnimatePresence>
-        {replyModalOpen && selectedReply && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-2xl rounded-3xl glass-card border border-purple-500/40 p-6 space-y-4 bg-zinc-950"
-            >
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-purple-600/30 flex items-center justify-center text-purple-300">
-                    <MessageSquare className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-white">Prospect Reply Review</h3>
-                    <p className="text-[11px] text-zinc-400">{selectedReply.company} ({selectedReply.email})</p>
-                  </div>
+                {/* Tab Panes */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
+                  {blogActiveTab === "preview" && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 text-xs text-purple-200">
+                        💡 <strong>Copywriter Humanization Applied:</strong> Burstiness pacing applied, sensory fabric drapes &amp; measurement details included, 0 robotic clichés. Ready for direct publication.
+                      </div>
+
+                      <div className="p-6 rounded-2xl bg-black/60 border border-white/5">
+                        <FormattedArticleRenderer markdown={draftedBlog.humanized_blog_markdown} />
+                      </div>
+                    </div>
+                  )}
+
+                  {blogActiveTab === "markdown" && (
+                    <div className="space-y-3">
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => copyToClipboard(draftedBlog.humanized_blog_markdown, "raw_md")}
+                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{copiedKey === "raw_md" ? "Copied Markdown!" : "Copy Raw Markdown"}</span>
+                        </button>
+                      </div>
+                      <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-zinc-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                        {draftedBlog.humanized_blog_markdown}
+                      </pre>
+                    </div>
+                  )}
+
+                  {blogActiveTab === "html" && (
+                    <div className="space-y-3">
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => copyToClipboard(draftedBlog.clean_html || "", "clean_html")}
+                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{copiedKey === "clean_html" ? "Copied HTML!" : "Copy Clean HTML"}</span>
+                        </button>
+                      </div>
+                      <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-purple-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                        {draftedBlog.clean_html || "<p>HTML conversion generated</p>"}
+                      </pre>
+                    </div>
+                  )}
+
+                  {blogActiveTab === "schema" && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-zinc-400">
+                          Valid <code className="text-purple-300">schema.org</code> JSON-LD script (Article + FAQPage). Paste directly into your site's <code className="text-purple-300">&lt;head&gt;</code>.
+                        </div>
+                        <button
+                          onClick={() => copyToClipboard(draftedBlog.schema_json_ld || "", "schema")}
+                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{copiedKey === "schema" ? "Copied Schema!" : "Copy JSON-LD"}</span>
+                        </button>
+                      </div>
+                      <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-emerald-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                        {draftedBlog.schema_json_ld || '{"@context": "https://schema.org"}'}
+                      </pre>
+                    </div>
+                  )}
+
+                  {blogActiveTab === "seo" && (
+                    <div className="space-y-4">
+                      <div className="grid sm:grid-cols-3 gap-4">
+                        <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-purple-300">Human Authenticity:</span>
+                          <div className="text-2xl font-black text-white">98%</div>
+                          <p className="text-[10px] text-zinc-400">Evaluated against 15+ robotic AI phrase triggers.</p>
+                        </div>
+
+                        <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-purple-300">Target SERP:</span>
+                          <div className="text-2xl font-black text-white truncate">{query}</div>
+                          <p className="text-[10px] text-zinc-400">Optimized for regional Google search rank.</p>
+                        </div>
+
+                        <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-purple-300">Schema Validation:</span>
+                          <div className="text-2xl font-black text-emerald-400">Valid ✓</div>
+                          <p className="text-[10px] text-zinc-400">Article &amp; FAQPage Rich Results ready.</p>
+                        </div>
+                      </div>
+
+                      {draftedBlog.copywriter_insights && (
+                        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-purple-300">Copywriter Strategy Note:</span>
+                          <p className="text-xs text-zinc-200 leading-relaxed">
+                            {draftedBlog.copywriter_insights}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={() => setReplyModalOpen(false)}
-                  className="text-zinc-400 hover:text-white text-xs px-2.5 py-1 rounded-lg border border-white/10"
-                >
-                  Close
-                </button>
-              </div>
 
-              {/* Prospect Message */}
-              <div className="p-4 rounded-2xl bg-black/50 border border-white/5 space-y-1">
-                <span className="text-[10px] font-bold uppercase text-purple-300">Prospect's Incoming Message:</span>
-                <p className="text-xs text-zinc-200 whitespace-pre-wrap leading-relaxed">{selectedReply.reply_body}</p>
-              </div>
-
-              {/* AI Draft Response */}
-              <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/30 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase text-purple-300 flex items-center gap-1.5">
-                    <Bot className="w-3.5 h-3.5" />
-                    <span>Gemini AI Drafted Reply:</span>
-                  </span>
-                  <span className="text-[10px] text-zinc-400">Review &amp; Approve</span>
+                {/* Modal Footer */}
+                <div className="p-4 border-t border-white/10 flex items-center justify-between bg-black/60 shrink-0">
+                  <div className="text-xs text-zinc-400">
+                    Model: <span className="font-mono text-purple-300">{draftedBlog.model_used || "gemini-flash-lite-latest"}</span>
+                  </div>
+                  <button
+                    onClick={() => setBlogModalOpen(false)}
+                    className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-colors"
+                  >
+                    Done / Close
+                  </button>
                 </div>
-                <textarea
-                  rows={6}
-                  defaultValue={selectedReply.ai_draft_reply || ""}
-                  className="w-full p-3 glass-input rounded-xl text-xs text-white font-mono leading-relaxed focus:outline-none"
-                />
               </div>
+            ) : null}
+          </motion.div>
+        </div>,
+        document.body
+      )}
 
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  onClick={() => setReplyModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-white/10 text-xs text-zinc-400 hover:text-white"
-                >
-                  Save as Draft
-                </button>
-                <button
-                  onClick={() => {
-                    alert(`Reply sent to ${selectedReply.email}!`);
-                    setReplyModalOpen(false);
-                  }}
-                  className="px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-900/50 flex items-center gap-2"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Send Reply Now</span>
-                </button>
+      {/* Reply Review & Approval Modal (Portaled) */}
+      {mounted && replyModalOpen && selectedReply && createPortal(
+        <div
+          onClick={() => setReplyModalOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl rounded-3xl glass-card border border-purple-500/40 p-6 space-y-4 bg-zinc-950 my-auto shadow-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-purple-600/30 flex items-center justify-center text-purple-300">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white">Prospect Reply Review</h3>
+                  <p className="text-[11px] text-zinc-400">{selectedReply.company} ({selectedReply.email})</p>
+                </div>
               </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              <button
+                onClick={() => setReplyModalOpen(false)}
+                className="text-zinc-400 hover:text-white text-xs px-2.5 py-1 rounded-lg border border-white/10"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* Prospect Message */}
+            <div className="p-4 rounded-2xl bg-black/50 border border-white/5 space-y-1">
+              <span className="text-[10px] font-bold uppercase text-purple-300">Prospect's Incoming Message:</span>
+              <p className="text-xs text-zinc-200 whitespace-pre-wrap leading-relaxed">{selectedReply.reply_body}</p>
+            </div>
+
+            {/* AI Draft Response */}
+            <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase text-purple-300 flex items-center gap-1.5">
+                  <Bot className="w-3.5 h-3.5" />
+                  <span>Gemini AI Drafted Reply:</span>
+                </span>
+                <span className="text-[10px] text-zinc-400">Review &amp; Approve</span>
+              </div>
+              <textarea
+                rows={6}
+                defaultValue={selectedReply.ai_draft_reply || ""}
+                className="w-full p-3 glass-input rounded-xl text-xs text-white font-mono leading-relaxed focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setReplyModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-white/10 text-xs text-zinc-400 hover:text-white"
+              >
+                Save as Draft
+              </button>
+              <button
+                onClick={() => {
+                  alert(`Reply sent to ${selectedReply.email}!`);
+                  setReplyModalOpen(false);
+                }}
+                className="px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-900/50 flex items-center gap-2"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Send Reply Now</span>
+              </button>
+            </div>
+          </motion.div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
