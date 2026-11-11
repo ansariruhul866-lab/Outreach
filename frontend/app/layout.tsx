@@ -10,9 +10,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "OutreachBot — Next.js Cold Outreach & Deep Email Scraper",
+  title: "OutRank AI — Autonomous SERP Intelligence & Multi-Channel Outreach OS",
   description:
-    "Automated deep web scraper, 7-layer MX spam verification, and Gmail API cold outreach dispatcher.",
+    "Crawl Google SERP, analyze competitor gaps, draft humanized SEO blogs with schema, extract verified emails, and dispatch automated cold outreach.",
 };
 
 export default function RootLayout({

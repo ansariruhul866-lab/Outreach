@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { BrandLogo } from "./BrandLogo";
 import {
   LayoutDashboard,
   Search,
@@ -58,23 +59,9 @@ export function Sidebar() {
     <aside className="w-64 border-r border-purple-500/20 bg-black/70 backdrop-blur-3xl p-6 flex flex-col justify-between shrink-0 min-h-screen relative z-10 shadow-[10px_0_40px_rgba(0,0,0,0.8)]">
       <div>
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-3 mb-6 group block">
-          <div className="relative">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-800 opacity-70 blur-md group-hover:opacity-100 transition duration-300" />
-            <div className="relative h-10 w-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-600 to-fuchsia-500 flex items-center justify-center font-black text-lg text-white shadow-xl shadow-purple-900/50">
-              ⚡
-            </div>
-          </div>
-          <div>
-            <h1 className="font-black text-sm tracking-tight text-white flex items-center gap-1.5">
-              <span>RankReach AI</span>
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            </h1>
-            <p className="text-[10px] bg-gradient-to-r from-purple-400 via-fuchsia-300 to-white bg-clip-text text-transparent font-black uppercase tracking-widest animate-gradient-text">
-              SERP &amp; OUTREACH OS
-            </p>
-          </div>
-        </Link>
+        <div className="mb-6">
+          <BrandLogo size="md" />
+        </div>
 
         {/* Grouped Navigation */}
         <nav className="space-y-4">

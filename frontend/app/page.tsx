@@ -118,30 +118,18 @@ export default function LandingPage() {
 
       <Navbar />
 
-      <main className="flex-1 max-w-6xl mx-auto px-6 pt-16 pb-24 text-center relative z-10">
-        {/* Glow badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border border-purple-500/30 text-xs font-bold text-purple-300 mb-8 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-          <span>RankReach AI &bull; Autonomous SERP Intelligence &amp; Multi-Channel Outreach OS</span>
-        </motion.div>
-
-        {/* Hero title */}
+      <main className="flex-1 max-w-6xl mx-auto px-6 pt-12 sm:pt-16 pb-24 text-center relative z-10">
+        {/* Hero title - 5 words punchy */}
         <motion.h1
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
           className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white max-w-4xl mx-auto leading-[1.1]"
         >
-          Search The Web. Uncover Competitors.<br />
+          Search Competitors.<br />
           <span className="bg-gradient-to-r from-purple-400 via-fuchsia-300 to-white bg-clip-text text-transparent">
-            Pitch High-Intent Inboxes.
-          </span><br />
-          Zero Cost.
+            Pitch High-Intent Leads.
+          </span>
         </motion.h1>
 
         <motion.p
@@ -381,7 +369,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-purple-500/20 py-8 text-center text-xs text-zinc-500 bg-black/60">
-        RankReach AI &bull; OutreachBot Pro Platform &bull; Connected to FastAPI &bull; Gmail API &amp; WhatsApp Ready
+        OutRank AI &bull; Autonomous SERP Intelligence &amp; Multi-Channel Outreach OS &bull; Gmail API &amp; WhatsApp Ready
       </footer>
 
       <AuthModal isOpen={modalOpen} initialMode={modalMode} onClose={() => setModalOpen(false)} />
