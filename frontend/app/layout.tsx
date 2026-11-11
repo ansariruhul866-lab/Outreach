@@ -1,18 +1,33 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Space_Grotesk, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
-const jakarta = Plus_Jakarta_Sans({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-jakarta",
+  weight: ["500", "600", "700"],
+  variable: "--font-heading",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "OutRank AI — Autonomous SERP Intelligence & Multi-Channel Outreach OS",
+  title: "OutRank AI — See the Opportunity. Own the Search.",
   description:
-    "Crawl Google SERP, analyze competitor gaps, draft humanized SEO blogs with schema, extract verified emails, and dispatch automated cold outreach.",
+    "AI-powered SEO and marketing intelligence platform. Real-time SERP deconstruction, competitor gap analysis, humanized content synthesis, and high-deliverability outreach.",
 };
 
 export default function RootLayout({
@@ -22,7 +37,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark h-full">
-      <body className={`${jakarta.variable} font-sans min-h-screen bg-black text-white antialiased selection:bg-purple-600/40 selection:text-white`}>
+      <body
+        className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} font-sans min-h-screen bg-[#090B12] text-[#F5F7FF] antialiased selection:bg-[#7857FF]/30 selection:text-[#F5F7FF]`}
+      >
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

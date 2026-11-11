@@ -123,120 +123,114 @@ export default function ScraperPage() {
   };
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
+    <div className="p-6 sm:p-8 space-y-6 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span>Black &amp; Purple Autonomous Crawler</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7857FF]/10 border border-[#7857FF]/30 text-[#A78BFA] text-xs font-semibold mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#22D3C5]" />
+            <span>Autonomous Lead &amp; SERP Crawler</span>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-lg shadow-purple-900/40">
-              <Search className="w-6 h-6" />
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#F5F7FF] tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA]">
+              <Search className="w-5 h-5" />
             </span>
-            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
-              Deep Web Scraper
-            </span>
+            <span>Deep Web Scraper</span>
           </h1>
-          <p className="text-xs text-zinc-400 mt-1">
-            Crawl target websites up to 4 levels deep, segment contacts into folders of 50, and verify MX records
+          <p className="text-xs text-[#A3AEC2] mt-1">
+            Crawl target websites up to 4 levels deep, segment contacts into folders, and verify DNS MX records.
           </p>
         </div>
 
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <div>
           <Link
             href="/dashboard/leads"
-            className="px-5 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md block"
+            className="px-4 py-2 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-[#F5F7FF] text-xs font-semibold flex items-center gap-2 transition-all block"
           >
-            <Users className="w-3.5 h-3.5 text-purple-400" />
+            <Users className="w-3.5 h-3.5 text-[#22D3C5]" />
             <span>View Leads Database</span>
           </Link>
-        </motion.div>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-purple-500/20 pb-4">
-        <motion.button
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
+      <div className="flex items-center gap-2 border-b border-[#283149] pb-3">
+        <button
           onClick={() => setTab("single")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             tab === "single"
-              ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
-              : "glass-card text-zinc-400 hover:text-white"
+              ? "bg-[#7857FF] text-[#F5F7FF] shadow-sm"
+              : "bg-[#0E1220] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
           }`}
         >
           Single Target URL
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
+        </button>
+        <button
           onClick={() => setTab("bulk")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             tab === "bulk"
-              ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
-              : "glass-card text-zinc-400 hover:text-white"
+              ? "bg-[#7857FF] text-[#F5F7FF] shadow-sm"
+              : "bg-[#0E1220] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
           }`}
         >
           Bulk Domain Crawler
-        </motion.button>
+        </button>
       </div>
 
       {error && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-2">
+        <div className="p-3.5 rounded-xl bg-[#F16C7C]/10 border border-[#F16C7C]/25 text-[#F16C7C] text-xs font-medium flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2">
+        <div className="p-3.5 rounded-xl bg-[#32C98A]/10 border border-[#32C98A]/25 text-[#32C98A] text-xs font-medium flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* Scrape Input Card */}
-      <div className="p-8 rounded-3xl glass-panel relative overflow-hidden border border-purple-500/20">
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#141A29] border border-[#283149] shadow-lg">
         {tab === "single" ? (
-          <form onSubmit={handleSingleScrape} className="space-y-6">
+          <form onSubmit={handleSingleScrape} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#A3AEC2] mb-2">
                 Target Website Domain or URL
               </label>
               <div className="relative">
-                <Globe className="absolute left-4 top-3.5 w-4 h-4 text-purple-400" />
+                <Globe className="absolute left-4 top-3.5 w-4 h-4 text-[#727E96]" />
                 <input
                   type="text"
                   required
                   value={singleUrl}
                   onChange={(e) => setSingleUrl(e.target.value)}
                   placeholder="https://example.com or stripe.com"
-                  className="w-full pl-11 pr-4 py-3 glass-input rounded-2xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                  className="w-full pl-11 pr-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none transition-colors"
                 />
               </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#A3AEC2] mb-2">
                   Crawl Depth
                 </label>
                 <select
                   value={depth}
                   onChange={(e) => setDepth(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 glass-input rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 >
-                  <option value={1} className="bg-zinc-950 text-white">1 Level (Homepage only - Fastest)</option>
-                  <option value={2} className="bg-zinc-950 text-white">2 Levels (Homepage + /contact, /about - Recommended)</option>
-                  <option value={3} className="bg-zinc-950 text-white">3 Levels (Deep team &amp; subpage discovery)</option>
-                  <option value={4} className="bg-zinc-950 text-white">4 Levels (Exhaustive full-site spider)</option>
+                  <option value={1} className="bg-[#0E1220] text-[#F5F7FF]">1 Level (Homepage only - Fastest)</option>
+                  <option value={2} className="bg-[#0E1220] text-[#F5F7FF]">2 Levels (Homepage + /contact, /about - Recommended)</option>
+                  <option value={3} className="bg-[#0E1220] text-[#F5F7FF]">3 Levels (Deep team &amp; subpage discovery)</option>
+                  <option value={4} className="bg-[#0E1220] text-[#F5F7FF]">4 Levels (Exhaustive full-site spider)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#A3AEC2] mb-2">
                   Quick Sample Domains
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -245,7 +239,7 @@ export default function ScraperPage() {
                       key={d}
                       type="button"
                       onClick={() => setSingleUrl(d)}
-                      className="px-2.5 py-1.5 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-[11px] font-semibold transition-all hover:scale-105"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#0E1220] border border-[#283149] hover:bg-[#1B2233] text-[#A3AEC2] hover:text-[#F5F7FF] text-[11px] font-medium transition-all"
                     >
                       {d}
                     </button>
@@ -254,61 +248,59 @@ export default function ScraperPage() {
               </div>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               type="submit"
               disabled={loading}
-              className="py-3.5 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all disabled:opacity-50"
+              className="py-3 px-6 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <Loader2 className="w-4 h-4 animate-spin text-[#F5F7FF]" />
                   <span>Crawling &amp; Verifying MX Records...</span>
                 </>
               ) : (
                 <>
-                  <Search className="w-4 h-4 text-white" />
+                  <Search className="w-4 h-4 text-[#F5F7FF]" />
                   <span>Start Deep Crawl</span>
-                  <ArrowRight className="w-4 h-4 text-white" />
+                  <ArrowRight className="w-4 h-4 text-[#F5F7FF]" />
                 </>
               )}
-            </motion.button>
+            </button>
           </form>
         ) : (
-          <form onSubmit={handleBulkScrape} className="space-y-6">
+          <form onSubmit={handleBulkScrape} className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
-                  Folder Name (Batch of ~50 leads per folder)
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#A3AEC2] mb-2">
+                  Folder Name (Batch Segmentation)
                 </label>
                 <input
                   type="text"
                   value={folderName}
                   onChange={(e) => setFolderName(e.target.value)}
                   placeholder="e.g. Fintech Founders Batch, SaaS Directories"
-                  className="w-full px-4 py-3 glass-input rounded-2xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#A3AEC2] mb-2">
                   Crawl Depth
                 </label>
                 <select
                   value={depth}
                   onChange={(e) => setDepth(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 glass-input rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 >
-                  <option value={1} className="bg-zinc-950 text-white">1 Level (Homepage only)</option>
-                  <option value={2} className="bg-zinc-950 text-white">2 Levels (Homepage + /contact, /about - Recommended)</option>
-                  <option value={3} className="bg-zinc-950 text-white">3 Levels (Deep subpage discovery)</option>
+                  <option value={1} className="bg-[#0E1220] text-[#F5F7FF]">1 Level (Homepage only)</option>
+                  <option value={2} className="bg-[#0E1220] text-[#F5F7FF]">2 Levels (Homepage + /contact, /about - Recommended)</option>
+                  <option value={3} className="bg-[#0E1220] text-[#F5F7FF]">3 Levels (Deep subpage discovery)</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#A3AEC2] mb-2">
                 Paste Multiple Domains / URLs (One per line)
               </label>
               <textarea
@@ -317,7 +309,7 @@ export default function ScraperPage() {
                 value={bulkUrls}
                 onChange={(e) => setBulkUrls(e.target.value)}
                 placeholder="stripe.com&#10;vercel.com&#10;linear.app&#10;supabase.com"
-                className="w-full p-4 glass-input rounded-2xl text-xs font-mono text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                className="w-full p-3.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs font-mono text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none"
               />
             </div>
 
@@ -325,30 +317,28 @@ export default function ScraperPage() {
               <button
                 type="button"
                 onClick={() => setBulkUrls(sampleDomains.join("\n"))}
-                className="text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                className="text-xs text-[#438BFF] hover:text-[#7857FF] font-medium transition-colors"
               >
                 + Insert 5 Sample Tech Domains
               </button>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <button
                 type="submit"
                 disabled={loading}
-                className="py-3 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all disabled:opacity-50"
+                className="py-2.5 px-6 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#F5F7FF]" />
                     <span>Initiating Bulk Spider...</span>
                   </>
                 ) : (
                   <>
-                    <Layers className="w-4 h-4 text-white" />
+                    <Layers className="w-4 h-4 text-[#F5F7FF]" />
                     <span>Run Bulk Crawler</span>
                   </>
                 )}
-              </motion.button>
+              </button>
             </div>
           </form>
         )}
@@ -356,29 +346,29 @@ export default function ScraperPage() {
 
       {/* Results View */}
       {extractedEmails.length > 0 && (
-        <div className="rounded-3xl bg-slate-900/50 border border-slate-800/80 overflow-hidden">
-          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+        <div className="rounded-2xl bg-[#141A29] border border-[#283149] overflow-hidden shadow-lg">
+          <div className="p-5 border-b border-[#283149] flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold text-white">Extracted Prospect Emails</h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <h2 className="text-sm font-bold font-heading text-[#F5F7FF]">Extracted Prospect Emails</h2>
+              <p className="text-xs text-[#A3AEC2] mt-0.5">
                 {extractedEmails.length} verified email addresses found from {activeJob?.target_url}
               </p>
             </div>
 
             <button
               onClick={handleExportCSV}
-              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 transition-all"
+              className="px-3.5 py-1.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-[#F5F7FF] text-xs font-semibold flex items-center gap-2 transition-all"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 text-[#22D3C5]" />
               <span>Export CSV</span>
             </button>
           </div>
 
-          <div className="divide-y divide-slate-800/60 max-h-96 overflow-y-auto">
+          <div className="divide-y divide-[#283149] max-h-96 overflow-y-auto">
             {extractedEmails.map((email, idx) => (
-              <div key={idx} className="p-4 flex items-center justify-between">
-                <span className="font-mono text-xs text-slate-200">{email}</span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <div key={idx} className="p-3.5 flex items-center justify-between bg-[#0E1220]/40">
+                <span className="font-mono text-xs text-[#F5F7FF]">{email}</span>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#32C98A]/15 text-[#32C98A] border border-[#32C98A]/30">
                   ✓ Verified MX
                 </span>
               </div>

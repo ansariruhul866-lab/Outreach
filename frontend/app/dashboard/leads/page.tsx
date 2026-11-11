@@ -511,63 +511,61 @@ export default function LeadsPage() {
   });
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
+    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span>Black &amp; Purple Lead Intelligence</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA] text-xs font-mono mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#7857FF]" />
+            <span>Lead Intelligence &amp; Contact Database</span>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-lg shadow-purple-900/40">
-              <Users className="w-6 h-6" />
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#F5F7FF] tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA]">
+              <Users className="w-5 h-5 text-[#7857FF]" />
             </span>
-            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
-              Leads &amp; Folders
-            </span>
+            <span>Leads &amp; Contact Intelligence</span>
           </h1>
-          <p className="text-xs text-zinc-400 mt-1">
-            Organize extracted prospects into folders of 50, batch select, delete, or export leads
+          <p className="text-xs text-[#A3AEC2] mt-1">
+            Segment prospects into structured folders, generate AI proposals, and monitor deliverability
           </p>
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setExtractorModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all"
+            className="btn-primary px-4 py-2.5 text-xs font-semibold flex items-center gap-2"
           >
             <FileUp className="w-3.5 h-3.5" />
-            <span>Upload Sheet / Doc (Auto-Extract)</span>
+            <span>Upload Document (Auto-Extract)</span>
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setCreateFolderModalOpen(true)}
-            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md"
+            className="px-4 py-2.5 rounded-xl bg-[#141A29] border border-[#283149] hover:bg-[#1B2233] text-[#F5F7FF] text-xs font-semibold flex items-center gap-2 transition-all"
           >
-            <FolderPlus className="w-3.5 h-3.5 text-purple-400" />
+            <FolderPlus className="w-3.5 h-3.5 text-[#7857FF]" />
             <span>New Folder</span>
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setAddModalOpen(true)}
-            className="px-4 py-2.5 rounded-2xl glass-card hover:border-purple-500/50 text-zinc-200 hover:text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md"
+            className="px-4 py-2.5 rounded-xl bg-[#141A29] border border-[#283149] hover:bg-[#1B2233] text-[#F5F7FF] text-xs font-semibold flex items-center gap-2 transition-all"
           >
-            <Plus className="w-3.5 h-3.5 text-purple-400" />
+            <Plus className="w-3.5 h-3.5 text-[#7857FF]" />
             <span>Add Single Lead</span>
           </motion.button>
         </div>
       </div>
 
       {notice && (
-        <div className="p-4 rounded-2xl glass-panel border border-purple-500/40 text-purple-200 text-xs font-semibold flex items-center gap-2 shadow-lg shadow-purple-950/40">
-          <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0" />
+        <div className="p-4 rounded-xl bg-[#141A29] border border-[#32C98A]/40 text-[#32C98A] text-xs font-medium flex items-center gap-2 shadow-sm">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{notice}</span>
         </div>
       )}
@@ -575,24 +573,24 @@ export default function LeadsPage() {
       {/* Folders Bar */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-            <Folder className="w-4 h-4 text-purple-400" />
+          <span className="text-xs font-bold uppercase tracking-wider text-[#A3AEC2] flex items-center gap-2">
+            <Folder className="w-4 h-4 text-[#7857FF]" />
             <span>Prospect Folders ({folders.length})</span>
           </span>
-          <span className="text-[11px] text-zinc-500">
+          <span className="text-[11px] text-[#727E96]">
             Crawl jobs automatically segment every ~50 prospects into separate folders
           </span>
         </div>
 
         <div className="flex items-center gap-2.5 overflow-x-auto pb-2">
           <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setSelectedFolderId("ALL")}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 shrink-0 transition-all ${
               selectedFolderId === "ALL"
-                ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
-                : "glass-card text-zinc-300 hover:text-white"
+                ? "bg-[#7857FF] text-white shadow-sm"
+                : "bg-[#141A29] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -601,16 +599,16 @@ export default function LeadsPage() {
 
           {unassignedCount > 0 && (
             <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedFolderId("UNASSIGNED")}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 shrink-0 transition-all ${
                 selectedFolderId === "UNASSIGNED"
-                  ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/40 border border-purple-400/50"
-                : "glass-card text-zinc-300 hover:text-white"
+                  ? "bg-[#7857FF] text-white shadow-sm"
+                  : "bg-[#141A29] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
               }`}
             >
-              <Folder className="w-3.5 h-3.5 text-zinc-400" />
+              <Folder className="w-3.5 h-3.5 text-[#727E96]" />
               <span>Unassigned ({unassignedCount})</span>
             </motion.button>
           )}
@@ -618,25 +616,25 @@ export default function LeadsPage() {
           {folders.map((f) => (
             <div
               key={f.id}
-              className={`flex items-center rounded-2xl transition-all shrink-0 ${
+              className={`flex items-center rounded-xl transition-all shrink-0 ${
                 selectedFolderId === f.id
-                  ? "bg-purple-500/25 border border-purple-500/60 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.25)]"
-                  : "glass-card hover:border-purple-500/30 text-zinc-300"
+                  ? "bg-[#7857FF]/20 border border-[#7857FF] text-[#F5F7FF]"
+                  : "bg-[#141A29] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
               }`}
             >
               <button
                 onClick={() => setSelectedFolderId(f.id)}
-                className="px-3.5 py-2 text-xs font-bold flex items-center gap-2"
+                className="px-3.5 py-2 text-xs font-medium flex items-center gap-2"
               >
-                <Folder className="w-3.5 h-3.5 text-purple-400" />
+                <Folder className="w-3.5 h-3.5 text-[#7857FF]" />
                 <span className="max-w-[180px] truncate">{f.name}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/60 font-mono text-purple-300 border border-purple-500/30">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#0E1220] font-mono text-[#A78BFA] border border-[#283149]">
                   {f.leads_count}
                 </span>
               </button>
               <button
                 onClick={() => handleDeleteFolder(f.id, f.name)}
-                className="p-2 pr-3 text-zinc-500 hover:text-red-400 transition-colors"
+                className="p-2 pr-3 text-[#727E96] hover:text-[#F16C7C] transition-colors"
                 title="Delete folder"
               >
                 <Trash2 className="w-3 h-3" />
@@ -647,7 +645,7 @@ export default function LeadsPage() {
       </div>
 
       {/* Smart Segments & Sorting Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 rounded-2xl glass-panel border border-purple-500/20 shadow-md">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 rounded-2xl bg-[#141A29] border border-[#283149]">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
           {[
             { id: "ALL", label: "All Leads" },
@@ -660,12 +658,12 @@ export default function LeadsPage() {
             <button
               key={seg.id}
               onClick={() => setSegmentFilter(seg.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all ${
                 segmentFilter === seg.id
-                  ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-md shadow-purple-900/40 border border-purple-400/40"
+                  ? "bg-[#7857FF] text-white"
                   : seg.highlight
-                  ? "bg-purple-950/40 text-purple-300 border border-purple-500/30 hover:border-purple-400"
-                  : "glass-card text-zinc-400 hover:text-white"
+                  ? "bg-[#7857FF]/15 text-[#A78BFA] border border-[#7857FF]/30 hover:border-[#7857FF]"
+                  : "bg-[#0E1220] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
               }`}
             >
               <span>{seg.label}</span>
@@ -675,22 +673,22 @@ export default function LeadsPage() {
 
         <div className="flex items-center gap-2 shrink-0">
           {/* Sorting */}
-          <div className="flex items-center gap-1.5 bg-black/40 border border-purple-500/20 rounded-xl px-2.5 py-1">
-            <span className="text-[10px] uppercase font-bold text-zinc-400">Sort:</span>
+          <div className="flex items-center gap-1.5 bg-[#0E1220] border border-[#283149] rounded-xl px-2.5 py-1">
+            <span className="text-[10px] uppercase font-bold text-[#727E96]">Sort:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent text-xs text-white focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs text-[#F5F7FF] focus:outline-none cursor-pointer"
             >
-              <option value="created_at" className="bg-zinc-950 text-white">Date Added</option>
-              <option value="phone" className="bg-zinc-950 text-white">Phone Number</option>
-              <option value="email" className="bg-zinc-950 text-white">Email Address</option>
-              <option value="website" className="bg-zinc-950 text-white">Website</option>
-              <option value="company" className="bg-zinc-950 text-white">Company Name</option>
+              <option value="created_at" className="bg-[#0E1220] text-[#F5F7FF]">Date Added</option>
+              <option value="phone" className="bg-[#0E1220] text-[#F5F7FF]">Phone Number</option>
+              <option value="email" className="bg-[#0E1220] text-[#F5F7FF]">Email Address</option>
+              <option value="website" className="bg-[#0E1220] text-[#F5F7FF]">Website</option>
+              <option value="company" className="bg-[#0E1220] text-[#F5F7FF]">Company Name</option>
             </select>
             <button
               onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className="p-1 text-zinc-400 hover:text-purple-300 transition-colors"
+              className="p-1 text-[#A3AEC2] hover:text-[#F5F7FF] transition-colors"
               title={`Order: ${sortOrder.toUpperCase()}`}
             >
               <ArrowUpDown className="w-3 h-3" />
@@ -700,10 +698,10 @@ export default function LeadsPage() {
           {/* Gemini AI Settings button */}
           <button
             onClick={() => setApiKeyModalOpen(true)}
-            className="px-2.5 py-1.5 rounded-xl glass-card hover:border-purple-500/50 text-purple-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+            className="px-2.5 py-1.5 rounded-xl bg-[#0E1220] border border-[#283149] hover:border-[#7857FF]/50 text-[#A3AEC2] hover:text-[#F5F7FF] text-xs font-semibold flex items-center gap-1.5 transition-all"
             title="Configure Gemini API Key & Sender Profile"
           >
-            <Settings2 className="w-3.5 h-3.5 text-purple-400" />
+            <Settings2 className="w-3.5 h-3.5 text-[#7857FF]" />
             <span className="hidden sm:inline">AI Settings</span>
           </button>
         </div>
@@ -713,13 +711,13 @@ export default function LeadsPage() {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3.5 top-3 w-4 h-4 text-[#727E96]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search email, name, company..."
-              className="w-full pl-10 pr-4 py-2.5 glass-input rounded-2xl text-xs text-white placeholder-slate-400 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none"
             />
           </div>
 
@@ -728,10 +726,10 @@ export default function LeadsPage() {
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all ${
                   statusFilter === s
-                    ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-md shadow-purple-900/40"
-                    : "glass-card text-zinc-400 hover:text-white"
+                    ? "bg-[#7857FF] text-white shadow-sm"
+                    : "bg-[#0E1220] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
                 }`}
               >
                 {s}
@@ -745,32 +743,32 @@ export default function LeadsPage() {
           {selectedLeadIds.length > 0 && (
             <>
               <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setBatchPitchModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-purple-900/40 transition-all"
+                className="btn-primary px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
               >
                 <Bot className="w-3.5 h-3.5" />
                 <span>AI Pitch ({selectedLeadIds.length})</span>
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setMoveModalOpen(true)}
                 disabled={actionLoading}
-                className="px-4 py-2 rounded-xl glass-card hover:border-purple-500/50 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                className="px-4 py-2 rounded-xl bg-[#141A29] border border-[#283149] hover:bg-[#1B2233] text-[#F5F7FF] text-xs font-semibold flex items-center gap-1.5 transition-all"
               >
-                <Folder className="w-3.5 h-3.5 text-purple-400" />
+                <Folder className="w-3.5 h-3.5 text-[#7857FF]" />
                 <span>Move ({selectedLeadIds.length})</span>
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleDeleteSelected}
                 disabled={actionLoading}
-                className="px-4 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-xs font-bold flex items-center gap-1.5 transition-all"
+                className="px-4 py-2 rounded-xl bg-[#F16C7C]/15 hover:bg-[#F16C7C]/25 border border-[#F16C7C]/30 text-[#F16C7C] text-xs font-semibold flex items-center gap-1.5 transition-all"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete Selected ({selectedLeadIds.length})</span>
@@ -779,11 +777,11 @@ export default function LeadsPage() {
           )}
 
           <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleDeleteAll}
             disabled={actionLoading || filteredLeads.length === 0}
-            className="px-4 py-2 rounded-xl glass-card hover:bg-red-500/15 hover:border-red-500/40 text-zinc-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
+            className="px-4 py-2 rounded-xl bg-[#141A29] border border-[#283149] hover:bg-[#F16C7C]/15 hover:border-[#F16C7C]/40 text-[#A3AEC2] hover:text-[#F16C7C] text-xs font-semibold flex items-center gap-1.5 transition-all"
             title="Delete all leads in current view"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -793,36 +791,36 @@ export default function LeadsPage() {
       </div>
 
       {/* Leads Table */}
-      <div className="rounded-3xl glass-panel overflow-hidden border border-purple-500/20">
+      <div className="rounded-2xl bg-[#141A29] overflow-hidden border border-[#283149]">
         {loading ? (
-          <div className="p-12 text-center text-zinc-500 flex flex-col items-center gap-2">
-            <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+          <div className="p-12 text-center text-[#727E96] flex flex-col items-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin text-[#7857FF]" />
             <span className="text-xs">Loading prospects...</span>
           </div>
         ) : filteredLeads.length === 0 ? (
-          <div className="p-12 text-center text-zinc-500">
-            <Users className="w-8 h-8 mx-auto mb-3 text-purple-400/50" />
-            <p className="font-bold text-white text-sm">No leads found in this filter</p>
-            <p className="text-xs text-zinc-400 mt-1">
+          <div className="p-12 text-center text-[#727E96]">
+            <Users className="w-8 h-8 mx-auto mb-3 text-[#7857FF]/40" />
+            <p className="font-bold text-[#F5F7FF] text-sm">No leads found in this filter</p>
+            <p className="text-xs text-[#A3AEC2] mt-1">
               {search ? "No leads matching your search" : "Try selecting 'All Leads' or importing a new sheet/document."}
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-black/40 border-b border-purple-500/20 text-[10px] uppercase font-bold text-zinc-400">
+              <thead className="bg-[#0E1220] border-b border-[#283149] text-[10px] uppercase font-bold text-[#727E96]">
                 <tr>
                   <th className="p-4 w-10">
                     <button
                       type="button"
                       onClick={handleToggleSelectAll}
-                      className="text-zinc-400 hover:text-white"
+                      className="text-[#727E96] hover:text-[#F5F7FF]"
                       title="Select all on this page"
                     >
                       {selectedLeadIds.length === filteredLeads.length && filteredLeads.length > 0 ? (
-                        <CheckSquare className="w-4 h-4 text-purple-400" />
+                        <CheckSquare className="w-4 h-4 text-[#7857FF]" />
                       ) : (
-                        <Square className="w-4 h-4 text-zinc-600" />
+                        <Square className="w-4 h-4 text-[#727E96]" />
                       )}
                     </button>
                   </th>
@@ -835,7 +833,7 @@ export default function LeadsPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-purple-500/10">
+              <tbody className="divide-y divide-[#283149]/60">
                 {filteredLeads.map((lead) => {
                   const isChecked = selectedLeadIds.includes(lead.id);
                   const folderObj = folders.find((f) => f.id === lead.folder_id);
@@ -848,49 +846,49 @@ export default function LeadsPage() {
                   return (
                     <tr
                       key={lead.id}
-                      className={`hover:bg-white/[0.04] transition-colors ${
-                        isChecked ? "bg-purple-600/15" : ""
+                      className={`hover:bg-[#1B2233]/40 transition-colors ${
+                        isChecked ? "bg-[#7857FF]/10" : ""
                       }`}
                     >
                       <td className="p-4">
                         <button
                           type="button"
                           onClick={() => handleToggleLead(lead.id)}
-                          className="text-zinc-400 hover:text-white"
+                          className="text-[#727E96] hover:text-[#F5F7FF]"
                         >
                           {isChecked ? (
-                            <CheckSquare className="w-4 h-4 text-purple-400" />
+                            <CheckSquare className="w-4 h-4 text-[#7857FF]" />
                           ) : (
-                            <Square className="w-4 h-4 text-zinc-600" />
+                            <Square className="w-4 h-4 text-[#727E96]" />
                           )}
                         </button>
                       </td>
                       <td className="p-4">
                         {lead.email && !lead.email.endsWith("@outreachbot.local") ? (
-                          <p className="font-mono text-white font-medium">{lead.email}</p>
+                          <p className="font-mono text-[#F5F7FF] font-medium">{lead.email}</p>
                         ) : null}
                         {lead.phone ? (
-                          <p className="font-mono text-purple-300 text-[11px] font-semibold flex items-center gap-1">
+                          <p className="font-mono text-[#22D3C5] text-[11px] font-semibold flex items-center gap-1">
                             <span>WA:</span> +{lead.phone}
                           </p>
                         ) : null}
                       </td>
-                      <td className="p-4 text-zinc-300">{lead.first_name || "—"}</td>
+                      <td className="p-4 text-[#A3AEC2]">{lead.first_name || "—"}</td>
                       <td className="p-4">
-                        <p className="text-white font-semibold">{lead.company || "—"}</p>
+                        <p className="text-[#F5F7FF] font-semibold">{lead.company || "—"}</p>
                         {hasWebsite ? (
                           <a
                             href={lead.website!.startsWith("http") ? lead.website! : `https://${lead.website}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[11px] text-zinc-400 hover:text-purple-300 flex items-center gap-1 truncate max-w-xs transition-colors mt-0.5"
+                            className="text-[11px] text-[#A3AEC2] hover:text-[#438BFF] flex items-center gap-1 truncate max-w-xs transition-colors mt-0.5"
                           >
                             <ExternalLink className="w-2.5 h-2.5 shrink-0" />
                             <span className="truncate">{lead.website}</span>
                           </a>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-md bg-purple-950/60 text-purple-300 border border-purple-500/30 text-[10px] font-semibold">
-                            <Globe className="w-2.5 h-2.5 text-purple-400" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-md bg-[#7857FF]/15 text-[#A78BFA] border border-[#7857FF]/30 text-[10px] font-semibold">
+                            <Globe className="w-2.5 h-2.5 text-[#7857FF]" />
                             No Website
                           </span>
                         )}
@@ -899,42 +897,42 @@ export default function LeadsPage() {
                         {lead.ai_pitch_subject ? (
                           <button
                             onClick={() => handleOpenPitch(lead)}
-                            className="px-2.5 py-1 rounded-xl bg-purple-500/20 hover:bg-purple-500/35 border border-purple-400/40 text-purple-200 text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                            className="px-2.5 py-1 rounded-lg bg-[#7857FF]/20 hover:bg-[#7857FF]/35 border border-[#7857FF]/40 text-[#A78BFA] text-[11px] font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                           >
-                            <Sparkles className="w-3 h-3 text-purple-300" />
+                            <Sparkles className="w-3 h-3 text-[#A78BFA]" />
                             <span>View Pitch</span>
                           </button>
                         ) : (
                           <button
                             onClick={() => handleOpenPitch(lead)}
-                            className="px-2.5 py-1 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-[11px] font-semibold flex items-center gap-1.5 transition-all"
+                            className="px-2.5 py-1 rounded-lg bg-[#0E1220] border border-[#283149] hover:border-[#7857FF]/50 text-[#A3AEC2] hover:text-[#F5F7FF] text-[11px] font-semibold flex items-center gap-1.5 transition-all"
                           >
-                            <Bot className="w-3 h-3 text-purple-400" />
+                            <Bot className="w-3 h-3 text-[#7857FF]" />
                             <span>Pitch</span>
                           </button>
                         )}
                       </td>
                       <td className="p-4">
                         {folderObj ? (
-                          <span className="px-2 py-0.5 rounded-lg bg-purple-950/40 text-[10px] text-purple-300 font-semibold border border-purple-500/20">
+                          <span className="px-2 py-0.5 rounded-lg bg-[#0E1220] text-[10px] text-[#A78BFA] font-medium border border-[#283149]">
                             {folderObj.name}
                           </span>
                         ) : (
-                          <span className="text-[10px] text-zinc-500">Unassigned</span>
+                          <span className="text-[10px] text-[#727E96]">Unassigned</span>
                         )}
                       </td>
                       <td className="p-4">
                         <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border ${
+                          className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase border ${
                             lead.status === "SENT"
-                              ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
+                              ? "bg-[#7857FF]/15 text-[#A78BFA] border-[#7857FF]/30"
                               : lead.status === "OPENED"
-                              ? "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40"
+                              ? "bg-[#22D3C5]/15 text-[#22D3C5] border-[#22D3C5]/30"
                               : lead.status === "PENDING"
-                              ? "bg-purple-950/60 text-purple-200 border-purple-500/30"
+                              ? "bg-[#438BFF]/15 text-[#438BFF] border-[#438BFF]/30"
                               : lead.status === "SKIPPED"
-                              ? "bg-zinc-800 text-zinc-400 border-zinc-700"
-                              : "bg-red-500/10 text-red-400 border-red-500/20"
+                              ? "bg-[#1B2233] text-[#727E96] border-[#283149]"
+                              : "bg-[#F16C7C]/15 text-[#F16C7C] border-[#F16C7C]/30"
                           }`}
                         >
                           {lead.status}
@@ -943,7 +941,7 @@ export default function LeadsPage() {
                       <td className="p-4 text-right">
                         <button
                           onClick={() => handleDeleteSingleLead(lead.id)}
-                          className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                          className="p-1.5 rounded-lg text-[#727E96] hover:text-[#F16C7C] hover:bg-[#F16C7C]/10 transition-colors"
                           title="Delete single lead"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -960,21 +958,21 @@ export default function LeadsPage() {
 
       {/* Create Folder Modal */}
       {createFolderModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 glass-panel border border-purple-500/30 rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl">
             <button
               onClick={() => setCreateFolderModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+              className="absolute top-5 right-5 text-[#A3AEC2] hover:text-[#F5F7FF]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-bold text-white mb-1">Create Prospect Folder</h3>
-            <p className="text-xs text-zinc-400 mb-6">Group leads for targeted campaign segmentation</p>
+            <h3 className="text-lg font-bold text-[#F5F7FF] mb-1">Create Prospect Folder</h3>
+            <p className="text-xs text-[#A3AEC2] mb-6">Group leads for targeted campaign segmentation</p>
 
             <form onSubmit={handleCreateFolder} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Folder Name *
                 </label>
                 <input
@@ -983,12 +981,12 @@ export default function LeadsPage() {
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   placeholder="e.g. B2B SaaS Leads - Batch 1"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Description (Optional)
                 </label>
                 <input
@@ -996,7 +994,7 @@ export default function LeadsPage() {
                   value={newFolderDesc}
                   onChange={(e) => setNewFolderDesc(e.target.value)}
                   placeholder="e.g. Scraped from TechCrunch top 50 SaaS list"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 />
               </div>
 
@@ -1004,13 +1002,13 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setCreateFolderModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs"
+                  className="flex-1 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#283149] text-[#A3AEC2] font-semibold text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40"
+                  className="btn-primary flex-1 py-2.5 text-xs font-bold"
                 >
                   Create Folder
                 </button>
@@ -1022,34 +1020,34 @@ export default function LeadsPage() {
 
       {/* Move Selected Leads Modal */}
       {moveModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 glass-panel border border-purple-500/30 rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl">
             <button
               onClick={() => setMoveModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+              className="absolute top-5 right-5 text-[#A3AEC2] hover:text-[#F5F7FF]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-bold text-white mb-1">Move Selected Leads</h3>
-            <p className="text-xs text-zinc-400 mb-6">
+            <h3 className="text-lg font-bold text-[#F5F7FF] mb-1">Move Selected Leads</h3>
+            <p className="text-xs text-[#A3AEC2] mb-6">
               Moving {selectedLeadIds.length} prospects into a chosen folder
             </p>
 
             <form onSubmit={handleMoveSelected} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Target Destination Folder
                 </label>
                 <select
                   value={targetMoveFolderId}
                   onChange={(e) => setTargetMoveFolderId(e.target.value)}
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 >
-                  <option value="" className="bg-zinc-950 text-white">Select a folder...</option>
-                  <option value="UNASSIGNED" className="bg-zinc-950 text-white">Unassigned (Remove from folder)</option>
+                  <option value="" className="bg-[#0E1220] text-[#F5F7FF]">Select a folder...</option>
+                  <option value="UNASSIGNED" className="bg-[#0E1220] text-[#F5F7FF]">Unassigned (Remove from folder)</option>
                   {folders.map((f) => (
-                    <option key={f.id} value={f.id} className="bg-zinc-950 text-white">
+                    <option key={f.id} value={f.id} className="bg-[#0E1220] text-[#F5F7FF]">
                       {f.name} ({f.leads_count} leads)
                     </option>
                   ))}
@@ -1060,14 +1058,14 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setMoveModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs"
+                  className="flex-1 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#283149] text-[#A3AEC2] font-semibold text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading || !targetMoveFolderId}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40"
+                  className="btn-primary flex-1 py-2.5 text-xs font-bold disabled:opacity-40"
                 >
                   Confirm Move
                 </button>
@@ -1079,31 +1077,31 @@ export default function LeadsPage() {
 
       {/* Add Lead Modal */}
       {addModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
-          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 glass-panel border border-purple-500/30 rounded-2xl sm:rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-6 bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl">
             <button
               onClick={() => setAddModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+              className="absolute top-5 right-5 text-[#A3AEC2] hover:text-[#F5F7FF]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-bold text-white mb-1">Add Single Lead</h3>
-            <p className="text-xs text-zinc-400 mb-6">Manually input a prospect contact</p>
+            <h3 className="text-lg font-bold text-[#F5F7FF] mb-1">Add Single Lead</h3>
+            <p className="text-xs text-[#A3AEC2] mb-6">Manually input a prospect contact</p>
 
             <form onSubmit={handleCreateLead} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Folder Assignment
                 </label>
                 <select
                   value={newLeadFolderId}
                   onChange={(e) => setNewLeadFolderId(e.target.value)}
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 >
-                  <option value="" className="bg-zinc-950 text-white">Unassigned</option>
+                  <option value="" className="bg-[#0E1220] text-[#F5F7FF]">Unassigned</option>
                   {folders.map((f) => (
-                    <option key={f.id} value={f.id} className="bg-zinc-950 text-white">
+                    <option key={f.id} value={f.id} className="bg-[#0E1220] text-[#F5F7FF]">
                       {f.name}
                     </option>
                   ))}
@@ -1112,7 +1110,7 @@ export default function LeadsPage() {
 
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                     Email Address
                   </label>
                   <input
@@ -1120,12 +1118,12 @@ export default function LeadsPage() {
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="contact@brand.com"
-                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                     WhatsApp Phone Number
                   </label>
                   <input
@@ -1133,13 +1131,13 @@ export default function LeadsPage() {
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
                     placeholder="e.g. 919876543210"
-                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none font-mono"
+                    className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   First Name
                 </label>
                 <input
@@ -1147,12 +1145,12 @@ export default function LeadsPage() {
                   value={newFirstName}
                   onChange={(e) => setNewFirstName(e.target.value)}
                   placeholder="Rahul"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Company Name
                 </label>
                 <input
@@ -1160,12 +1158,12 @@ export default function LeadsPage() {
                   value={newCompany}
                   onChange={(e) => setNewCompany(e.target.value)}
                   placeholder="Acme Inc"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Website URL
                 </label>
                 <input
@@ -1173,7 +1171,7 @@ export default function LeadsPage() {
                   value={newWebsite}
                   onChange={(e) => setNewWebsite(e.target.value)}
                   placeholder="https://acme.com"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 />
               </div>
 
@@ -1181,7 +1179,7 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setAddModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#283149] text-[#A3AEC2] font-semibold text-xs transition-colors"
                 >
                   Cancel
                 </button>
@@ -1190,7 +1188,7 @@ export default function LeadsPage() {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={modalLoading}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-1.5"
+                  className="btn-primary flex-1 py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                 >
                   {modalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : "Save Lead"}
                 </motion.button>
@@ -1201,26 +1199,26 @@ export default function LeadsPage() {
       )}
       {/* Smart Sheet / Doc File Extractor Modal */}
       {extractorModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
-          <div className="relative w-full max-w-lg p-6 glass-panel border border-purple-500/30 rounded-2xl sm:rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-lg p-6 bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl">
             <button
               onClick={() => {
                 setExtractorModalOpen(false);
                 setExtractorFile(null);
               }}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+              className="absolute top-5 right-5 text-[#A3AEC2] hover:text-[#F5F7FF]"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-2 mb-1">
-              <span className="p-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                <FileSpreadsheet className="w-5 h-5" />
+              <span className="p-2 rounded-xl bg-[#7857FF]/15 text-[#A78BFA] border border-[#7857FF]/30">
+                <FileSpreadsheet className="w-5 h-5 text-[#7857FF]" />
               </span>
-              <h3 className="text-lg font-bold text-white">Smart Document &amp; Sheet Extractor</h3>
+              <h3 className="text-lg font-bold text-[#F5F7FF]">Smart Document &amp; Sheet Extractor</h3>
             </div>
-            <p className="text-xs text-zinc-400 mb-6">
-              Upload any Spreadsheet or Document. We will automatically parse and extract all phone numbers &amp; emails, and organize them into a brand new folder.
+            <p className="text-xs text-[#A3AEC2] mb-6">
+              Upload any spreadsheet or document. OutRank AI will automatically extract all phone numbers and emails into a designated folder.
             </p>
 
             <form onSubmit={handleExtractFile} className="space-y-4">
@@ -1245,10 +1243,10 @@ export default function LeadsPage() {
                 }}
                 className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
                   dragActive
-                    ? "border-purple-400 bg-purple-500/10 scale-[1.01]"
+                    ? "border-[#7857FF] bg-[#7857FF]/10 scale-[1.01]"
                     : extractorFile
-                    ? "border-purple-500/50 bg-purple-950/20"
-                    : "border-purple-500/25 hover:border-purple-500/40 bg-black/40"
+                    ? "border-[#7857FF]/50 bg-[#0E1220]"
+                    : "border-[#283149] hover:border-[#7857FF]/40 bg-[#0E1220]"
                 }`}
               >
                 <input
@@ -1270,36 +1268,36 @@ export default function LeadsPage() {
 
                 {extractorFile ? (
                   <div className="space-y-2">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 text-purple-300 flex items-center justify-center mx-auto">
-                      <FileText className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-xl bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA] flex items-center justify-center mx-auto">
+                      <FileText className="w-6 h-6 text-[#7857FF]" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white max-w-xs truncate mx-auto">{extractorFile.name}</p>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                      <p className="text-sm font-bold text-[#F5F7FF] max-w-xs truncate mx-auto">{extractorFile.name}</p>
+                      <p className="text-[11px] text-[#A3AEC2] mt-0.5">
                         {(extractorFile.size / 1024).toFixed(1)} KB &bull; Ready to extract
                       </p>
                     </div>
                     <label
                       htmlFor="sheetDocFileInput"
-                      className="inline-block text-[11px] text-purple-400 hover:text-purple-300 underline cursor-pointer font-semibold"
+                      className="inline-block text-[11px] text-[#438BFF] hover:underline cursor-pointer font-semibold"
                     >
                       Change file
                     </label>
                   </div>
                 ) : (
                   <label htmlFor="sheetDocFileInput" className="cursor-pointer block space-y-2">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 flex items-center justify-center mx-auto shadow-inner">
+                    <div className="w-12 h-12 rounded-xl bg-[#1B2233] border border-[#283149] text-[#7857FF] flex items-center justify-center mx-auto">
                       <Upload className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">
+                      <p className="text-xs font-bold text-[#F5F7FF]">
                         Click to browse or drag &amp; drop your file here
                       </p>
-                      <p className="text-[11px] text-zinc-400 mt-1">
+                      <p className="text-[11px] text-[#A3AEC2] mt-1">
                         Supports <strong>Excel (.xlsx, .xls)</strong>, <strong>CSV (.csv)</strong>, <strong>Word (.docx)</strong>, <strong>PDF (.pdf)</strong>, or <strong>Text (.txt)</strong>
                       </p>
                     </div>
-                    <span className="inline-block px-3 py-1 rounded-xl glass-card text-[10px] font-semibold text-purple-300 border border-purple-500/30">
+                    <span className="inline-block px-3 py-1 rounded-xl bg-[#090B12] text-[10px] font-mono text-[#A78BFA] border border-[#283149]">
                       Auto-detects emails &amp; phone numbers
                     </span>
                   </label>
@@ -1308,21 +1306,21 @@ export default function LeadsPage() {
 
               {/* Target Folder Name */}
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Destination Folder Name (Auto-created)
                 </label>
                 <div className="relative">
-                  <Folder className="absolute left-3.5 top-3 w-4 h-4 text-purple-400" />
+                  <Folder className="absolute left-3.5 top-3 w-4 h-4 text-[#7857FF]" />
                   <input
                     type="text"
                     required
                     value={extractorFolderName}
                     onChange={(e) => setExtractorFolderName(e.target.value)}
                     placeholder="e.g. Imported: SaaS Founders Sheet"
-                    className="w-full pl-10 pr-4 py-2.5 glass-input rounded-xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none"
                   />
                 </div>
-                <p className="text-[10px] text-zinc-500 mt-1">
+                <p className="text-[10px] text-[#727E96] mt-1">
                   All extracted leads will be grouped together into this folder.
                 </p>
               </div>
@@ -1334,7 +1332,7 @@ export default function LeadsPage() {
                     setExtractorModalOpen(false);
                     setExtractorFile(null);
                   }}
-                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#283149] text-[#A3AEC2] font-semibold text-xs transition-colors"
                 >
                   Cancel
                 </button>
@@ -1343,7 +1341,7 @@ export default function LeadsPage() {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={extracting || !extractorFile}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                  className="btn-primary flex-1 py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-40"
                 >
                   {extracting ? (
                     <>
@@ -1365,46 +1363,46 @@ export default function LeadsPage() {
 
       {/* AI Pitch Drawer / Modal */}
       {pitchModalOpen && pitchLead && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-2xl animate-in fade-in">
-          <div className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 glass-panel border border-purple-500/40 rounded-3xl shadow-2xl shadow-purple-950/60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl">
             <button
               onClick={() => {
                 setPitchModalOpen(false);
                 setPitchData(null);
               }}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+              className="absolute top-5 right-5 text-[#A3AEC2] hover:text-[#F5F7FF] p-1 rounded-lg hover:bg-[#1B2233] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Modal Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-purple-500/20 mb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#283149] mb-5">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-1.5">
-                  <Bot className="w-3.5 h-3.5 text-purple-400" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA] text-xs font-mono mb-1.5">
+                  <Bot className="w-3.5 h-3.5 text-[#7857FF]" />
                   <span>Gemini AI Lead Intelligence</span>
                 </div>
-                <h3 className="text-xl font-black text-white flex items-center gap-2">
+                <h3 className="text-xl font-bold font-heading text-[#F5F7FF] flex items-center gap-2">
                   <span>{pitchLead.company || "Business Proposal"}</span>
                   {pitchLead.first_name && (
-                    <span className="text-xs font-normal text-zinc-400">({pitchLead.first_name})</span>
+                    <span className="text-xs font-normal text-[#A3AEC2]">({pitchLead.first_name})</span>
                   )}
                 </h3>
-                <div className="flex items-center gap-3 text-xs text-zinc-400 mt-1">
+                <div className="flex items-center gap-3 text-xs text-[#A3AEC2] mt-1">
                   {pitchLead.email && <span>Email: {pitchLead.email}</span>}
                   {pitchLead.phone && <span>WA: +{pitchLead.phone}</span>}
                   {pitchLead.website ? (
-                    <span className="text-purple-300">Web: {pitchLead.website}</span>
+                    <span className="text-[#438BFF]">Web: {pitchLead.website}</span>
                   ) : (
-                    <span className="text-purple-400 font-semibold">No Website Detected</span>
+                    <span className="text-[#A78BFA] font-medium">No Website Detected</span>
                   )}
                 </div>
               </div>
 
               {pitchData && (
                 <div className="self-start sm:self-center">
-                  <span className="px-3 py-1.5 rounded-xl bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-bold inline-flex items-center gap-1.5 shadow-md">
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="px-3 py-1.5 rounded-xl bg-[#0E1220] border border-[#283149] text-[#A78BFA] text-xs font-semibold inline-flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#7857FF]" />
                     <span>
                       {pitchData.strategy === "NO_WEBSITE"
                         ? "🌐 Website First + Marketing Offer"
@@ -1419,46 +1417,46 @@ export default function LeadsPage() {
 
             {pitchLoading ? (
               <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
-                <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
-                <p className="text-sm font-bold text-white">Analyzing credentials with Gemini AI...</p>
-                <p className="text-xs text-zinc-400 max-w-md">
-                  Formulating 3-pillar proposal: Identifying business pain points, designing the Website First + Marketing offer, and structuring competitive differentiators.
+                <Loader2 className="w-8 h-8 animate-spin text-[#7857FF]" />
+                <p className="text-sm font-bold text-[#F5F7FF]">Analyzing credentials with Gemini AI...</p>
+                <p className="text-xs text-[#A3AEC2] max-w-md">
+                  Formulating 3-pillar proposal: Identifying business pain points, designing the offer, and structuring competitive differentiators.
                 </p>
               </div>
             ) : pitchData ? (
               <div className="space-y-6">
                 {/* 3 Pillar Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="p-3.5 rounded-2xl bg-black/40 border border-red-500/20 text-xs">
-                    <span className="text-[10px] uppercase font-bold text-red-400 block mb-1">
+                  <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#F16C7C]/25 text-xs">
+                    <span className="text-[10px] uppercase font-bold text-[#F16C7C] block mb-1">
                       1. Problem Identified
                     </span>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed">{pitchData.problem}</p>
+                    <p className="text-[#A3AEC2] text-[11px] leading-relaxed">{pitchData.problem}</p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-black/40 border border-emerald-500/20 text-xs">
-                    <span className="text-[10px] uppercase font-bold text-emerald-400 block mb-1">
+                  <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#32C98A]/25 text-xs">
+                    <span className="text-[10px] uppercase font-bold text-[#32C98A] block mb-1">
                       2. Proposed Solution
                     </span>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed">{pitchData.solution}</p>
+                    <p className="text-[#A3AEC2] text-[11px] leading-relaxed">{pitchData.solution}</p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-500/30 text-xs">
-                    <span className="text-[10px] uppercase font-bold text-purple-300 block mb-1">
+                  <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#7857FF]/30 text-xs">
+                    <span className="text-[10px] uppercase font-bold text-[#A78BFA] block mb-1">
                       3. Why Choose Me
                     </span>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed">{pitchData.why_choose_me}</p>
+                    <p className="text-[#A3AEC2] text-[11px] leading-relaxed">{pitchData.why_choose_me}</p>
                   </div>
                 </div>
 
                 {/* Pitch Tabs */}
-                <div className="flex items-center gap-2 border-b border-purple-500/20 pb-3">
+                <div className="flex items-center gap-2 border-b border-[#283149] pb-3">
                   <button
                     onClick={() => setPitchTab("email")}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
                       pitchTab === "email"
-                        ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                        : "glass-card text-zinc-400 hover:text-white"
+                        ? "bg-[#7857FF] text-white"
+                        : "bg-[#0E1220] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
                     }`}
                   >
                     <Mail className="w-3.5 h-3.5" />
@@ -1467,10 +1465,10 @@ export default function LeadsPage() {
 
                   <button
                     onClick={() => setPitchTab("whatsapp")}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
                       pitchTab === "whatsapp"
-                        ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                        : "glass-card text-zinc-400 hover:text-white"
+                        ? "bg-[#7857FF] text-white"
+                        : "bg-[#0E1220] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF]"
                     }`}
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
@@ -1483,17 +1481,17 @@ export default function LeadsPage() {
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-[11px] font-bold uppercase text-purple-300">
+                        <label className="text-[11px] font-bold uppercase text-[#A78BFA]">
                           Subject Line
                         </label>
                         <button
                           onClick={() => copyToClipboard(pitchData.subject, "subject")}
-                          className="text-[11px] text-zinc-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                          className="text-[11px] text-[#A3AEC2] hover:text-[#F5F7FF] flex items-center gap-1 transition-colors"
                         >
                           {copiedField === "subject" ? (
                             <>
-                              <Check className="w-3 h-3 text-emerald-400" />
-                              <span className="text-emerald-400">Copied!</span>
+                              <Check className="w-3 h-3 text-[#32C98A]" />
+                              <span className="text-[#32C98A]">Copied!</span>
                             </>
                           ) : (
                             <>
@@ -1507,23 +1505,23 @@ export default function LeadsPage() {
                         type="text"
                         value={pitchData.subject}
                         onChange={(e) => setPitchData({ ...pitchData, subject: e.target.value })}
-                        className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none font-medium"
+                        className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none font-medium"
                       />
                     </div>
 
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-[11px] font-bold uppercase text-purple-300">
+                        <label className="text-[11px] font-bold uppercase text-[#A78BFA]">
                           Personalized Pitch Body
                         </label>
                         <button
                           onClick={() => copyToClipboard(pitchData.email_body, "body")}
-                          className="text-[11px] text-zinc-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                          className="text-[11px] text-[#A3AEC2] hover:text-[#F5F7FF] flex items-center gap-1 transition-colors"
                         >
                           {copiedField === "body" ? (
                             <>
-                              <Check className="w-3 h-3 text-emerald-400" />
-                              <span className="text-emerald-400">Copied!</span>
+                              <Check className="w-3 h-3 text-[#32C98A]" />
+                              <span className="text-[#32C98A]">Copied!</span>
                             </>
                           ) : (
                             <>
@@ -1537,7 +1535,7 @@ export default function LeadsPage() {
                         rows={11}
                         value={pitchData.email_body}
                         onChange={(e) => setPitchData({ ...pitchData, email_body: e.target.value })}
-                        className="w-full p-4 glass-input rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none font-sans leading-relaxed"
+                        className="w-full p-4 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none font-sans leading-relaxed"
                       />
                     </div>
 
@@ -1545,9 +1543,9 @@ export default function LeadsPage() {
                     <div className="flex items-center justify-between gap-3 pt-2">
                       <button
                         onClick={() => generatePitchForLead(pitchLead)}
-                        className="px-4 py-2.5 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        className="px-4 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:border-[#7857FF]/50 text-[#A3AEC2] hover:text-[#F5F7FF] text-xs font-semibold flex items-center gap-1.5 transition-all"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#7857FF]" />
                         <span>Regenerate Pitch</span>
                       </button>
 
@@ -1561,7 +1559,7 @@ export default function LeadsPage() {
                             )}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 flex items-center gap-2 transition-all"
+                            className="btn-primary px-5 py-2.5 text-xs font-bold flex items-center gap-2 transition-all"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>Send via Gmail</span>
@@ -1577,17 +1575,17 @@ export default function LeadsPage() {
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-[11px] font-bold uppercase text-purple-300">
+                        <label className="text-[11px] font-bold uppercase text-[#A78BFA]">
                           Direct WhatsApp Script
                         </label>
                         <button
                           onClick={() => copyToClipboard(pitchData.whatsapp_message, "wa")}
-                          className="text-[11px] text-zinc-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                          className="text-[11px] text-[#A3AEC2] hover:text-[#F5F7FF] flex items-center gap-1 transition-colors"
                         >
                           {copiedField === "wa" ? (
                             <>
-                              <Check className="w-3 h-3 text-emerald-400" />
-                              <span className="text-emerald-400">Copied!</span>
+                              <Check className="w-3 h-3 text-[#32C98A]" />
+                              <span className="text-[#32C98A]">Copied!</span>
                             </>
                           ) : (
                             <>
@@ -1603,7 +1601,7 @@ export default function LeadsPage() {
                         onChange={(e) =>
                           setPitchData({ ...pitchData, whatsapp_message: e.target.value })
                         }
-                        className="w-full p-4 glass-input rounded-2xl text-xs text-white focus:border-purple-500 focus:outline-none font-sans leading-relaxed"
+                        className="w-full p-4 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none font-sans leading-relaxed"
                       />
                     </div>
 
@@ -1611,9 +1609,9 @@ export default function LeadsPage() {
                     <div className="flex items-center justify-between gap-3 pt-2">
                       <button
                         onClick={() => generatePitchForLead(pitchLead)}
-                        className="px-4 py-2.5 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        className="px-4 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:border-[#7857FF]/50 text-[#A3AEC2] hover:text-[#F5F7FF] text-xs font-semibold flex items-center gap-1.5 transition-all"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#7857FF]" />
                         <span>Regenerate Pitch</span>
                       </button>
 
@@ -1625,7 +1623,7 @@ export default function LeadsPage() {
                           )}?text=${encodeURIComponent(pitchData.whatsapp_message)}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold text-xs shadow-lg shadow-emerald-900/40 flex items-center gap-2 transition-all"
+                          className="px-5 py-2.5 rounded-xl bg-[#22D3C5]/20 hover:bg-[#22D3C5]/30 border border-[#22D3C5]/40 text-[#22D3C5] font-bold text-xs flex items-center gap-2 transition-all"
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
                           <span>Open in WhatsApp (+{pitchLead.phone})</span>
@@ -1642,29 +1640,29 @@ export default function LeadsPage() {
 
       {/* Batch AI Pitch Modal */}
       {batchPitchModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 glass-panel border border-purple-500/30 rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl">
             <button
               onClick={() => setBatchPitchModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+              className="absolute top-5 right-5 text-[#A3AEC2] hover:text-[#F5F7FF]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2">
-              <Bot className="w-3.5 h-3.5 text-purple-400" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA] text-xs font-mono mb-2">
+              <Bot className="w-3.5 h-3.5 text-[#7857FF]" />
               <span>Batch AI Pitch Generator</span>
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">
+            <h3 className="text-lg font-bold text-[#F5F7FF] mb-1">
               Generate AI Pitches for {selectedLeadIds.length} Leads
             </h3>
-            <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
+            <p className="text-xs text-[#A3AEC2] mb-5 leading-relaxed">
               Gemini AI will inspect each prospect&apos;s credentials, detect whether they lack a website or have phone only, and generate custom proposals following the Problem &rarr; Solution &rarr; Why Me framework.
             </p>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Sender Identity Name
                 </label>
                 <input
@@ -1672,7 +1670,7 @@ export default function LeadsPage() {
                   value={senderName}
                   onChange={(e) => setSenderName(e.target.value)}
                   placeholder="e.g. Ruhul (Growth & Web Specialist)"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 />
               </div>
 
@@ -1680,7 +1678,7 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setBatchPitchModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#283149] text-[#A3AEC2] font-semibold text-xs transition-colors"
                 >
                   Cancel
                 </button>
@@ -1689,7 +1687,7 @@ export default function LeadsPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleBatchGeneratePitches}
                   disabled={batchPitching}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                  className="btn-primary flex-1 py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-40"
                 >
                   {batchPitching ? (
                     <>
@@ -1711,27 +1709,27 @@ export default function LeadsPage() {
 
       {/* Gemini Settings Modal */}
       {apiKeyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in">
-          <div className="relative w-full max-w-md p-6 glass-panel border border-purple-500/30 rounded-3xl shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md p-6 bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl">
             <button
               onClick={() => setApiKeyModalOpen(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+              className="absolute top-5 right-5 text-[#A3AEC2] hover:text-[#F5F7FF]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2">
-              <Settings2 className="w-3.5 h-3.5 text-purple-400" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA] text-xs font-mono mb-2">
+              <Settings2 className="w-3.5 h-3.5 text-[#7857FF]" />
               <span>Gemini AI Configuration</span>
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">AI Pitch Engine Settings</h3>
-            <p className="text-xs text-zinc-400 mb-5">
+            <h3 className="text-lg font-bold text-[#F5F7FF] mb-1">AI Pitch Engine Settings</h3>
+            <p className="text-xs text-[#A3AEC2] mb-5">
               Configure your Gemini API credentials and outreach signature
             </p>
 
             <form onSubmit={handleSaveApiKey} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Gemini API Key
                 </label>
                 <input
@@ -1739,15 +1737,15 @@ export default function LeadsPage() {
                   value={geminiApiKey}
                   onChange={(e) => setGeminiApiKey(e.target.value)}
                   placeholder="Defaults to server's configured key if empty"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white font-mono focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] font-mono focus:border-[#7857FF] focus:outline-none"
                 />
-                <p className="text-[10px] text-zinc-500 mt-1">
+                <p className="text-[10px] text-[#727E96] mt-1">
                   Leave blank to use the pre-configured server environment key.
                 </p>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1">
+                <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1">
                   Your Name / Signature
                 </label>
                 <input
@@ -1755,7 +1753,7 @@ export default function LeadsPage() {
                   value={senderName}
                   onChange={(e) => setSenderName(e.target.value)}
                   placeholder="e.g. Ruhul"
-                  className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                 />
               </div>
 
@@ -1763,13 +1761,13 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setApiKeyModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#283149] text-[#A3AEC2] font-semibold text-xs transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all"
+                  className="btn-primary flex-1 py-2.5 text-xs font-bold transition-all"
                 >
                   Save Settings
                 </button>

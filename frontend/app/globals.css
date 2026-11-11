@@ -1,149 +1,196 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  --background: #090B12;
+  --foreground: #F5F7FF;
+
+  /* OutRank AI Design Tokens */
+  --color-bg-main: #090B12;
+  --color-bg-secondary: #0E1220;
+  --color-bg-card: #141A29;
+  --color-bg-elevated: #1B2233;
+  --color-border: #283149;
+  --color-border-subtle: #1E2638;
+
+  --color-primary-purple: #7857FF;
+  --color-secondary-blue: #438BFF;
+  --color-accent-cyan: #22D3C5;
+  --color-ai-highlight: #A78BFA;
+
+  --color-text-primary: #F5F7FF;
+  --color-text-secondary: #A3AEC2;
+  --color-text-muted: #727E96;
+
+  --color-status-success: #32C98A;
+  --color-status-warning: #F3B84C;
+  --color-status-error: #F16C7C;
+  --color-status-info: #438BFF;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-jakarta), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-heading), var(--font-sans), sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 body {
-  background: #000000;
-  color: #ffffff;
+  background: #090B12;
+  color: #F5F7FF;
   overflow-x: hidden;
+  font-family: var(--font-sans), sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Custom Ultra-Smooth Scrollbars */
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-heading), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Precision Enterprise Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: #090B12;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.25);
-  border-radius: 9999px;
-  backdrop-filter: blur(10px);
+  background: #283149;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.6);
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+  background: #7857FF;
 }
 
-/* Luxury Black + Purple + White Glassmorphism */
+/* Enterprise Surface Utility Classes */
+.bg-surface-main {
+  background-color: #090B12;
+}
+
+.bg-surface-secondary {
+  background-color: #0E1220;
+}
+
+.bg-surface-card {
+  background-color: #141A29;
+}
+
+.bg-surface-elevated {
+  background-color: #1B2233;
+}
+
+.border-theme {
+  border-color: #283149;
+}
+
+.border-theme-subtle {
+  border-color: #1E2638;
+}
+
+.text-theme-primary {
+  color: #F5F7FF;
+}
+
+.text-theme-secondary {
+  color: #A3AEC2;
+}
+
+.text-theme-muted {
+  color: #727E96;
+}
+
+/* Mapped UI Tokens (Refined Modern Enterprise Look) */
 .glass-panel {
-  background: rgba(10, 3, 20, 0.55);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(168, 85, 247, 0.18);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  background: #0E1220;
+  border: 1px solid #283149;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(147, 51, 234, 0.03) 100%);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #141A29;
+  border: 1px solid #283149;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass-card:hover {
-  border-color: rgba(168, 85, 247, 0.45);
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 30px -5px rgba(168, 85, 247, 0.35);
+  border-color: #3B4665;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6);
 }
 
 .glass-card-purple {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(10, 3, 20, 0.4) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(168, 85, 247, 0.3);
-  box-shadow: 0 15px 35px -10px rgba(147, 51, 234, 0.2);
+  background: #171B30;
+  border: 1px solid rgba(120, 87, 255, 0.35);
+  box-shadow: 0 8px 25px -5px rgba(120, 87, 255, 0.15);
 }
 
 .glass-input {
-  background: rgba(5, 1, 10, 0.75);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  transition: all 0.25s ease;
+  background: #0E1220;
+  border: 1px solid #283149;
+  color: #F5F7FF;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass-input:focus {
-  border-color: rgba(168, 85, 247, 0.75);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2), 0 0 25px rgba(168, 85, 247, 0.2);
+  border-color: #7857FF;
+  box-shadow: 0 0 0 1px #7857FF, 0 0 15px rgba(120, 87, 255, 0.2);
 }
 
 .glass-pill {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #1B2233;
+  border: 1px solid #283149;
+  color: #A3AEC2;
 }
 
-/* Animations */
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+/* Primary Enterprise Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, #7857FF 0%, #6845EF 100%);
+  color: #F5F7FF;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px rgba(120, 87, 255, 0.35);
+  transition: all 0.2s ease;
 }
 
-.animate-gradient-text {
-  background-size: 200% auto;
-  animation: gradientShift 6s ease infinite;
+.btn-primary:hover {
+  background: linear-gradient(135deg, #8767FF 0%, #7857FF 100%);
+  box-shadow: 0 6px 20px rgba(120, 87, 255, 0.45);
+  transform: translateY(-1px);
 }
 
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.35;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.75;
-    transform: scale(1.06);
-  }
+.btn-secondary {
+  background: #1B2233;
+  border: 1px solid #283149;
+  color: #A3AEC2;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.animate-pulse-glow {
-  animation: pulseGlow 5s ease-in-out infinite;
+.btn-secondary:hover {
+  background: #232B40;
+  color: #F5F7FF;
+  border-color: #3B4665;
 }
 
-@keyframes floatSlow {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-float {
-  animation: floatSlow 6s ease-in-out infinite;
-}
-
-/* Pure Deep Purple Ambient Glow Orbs */
+/* Subtle, Restrained Background Ambient Lighting */
 .ambient-glow-purple-lg {
-  background: radial-gradient(circle, rgba(147, 51, 234, 0.22) 0%, rgba(147, 51, 234, 0.04) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(120, 87, 255, 0.12) 0%, rgba(120, 87, 255, 0.02) 50%, transparent 70%);
 }
 
 .ambient-glow-purple-accent {
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.28) 0%, rgba(192, 132, 252, 0.05) 55%, transparent 75%);
+  background: radial-gradient(circle, rgba(67, 139, 255, 0.10) 0%, rgba(120, 87, 255, 0.03) 55%, transparent 75%);
 }
 
 .ambient-glow-white-subtle {
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(245, 247, 255, 0.04) 0%, transparent 70%);
+}
+
+/* Subtle Grid Pattern */
+.bg-grid-subtle {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(40, 49, 73, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(40, 49, 73, 0.25) 1px, transparent 1px);
 }

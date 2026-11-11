@@ -518,20 +518,20 @@ function SerpDiscoveryContent() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 glass-card border border-purple-500/20 bg-gradient-to-br from-black via-purple-950/20 to-black">
+      <div className="relative overflow-hidden rounded-2xl p-6 sm:p-7 bg-[#141A29] border border-[#283149] shadow-lg">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="max-w-2xl space-y-2.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold">
-              <Globe className="w-3.5 h-3.5 text-purple-400" />
-              <span>OutRank AI &bull; SERP Discovery Engine</span>
+          <div className="max-w-2xl space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7857FF]/10 border border-[#7857FF]/30 text-[#A78BFA] text-xs font-semibold">
+              <Globe className="w-3.5 h-3.5 text-[#22D3C5]" />
+              <span>OutRank AI &bull; SERP Intelligence Engine</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight break-words">
-              What are you looking for today?
+            <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#F5F7FF] tracking-tight">
+              SERP Intelligence &amp; Keyword Discovery
             </h1>
 
-            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              Select your intent below. Our engine crawls regional Google &amp; Bing SERPs, purges forum noise, and dynamically activates the exact tools you need — from Keyword Planning to Blog Drafting and Cold Outreach.
+            <p className="text-xs sm:text-sm text-[#A3AEC2] leading-relaxed">
+              Targeted crawling of regional Google &amp; Bing SERPs. Filter forum noise, uncover ranking competitor strategies, and auto-activate intent tools.
             </p>
           </div>
 
@@ -539,22 +539,24 @@ function SerpDiscoveryContent() {
             href="/OutRank_AI_Platform_Guide.pdf"
             target="_blank"
             rel="noreferrer"
-            className="self-start md:self-center px-4 py-2.5 rounded-xl border border-purple-500/30 hover:bg-purple-500/10 text-purple-200 text-xs font-bold flex items-center gap-2 transition-all shrink-0 shadow-lg shadow-purple-950/40"
+            className="self-start md:self-center px-4 py-2 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-[#F5F7FF] text-xs font-semibold flex items-center gap-2 transition-all shrink-0"
           >
-            <Download className="w-3.5 h-3.5 text-purple-400" />
+            <Download className="w-3.5 h-3.5 text-[#22D3C5]" />
             <span>Platform PDF Guide</span>
           </a>
         </div>
 
-        {/* Ambient Glow */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient Subtle Accent */}
+        <div className="absolute top-0 right-0 w-80 h-80 ambient-glow-purple-lg pointer-events-none" />
       </div>
 
       {/* Purpose / Category Selector */}
       <div className="space-y-3">
-        <label className="block text-xs font-extrabold uppercase tracking-wider text-purple-300">
-          Select Outreach Purpose &amp; Category
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold uppercase tracking-wider text-[#A3AEC2]">
+            Select Outreach Purpose &amp; Category
+          </label>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {PURPOSES.map((p) => {
             const isSelected = purpose === p.id;
@@ -563,23 +565,23 @@ function SerpDiscoveryContent() {
                 key={p.id}
                 type="button"
                 onClick={() => setPurpose(p.id)}
-                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between ${
+                className={`p-4 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between ${
                   isSelected
-                    ? "bg-purple-600/20 border-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/50"
-                    : "bg-white/[0.02] border-white/5 hover:border-purple-500/30 hover:bg-white/[0.04]"
+                    ? "bg-[#1B2233] border-[#7857FF] shadow-sm text-[#F5F7FF] ring-1 ring-[#7857FF]/60"
+                    : "bg-[#0E1220] border-[#283149] hover:border-[#438BFF]/40 hover:bg-[#1B2233]/40 text-[#A3AEC2]"
                 }`}
               >
                 <div>
                   <div className="text-2xl mb-2">{p.icon}</div>
-                  <div className="font-black text-xs text-white">{p.label}</div>
-                  <div className="text-[10px] text-zinc-400 mt-1 leading-snug line-clamp-2">
+                  <div className={`font-semibold text-xs ${isSelected ? "text-[#F5F7FF]" : "text-[#A3AEC2]"}`}>{p.label}</div>
+                  <div className="text-[10px] text-[#727E96] mt-1 leading-snug line-clamp-2">
                     {p.desc}
                   </div>
                 </div>
                 {isSelected && (
                   <motion.div
                     layoutId="activePurposeGlow"
-                    className="absolute inset-0 border-2 border-purple-400 rounded-2xl pointer-events-none"
+                    className="absolute inset-0 border-2 border-[#7857FF] rounded-xl pointer-events-none"
                   />
                 )}
               </button>
@@ -589,21 +591,21 @@ function SerpDiscoveryContent() {
       </div>
 
       {/* Search Input Box & Regional Selector */}
-      <div className="p-6 rounded-3xl glass-card border border-purple-500/30 space-y-4 shadow-2xl">
+      <div className="p-6 rounded-2xl bg-[#141A29] border border-[#283149] space-y-4 shadow-lg">
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <label className="text-xs font-extrabold uppercase tracking-wider text-purple-300">
+            <label className="text-xs font-bold uppercase tracking-wider text-[#A3AEC2]">
               Search Keyword / Topic
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-zinc-400">Region:</span>
+              <span className="text-[11px] font-medium text-[#727E96]">Region:</span>
               <select
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="bg-black/60 border border-purple-500/30 rounded-xl px-3 py-1.5 text-xs text-purple-200 focus:outline-none focus:border-purple-400 font-medium"
+                className="bg-[#0E1220] border border-[#283149] rounded-xl px-3 py-1.5 text-xs text-[#F5F7FF] focus:outline-none focus:border-[#7857FF] font-medium"
               >
                 {REGIONS.map((r) => (
-                  <option key={r.id} value={r.id} className="bg-zinc-950 text-white">
+                  <option key={r.id} value={r.id} className="bg-[#0E1220] text-[#F5F7FF]">
                     {r.icon} {r.label}
                   </option>
                 ))}
@@ -612,20 +614,20 @@ function SerpDiscoveryContent() {
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#727E96]" />
               <input
                 type="text"
                 required
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="e.g. best custom clothing store, customised t shirt in lucknow, backlink for marketing..."
-                className="w-full pl-11 pr-4 py-3.5 glass-input rounded-2xl text-sm text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                className="w-full pl-11 pr-4 py-3 bg-[#0E1220] border border-[#283149] rounded-xl text-sm text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none transition-colors"
               />
             </div>
             <button
               type="submit"
               disabled={searching || !query.trim()}
-              className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50 shrink-0"
+              className="px-7 py-3 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 shrink-0"
             >
               {searching ? (
                 <>
@@ -643,7 +645,7 @@ function SerpDiscoveryContent() {
 
           {/* Quick preset chips */}
           <div className="flex items-center gap-2 flex-wrap pt-1">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Popular:</span>
+            <span className="text-[10px] font-bold text-[#727E96] uppercase tracking-wider">Popular:</span>
             {PRESET_QUERIES.map((preset) => (
               <button
                 key={preset}
@@ -651,7 +653,7 @@ function SerpDiscoveryContent() {
                 onClick={() => {
                   setQuery(preset);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-white/[0.03] hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/30 text-zinc-300 hover:text-purple-300 transition-colors"
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-[#0E1220] hover:bg-[#1B2233] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF] transition-colors"
               >
                 {preset}
               </button>
@@ -668,22 +670,22 @@ function SerpDiscoveryContent() {
           className="space-y-6"
         >
           {/* Section Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl glass-card border border-purple-500/20">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl bg-[#141A29] border border-[#283149]">
             <div>
-              <h3 className="text-base font-black text-white flex items-center gap-2">
+              <h3 className="text-base font-bold font-heading text-[#F5F7FF] flex items-center gap-2">
                 <span>
                   {purpose === "COMPETITOR"
                     ? "Top Ranking Competitor Businesses"
                     : purpose === "KEYWORD"
-                    ? "Top 5 Authority Sites Crawled for Keyword Research"
+                    ? "Top Authority Sites Crawled for Keyword Research"
                     : "Top Ranking Sites on SERP"}
                 </span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 font-mono">
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#7857FF]/15 text-[#A78BFA] border border-[#7857FF]/30 font-mono">
                   {selectedRanks.length} of {serpResults.length} selected
                 </span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Targeting real ranking businesses in <strong className="text-purple-300">{region}</strong> for: <strong className="text-purple-300">"{query}"</strong> (No forum UGC noise)
+              <p className="text-xs text-[#A3AEC2] mt-0.5">
+                Targeting ranking domains in <strong className="text-[#F5F7FF]">{region}</strong> for: <strong className="text-[#A78BFA]">"{query}"</strong>
               </p>
             </div>
 
@@ -692,9 +694,9 @@ function SerpDiscoveryContent() {
                 <button
                   onClick={handleDraftBlog}
                   disabled={draftingBlog}
-                  className="text-xs px-3.5 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500 text-white font-bold transition-all flex items-center gap-1.5"
+                  className="text-xs px-3.5 py-2 rounded-xl btn-primary text-[#F5F7FF] font-semibold transition-all flex items-center gap-1.5"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-purple-300" />
+                  <Sparkles className="w-3.5 h-3.5 text-[#22D3C5]" />
                   <span>Draft Blog</span>
                 </button>
               )}
@@ -702,15 +704,15 @@ function SerpDiscoveryContent() {
                 <button
                   onClick={() => triggerKeywordPlan()}
                   disabled={loadingKeywordPlan}
-                  className="text-xs px-3.5 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500 text-white font-bold transition-all flex items-center gap-1.5"
+                  className="text-xs px-3.5 py-2 rounded-xl btn-primary text-[#F5F7FF] font-semibold transition-all flex items-center gap-1.5"
                 >
-                  <Target className="w-3.5 h-3.5 text-purple-300" />
+                  <Target className="w-3.5 h-3.5 text-[#22D3C5]" />
                   <span>{loadingKeywordPlan ? "Generating Plan..." : "Refresh Keyword Plan"}</span>
                 </button>
               )}
               <button
                 onClick={handleSelectAll}
-                className="text-xs px-3 py-2 rounded-xl border border-white/10 hover:border-purple-500/30 text-zinc-300 hover:text-white transition-colors"
+                className="text-xs px-3 py-2 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-[#A3AEC2] hover:text-[#F5F7FF] transition-colors"
               >
                 {selectedRanks.length === serpResults.length ? "Deselect All" : "Select All"}
               </button>
@@ -729,25 +731,25 @@ function SerpDiscoveryContent() {
                   onClick={() => toggleSelect(item.rank)}
                   className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between gap-3 ${
                     isSelected
-                      ? "bg-purple-950/25 border-purple-500/60 shadow-[0_0_25px_rgba(168,85,247,0.18)]"
-                      : "bg-white/[0.01] border-white/5 opacity-70 hover:opacity-100"
+                      ? "bg-[#1B2233] border-[#7857FF]/70 shadow-md ring-1 ring-[#7857FF]/40"
+                      : "bg-[#141A29] border-[#283149] hover:border-[#3B4665]"
                   }`}
                 >
                   <div className="space-y-2.5">
                     {/* Header Row: Rank, Site Name, Domain, Checkbox */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-mono font-black px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-[#7857FF]/15 text-[#A78BFA] border border-[#7857FF]/30">
                           #{item.rank < 10 ? `0${item.rank}` : item.rank}
                         </span>
 
                         {item.site_name && (
-                          <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-white/10 text-white border border-white/15">
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-[#0E1220] text-[#F5F7FF] border border-[#283149]">
                             {item.site_name}
                           </span>
                         )}
 
-                        <span className="text-xs font-bold text-zinc-300 truncate max-w-[180px]">
+                        <span className="text-xs font-semibold text-[#A3AEC2] truncate max-w-[180px]">
                           {item.domain}
                         </span>
                       </div>
@@ -758,7 +760,7 @@ function SerpDiscoveryContent() {
                           target="_blank"
                           rel="noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="p-1 rounded-md hover:bg-purple-500/20 text-zinc-400 hover:text-purple-300 transition-colors"
+                          className="p-1 rounded-md hover:bg-[#232B40] text-[#727E96] hover:text-[#438BFF] transition-colors"
                           title="Open URL in new tab"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -766,8 +768,8 @@ function SerpDiscoveryContent() {
                         <div
                           className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
                             isSelected
-                              ? "bg-purple-600 border-purple-500 text-white"
-                              : "border-white/20"
+                              ? "bg-[#7857FF] border-[#7857FF] text-[#F5F7FF]"
+                              : "border-[#283149] bg-[#0E1220]"
                           }`}
                         >
                           {isSelected && <Check className="w-3.5 h-3.5" />}
@@ -776,26 +778,26 @@ function SerpDiscoveryContent() {
                     </div>
 
                     {/* Page Title */}
-                    <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug">
+                    <h4 className="text-xs font-semibold text-[#F5F7FF] line-clamp-2 leading-snug">
                       {item.title}
                     </h4>
 
                     {/* Snippet */}
-                    <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                    <p className="text-[11px] text-[#A3AEC2] line-clamp-2 leading-relaxed">
                       {item.snippet}
                     </p>
 
                     {/* Keywords badges */}
                     {item.keywords && item.keywords.length > 0 && (
                       <div className="pt-1.5 space-y-1">
-                        <span className="text-[9px] font-black uppercase tracking-wider text-purple-300">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#727E96]">
                           Extracted Keywords:
                         </span>
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {item.keywords.slice(0, 5).map((kw, i) => (
                             <span
                               key={i}
-                              className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-200 border border-purple-500/25 font-medium"
+                              className="text-[10px] px-2 py-0.5 rounded-full bg-[#0E1220] text-[#A78BFA] border border-[#283149] font-medium"
                             >
                               #{kw}
                             </span>
@@ -808,19 +810,19 @@ function SerpDiscoveryContent() {
                     {(item.word_count || (item.schemas_detected && item.schemas_detected.length > 0)) && (
                       <div className="flex items-center gap-2 flex-wrap pt-1 text-[10px]">
                         {item.word_count ? (
-                          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-300 font-mono">
+                          <span className="px-2 py-0.5 rounded bg-[#0E1220] border border-[#283149] text-[#A3AEC2] font-mono">
                             📊 {item.word_count.toLocaleString()} words
                           </span>
                         ) : null}
                         {item.reading_time ? (
-                          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-300 font-mono">
+                          <span className="px-2 py-0.5 rounded bg-[#0E1220] border border-[#283149] text-[#A3AEC2] font-mono">
                             ⏱️ {item.reading_time}
                           </span>
                         ) : null}
                         {item.schemas_detected?.map((sc, i) => (
                           <span
                             key={i}
-                            className="px-1.5 py-0.5 rounded bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20 font-mono text-[9px]"
+                            className="px-1.5 py-0.5 rounded bg-[#22D3C5]/10 text-[#22D3C5] border border-[#22D3C5]/20 font-mono text-[9px]"
                           >
                             Schema: {sc}
                           </span>
@@ -834,7 +836,7 @@ function SerpDiscoveryContent() {
                         <button
                           type="button"
                           onClick={(e) => toggleOutline(item.rank, e)}
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-purple-300 hover:text-purple-200 transition-colors"
+                          className="flex items-center gap-1.5 text-[11px] font-medium text-[#438BFF] hover:text-[#7857FF] transition-colors"
                         >
                           <BookOpen className="w-3.5 h-3.5" />
                           <span>
@@ -853,9 +855,9 @@ function SerpDiscoveryContent() {
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: "auto" }}
                               exit={{ opacity: 0, height: 0 }}
-                              className="mt-2 p-3 rounded-xl bg-black/60 border border-purple-500/20 space-y-1.5 max-h-48 overflow-y-auto"
+                              className="mt-2 p-3 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1.5 max-h-48 overflow-y-auto"
                             >
-                              <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
+                              <div className="text-[10px] font-bold text-[#727E96] uppercase tracking-wider mb-1">
                                 Headings Hierarchy:
                               </div>
                               {item.headings_outline.map((h, hIdx) => (
@@ -863,13 +865,13 @@ function SerpDiscoveryContent() {
                                   key={hIdx}
                                   className={`text-[11px] leading-tight ${
                                     h.level === 1
-                                      ? "font-black text-purple-200 pl-1 border-l-2 border-purple-500"
+                                      ? "font-bold text-[#F5F7FF] pl-1 border-l-2 border-[#7857FF]"
                                       : h.level === 2
-                                      ? "font-semibold text-zinc-200 pl-3 border-l-2 border-purple-400/40"
-                                      : "text-zinc-400 pl-5 border-l-2 border-zinc-700 text-[10px]"
+                                      ? "font-medium text-[#A3AEC2] pl-3 border-l-2 border-[#438BFF]"
+                                      : "text-[#727E96] pl-5 border-l-2 border-[#283149] text-[10px]"
                                   }`}
                                 >
-                                  <span className="font-mono text-[9px] text-purple-400 mr-1.5">
+                                  <span className="font-mono text-[9px] text-[#A78BFA] mr-1.5">
                                     H{h.level}
                                   </span>
                                   <span>{h.text}</span>
@@ -883,9 +885,9 @@ function SerpDiscoveryContent() {
                   </div>
 
                   {/* Card Footer */}
-                  <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-zinc-500">
+                  <div className="mt-2 pt-2 border-t border-[#283149] flex items-center justify-between text-[10px] text-[#727E96]">
                     <span className="truncate max-w-[280px] font-mono">{item.url}</span>
-                    <span className="text-purple-400 font-semibold">{purpose}</span>
+                    <span className="text-[#438BFF] font-medium">{purpose}</span>
                   </div>
                 </div>
               );
@@ -898,37 +900,37 @@ function SerpDiscoveryContent() {
 
           {/* 1. BACKLINK: Cold Outreach & Email Setup */}
           {purpose === "BACKLINK" && (
-            <div className="p-6 sm:p-8 rounded-3xl glass-card border border-purple-500/30 space-y-6">
+            <div className="p-6 sm:p-7 rounded-2xl bg-[#141A29] border border-[#283149] space-y-6 shadow-lg">
               <div>
-                <h3 className="text-lg font-black text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
-                  <span>Automated Email Extraction &amp; Outreach Setup</span>
+                <h3 className="text-base font-bold font-heading text-[#F5F7FF] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#7857FF]" />
+                  <span>Automated Contact Extraction &amp; Outreach Setup</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
+                <p className="text-xs text-[#A3AEC2] mt-1">
                   Selected websites will be crawled for verified contact emails, organized into a designated folder, and queued for cold email backlink pitches.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 pt-2">
-                <div className="space-y-3">
-                  <label className="block text-[11px] font-extrabold uppercase tracking-wider text-purple-300">
+              <div className="grid md:grid-cols-2 gap-5 pt-1">
+                <div className="space-y-2.5">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#A3AEC2]">
                     Emailing Strategy
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setOutreachMode("AI_PERSONALIZED")}
-                      className={`p-4 rounded-2xl border text-left transition-all ${
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
                         outreachMode === "AI_PERSONALIZED"
-                          ? "bg-purple-600/20 border-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-                          : "bg-white/[0.02] border-white/5 text-zinc-400 hover:text-white"
+                          ? "bg-[#1B2233] border-[#7857FF] text-[#F5F7FF] ring-1 ring-[#7857FF]/50"
+                          : "bg-[#0E1220] border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF] hover:border-[#3B4665]"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <Bot className="w-4 h-4 text-purple-400" />
-                        <span className="text-xs font-black">Gemini AI Custom</span>
+                        <Bot className="w-4 h-4 text-[#7857FF]" />
+                        <span className="text-xs font-semibold text-[#F5F7FF]">Gemini AI Custom</span>
                       </div>
-                      <p className="text-[10px] text-zinc-400 leading-snug">
+                      <p className="text-[10px] text-[#727E96] leading-snug">
                         AI crafts a 100% unique backlink collaboration email for each site.
                       </p>
                     </button>
@@ -936,60 +938,60 @@ function SerpDiscoveryContent() {
                     <button
                       type="button"
                       onClick={() => setOutreachMode("TEMPLATE")}
-                      className={`p-4 rounded-2xl border text-left transition-all ${
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
                         outreachMode === "TEMPLATE"
-                          ? "bg-purple-600/20 border-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-                          : "bg-white/[0.02] border-white/5 text-zinc-400 hover:text-white"
+                          ? "bg-[#1B2233] border-[#7857FF] text-[#F5F7FF] ring-1 ring-[#7857FF]/50"
+                          : "bg-[#0E1220] border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF] hover:border-[#3B4665]"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <Mail className="w-4 h-4 text-purple-400" />
-                        <span className="text-xs font-black">Master Template</span>
+                        <Mail className="w-4 h-4 text-[#438BFF]" />
+                        <span className="text-xs font-semibold text-[#F5F7FF]">Master Template</span>
                       </div>
-                      <p className="text-[10px] text-zinc-400 leading-snug">
+                      <p className="text-[10px] text-[#727E96] leading-snug">
                         Dispatches verified High-Converting Backlink collaboration template.
                       </p>
                     </button>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="block text-[11px] font-extrabold uppercase tracking-wider text-purple-300">
+                <div className="space-y-2.5">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#A3AEC2]">
                     Connected Mailbox (Sending As)
                   </label>
                   <select
                     value={selectedSenderId}
                     onChange={(e) => setSelectedSenderId(e.target.value)}
-                    className="w-full glass-input rounded-xl px-3 py-3 text-xs text-white focus:outline-none focus:border-purple-500"
+                    className="w-full bg-[#0E1220] border border-[#283149] rounded-xl px-3 py-2.5 text-xs text-[#F5F7FF] focus:outline-none focus:border-[#7857FF]"
                   >
                     {senders.map((s) => (
-                      <option key={s.id} value={s.id} className="bg-zinc-950 text-white">
+                      <option key={s.id} value={s.id} className="bg-[#0E1220] text-[#F5F7FF]">
                         {s.display_name} ({s.email}) - {s.status}
                       </option>
                     ))}
                   </select>
 
-                  <div className="pt-2 flex items-center justify-between p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 text-xs">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-[#0E1220] border border-[#283149] text-xs">
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-purple-400" />
+                      <Clock className="w-4 h-4 text-[#438BFF]" />
                       <div>
-                        <div className="font-bold text-white">2-Day Automated Follow-Up</div>
-                        <div className="text-[10px] text-zinc-400">If no reply received in 2 days, auto-send gentle nudge</div>
+                        <div className="font-semibold text-[#F5F7FF]">2-Day Automated Follow-Up</div>
+                        <div className="text-[10px] text-[#727E96]">If no reply received in 2 days, auto-send gentle nudge</div>
                       </div>
                     </div>
                     <input
                       type="checkbox"
                       checked={followUpEnabled}
                       onChange={(e) => setFollowUpEnabled(e.target.checked)}
-                      className="w-4 h-4 accent-purple-600 rounded cursor-pointer"
+                      className="w-4 h-4 accent-[#7857FF] rounded cursor-pointer"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs text-zinc-400">
-                  {selectedRanks.length} domains selected for contact extraction
+              <div className="pt-4 border-t border-[#283149] flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-[#A3AEC2]">
+                  <span className="font-semibold text-[#F5F7FF]">{selectedRanks.length}</span> domains selected for contact extraction
                 </div>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -997,20 +999,20 @@ function SerpDiscoveryContent() {
                     type="button"
                     disabled={extracting || selectedRanks.length === 0}
                     onClick={() => handleExtractAndOrganize(false)}
-                    className="flex-1 sm:flex-initial px-6 py-3 rounded-xl border border-purple-500/40 hover:bg-purple-500/10 text-purple-200 font-bold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                    className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-[#F5F7FF] font-semibold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                   >
                     {extracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderPlus className="w-4 h-4" />}
-                    <span>Extract Emails &amp; Save to Folder</span>
+                    <span>Save to Folder</span>
                   </button>
 
                   <button
                     type="button"
                     disabled={extracting || selectedRanks.length === 0 || !selectedSenderId}
                     onClick={() => handleExtractAndOrganize(true)}
-                    className="flex-1 sm:flex-initial px-7 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                    className="flex-1 sm:flex-initial px-6 py-2.5 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                   >
                     {extracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    <span>Extract &amp; Launch Backlink Campaign</span>
+                    <span>Extract &amp; Launch Campaign</span>
                   </button>
                 </div>
               </div>
@@ -1019,9 +1021,9 @@ function SerpDiscoveryContent() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 text-xs text-purple-200 flex items-center gap-3"
+                  className="p-3.5 rounded-xl bg-[#32C98A]/10 border border-[#32C98A]/25 text-xs text-[#32C98A] flex items-center gap-2.5"
                 >
-                  <CheckCircle2 className="w-5 h-5 text-purple-400 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <div className="flex-1 font-medium">{extractStatus}</div>
                 </motion.div>
               )}
@@ -1030,23 +1032,23 @@ function SerpDiscoveryContent() {
 
           {/* 2. EDITORIAL: AI Copywriter & Blog Drafting Suite */}
           {purpose === "EDITORIAL" && (
-            <div className="p-6 sm:p-8 rounded-3xl glass-card border border-purple-500/30 space-y-6 bg-gradient-to-br from-purple-950/30 via-black to-zinc-950">
+            <div className="p-6 sm:p-7 rounded-2xl bg-[#141A29] border border-[#283149] space-y-5 shadow-lg">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-200 text-[11px] font-bold border border-purple-400/30 mb-2">
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#7857FF]/15 text-[#A78BFA] text-[11px] font-semibold border border-[#7857FF]/30 mb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-[#22D3C5]" />
                     <span>AI Copywriter &amp; Schema Engine</span>
                   </div>
-                  <h3 className="text-xl font-black text-white">Draft Publication-Ready Humanized Blog Post</h3>
-                  <p className="text-xs text-zinc-400 mt-1 max-w-2xl">
-                    Reverse-engineers the outline structures, keyword frequencies, and schema types from these {serpResults.length} ranking competitor articles to generate an authoritative, 100% humanized blog post with zero robotic clichés.
+                  <h3 className="text-lg font-bold font-heading text-[#F5F7FF]">Draft Publication-Ready Humanized Blog Post</h3>
+                  <p className="text-xs text-[#A3AEC2] mt-1 max-w-2xl">
+                    Reverse-engineers the outline structures, keyword frequencies, and schema types from {serpResults.length} ranking competitor articles to generate an authoritative, 100% humanized blog post with zero robotic clichés.
                   </p>
                 </div>
 
                 <button
                   onClick={handleDraftBlog}
                   disabled={draftingBlog}
-                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 to-fuchsia-600 hover:from-purple-400 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/60 flex items-center gap-2.5 transition-all shrink-0 hover:scale-[1.02]"
+                  className="px-6 py-3 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2 transition-all shrink-0"
                 >
                   {draftingBlog ? (
                     <>
@@ -1056,27 +1058,27 @@ function SerpDiscoveryContent() {
                   ) : (
                     <>
                       <FileText className="w-4 h-4" />
-                      <span>✨ Launch Blog Drafter &amp; Schema Generator</span>
+                      <span>Launch Blog Drafter &amp; Schema</span>
                     </>
                   )}
                 </button>
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase">Tone &amp; Burstiness:</span>
-                  <div className="text-xs font-bold text-purple-300">100% Humanized Publication Copywriter</div>
-                  <p className="text-[10px] text-zinc-500">Zero AI fluff. Tested against 15+ robotic cliché triggers.</p>
+              <div className="grid sm:grid-cols-3 gap-3.5 pt-1">
+                <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+                  <span className="text-[10px] font-bold text-[#727E96] uppercase">Tone &amp; Burstiness:</span>
+                  <div className="text-xs font-semibold text-[#A78BFA]">100% Humanized Editorial Voice</div>
+                  <p className="text-[10px] text-[#727E96]">Zero AI fluff. Tested against 15+ robotic cliché triggers.</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase">Outline Synthesis:</span>
-                  <div className="text-xs font-bold text-purple-300">Synthesizing {serpResults.length} SERP Competitors</div>
-                  <p className="text-[10px] text-zinc-500">Extracts highest-performing H1, H2, and FAQ structures.</p>
+                <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+                  <span className="text-[10px] font-bold text-[#727E96] uppercase">Outline Synthesis:</span>
+                  <div className="text-xs font-semibold text-[#438BFF]">Synthesizing {serpResults.length} SERP Competitors</div>
+                  <p className="text-[10px] text-[#727E96]">Extracts highest-performing H1, H2, and FAQ structures.</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase">Technical SEO:</span>
-                  <div className="text-xs font-bold text-purple-300">JSON-LD Schema Markup Ready</div>
-                  <p className="text-[10px] text-zinc-500">Full Article + FAQPage schema for Google Rich Snippets.</p>
+                <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+                  <span className="text-[10px] font-bold text-[#727E96] uppercase">Technical SEO:</span>
+                  <div className="text-xs font-semibold text-[#22D3C5]">JSON-LD Schema Markup Ready</div>
+                  <p className="text-[10px] text-[#727E96]">Full Article + FAQPage schema for Google Rich Snippets.</p>
                 </div>
               </div>
             </div>
@@ -1084,43 +1086,43 @@ function SerpDiscoveryContent() {
 
           {/* 3. KEYWORD: Interactive Keyword Planner & Content Structuring Suite */}
           {purpose === "KEYWORD" && (
-            <div className="p-6 sm:p-8 rounded-3xl glass-card border border-purple-500/30 space-y-6">
+            <div className="p-6 sm:p-7 rounded-2xl bg-[#141A29] border border-[#283149] space-y-5 shadow-lg">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-200 text-[11px] font-bold border border-purple-400/30 mb-2">
-                    <Target className="w-3.5 h-3.5 text-purple-400" />
+                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#7857FF]/15 text-[#A78BFA] text-[11px] font-semibold border border-[#7857FF]/30 mb-2">
+                    <Target className="w-3.5 h-3.5 text-[#22D3C5]" />
                     <span>Keyword Planner &amp; SERP Opportunity Matrix</span>
                   </div>
-                  <h3 className="text-xl font-black text-white">Top 5 Competitor Keyword Extraction &amp; Ranking Chances</h3>
-                  <p className="text-xs text-zinc-400 mt-1 max-w-2xl">
-                    Crawls the top 5 ranking sites on SERP, extracts common overlapping keywords, and uncovers high-opportunity keywords with high probability to rank your site.
+                  <h3 className="text-lg font-bold font-heading text-[#F5F7FF]">Top Competitor Keyword Extraction &amp; Ranking Opportunities</h3>
+                  <p className="text-xs text-[#A3AEC2] mt-1 max-w-2xl">
+                    Crawls ranking sites on SERP, extracts common overlapping keywords, and uncovers high-opportunity keywords with high probability to rank your site.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   {keywordPlan && (
                     <button
                       onClick={handleExportKeywordsCsv}
-                      className="px-4 py-2.5 rounded-xl border border-purple-500/40 hover:bg-purple-500/10 text-purple-200 font-bold text-xs flex items-center gap-2 transition-all"
+                      className="px-3.5 py-2 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-[#F5F7FF] font-semibold text-xs flex items-center gap-2 transition-all"
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Export CSV Plan</span>
+                      <Download className="w-3.5 h-3.5 text-[#22D3C5]" />
+                      <span>Export CSV</span>
                     </button>
                   )}
                   <button
                     onClick={() => triggerKeywordPlan()}
                     disabled={loadingKeywordPlan}
-                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/50 flex items-center gap-2 transition-all disabled:opacity-50"
+                    className="px-5 py-2.5 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50"
                   >
                     {loadingKeywordPlan ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Analyzing Top 5 Sites...</span>
+                        <span>Analyzing Sites...</span>
                       </>
                     ) : (
                       <>
                         <Target className="w-4 h-4" />
-                        <span>{keywordPlan ? "Re-Analyze Top 5 Sites" : "Generate Keyword Plan"}</span>
+                        <span>{keywordPlan ? "Re-Analyze Top Sites" : "Generate Keyword Plan"}</span>
                       </>
                     )}
                   </button>
@@ -1128,54 +1130,54 @@ function SerpDiscoveryContent() {
               </div>
 
               {loadingKeywordPlan ? (
-                <div className="py-16 text-center space-y-3">
-                  <Loader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto" />
-                  <p className="text-xs text-zinc-400">Crawling top 5 domains, analyzing search volume intent, and calculating ranking difficulty...</p>
+                <div className="py-14 text-center space-y-3">
+                  <Loader2 className="w-7 h-7 text-[#7857FF] animate-spin mx-auto" />
+                  <p className="text-xs text-[#A3AEC2]">Crawling domains, analyzing search volume intent, and calculating ranking difficulty...</p>
                 </div>
               ) : keywordPlan ? (
-                <div className="space-y-6 pt-2">
+                <div className="space-y-5 pt-1">
                   {/* Summary Metric Chips */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase">Analyzed Sites:</span>
-                      <div className="text-xl font-black text-white mt-0.5">{keywordPlan.total_analyzed_sites} Competitors</div>
+                    <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149]">
+                      <span className="text-[10px] font-bold text-[#727E96] uppercase">Analyzed Sites:</span>
+                      <div className="text-lg font-bold text-[#F5F7FF] mt-0.5">{keywordPlan.total_analyzed_sites} Competitors</div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase">Core Overlap Keywords:</span>
-                      <div className="text-xl font-black text-purple-300 mt-0.5">{keywordPlan.core_common_keywords?.length || 0} Keywords</div>
+                    <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149]">
+                      <span className="text-[10px] font-bold text-[#727E96] uppercase">Core Overlap Keywords:</span>
+                      <div className="text-lg font-bold text-[#A78BFA] mt-0.5">{keywordPlan.core_common_keywords?.length || 0} Keywords</div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase">High Rank Chance:</span>
-                      <div className="text-xl font-black text-emerald-300 mt-0.5">{keywordPlan.high_opportunity_keywords?.length || 0} Targets</div>
+                    <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149]">
+                      <span className="text-[10px] font-bold text-[#727E96] uppercase">High Rank Chance:</span>
+                      <div className="text-lg font-bold text-[#32C98A] mt-0.5">{keywordPlan.high_opportunity_keywords?.length || 0} Targets</div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase">Semantic LSI Terms:</span>
-                      <div className="text-xl font-black text-fuchsia-300 mt-0.5">{keywordPlan.lsi_semantic_keywords?.length || 0} Phrases</div>
+                    <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149]">
+                      <span className="text-[10px] font-bold text-[#727E96] uppercase">Semantic LSI Terms:</span>
+                      <div className="text-lg font-bold text-[#22D3C5] mt-0.5">{keywordPlan.lsi_semantic_keywords?.length || 0} Phrases</div>
                     </div>
                   </div>
 
                   {/* Filter Tabs */}
-                  <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2 border-b border-[#283149] pb-2.5">
                     <button
                       onClick={() => setKeywordFilterTab("all")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        keywordFilterTab === "all" ? "bg-purple-600 text-white" : "text-zinc-400 hover:text-white"
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        keywordFilterTab === "all" ? "bg-[#7857FF] text-[#F5F7FF]" : "text-[#A3AEC2] hover:text-[#F5F7FF]"
                       }`}
                     >
                       All Keywords
                     </button>
                     <button
                       onClick={() => setKeywordFilterTab("core")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        keywordFilterTab === "core" ? "bg-purple-600 text-white" : "text-zinc-400 hover:text-white"
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        keywordFilterTab === "core" ? "bg-[#7857FF] text-[#F5F7FF]" : "text-[#A3AEC2] hover:text-[#F5F7FF]"
                       }`}
                     >
                       Core Overlapping ({keywordPlan.core_common_keywords?.length || 0})
                     </button>
                     <button
                       onClick={() => setKeywordFilterTab("high_opp")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        keywordFilterTab === "high_opp" ? "bg-purple-600 text-white" : "text-zinc-400 hover:text-white"
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        keywordFilterTab === "high_opp" ? "bg-[#7857FF] text-[#F5F7FF]" : "text-[#A3AEC2] hover:text-[#F5F7FF]"
                       }`}
                     >
                       High Ranking Chance ({keywordPlan.high_opportunity_keywords?.length || 0})
@@ -1183,67 +1185,67 @@ function SerpDiscoveryContent() {
                   </div>
 
                   {/* Keywords Table */}
-                  <div className="rounded-2xl border border-white/10 overflow-hidden bg-black/40">
+                  <div className="rounded-xl border border-[#283149] overflow-hidden bg-[#0E1220]">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-white/[0.03] text-zinc-400 uppercase font-bold text-[10px] border-b border-white/10">
+                      <thead className="bg-[#141A29] text-[#727E96] uppercase font-bold text-[10px] border-b border-[#283149]">
                         <tr>
-                          <th className="py-3 px-4">Keyword</th>
-                          <th className="py-3 px-4">Intent</th>
-                          <th className="py-3 px-4">Opportunity Score</th>
-                          <th className="py-3 px-4">Competitors Using</th>
-                          <th className="py-3 px-4">Recommended Page Structure</th>
-                          <th className="py-3 px-4 text-right">Action</th>
+                          <th className="py-2.5 px-3.5">Keyword</th>
+                          <th className="py-2.5 px-3.5">Intent</th>
+                          <th className="py-2.5 px-3.5">Opportunity Score</th>
+                          <th className="py-2.5 px-3.5">Competitors Using</th>
+                          <th className="py-2.5 px-3.5">Recommended Structure</th>
+                          <th className="py-2.5 px-3.5 text-right">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5">
+                      <tbody className="divide-y divide-[#283149]">
                         {/* Core Keywords */}
                         {(keywordFilterTab === "all" || keywordFilterTab === "core") &&
                           keywordPlan.core_common_keywords?.map((k, idx) => (
-                            <tr key={`core-${idx}`} className="hover:bg-purple-500/5 transition-colors">
-                              <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                            <tr key={`core-${idx}`} className="hover:bg-[#141A29] transition-colors">
+                              <td className="py-2.5 px-3.5 font-semibold text-[#F5F7FF] flex items-center gap-2">
                                 <span>{k.keyword}</span>
                                 <button
                                   onClick={() => copyToClipboard(k.keyword, `k-core-${idx}`)}
-                                  className="text-zinc-500 hover:text-purple-300"
+                                  className="text-[#727E96] hover:text-[#A78BFA]"
                                 >
-                                  {copiedKey === `k-core-${idx}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                                  {copiedKey === `k-core-${idx}` ? <Check className="w-3 h-3 text-[#32C98A]" /> : <Copy className="w-3 h-3" />}
                                 </button>
                               </td>
-                              <td className="py-3 px-4">
-                                <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20 text-[10px] font-medium">
+                              <td className="py-2.5 px-3.5">
+                                <span className="px-2 py-0.5 rounded-md bg-[#438BFF]/15 text-[#438BFF] border border-[#438BFF]/30 text-[10px] font-medium">
                                   {k.search_intent}
                                 </span>
                               </td>
-                              <td className="py-3 px-4">
+                              <td className="py-2.5 px-3.5">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-16 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                                  <div className="w-16 h-1.5 rounded-full bg-[#1B2233] overflow-hidden">
                                     <div
-                                      className="h-full bg-gradient-to-r from-purple-500 to-emerald-400 rounded-full"
+                                      className="h-full bg-gradient-to-r from-[#7857FF] to-[#32C98A] rounded-full"
                                       style={{ width: `${k.opportunity_score}%` }}
                                     />
                                   </div>
-                                  <span className="font-mono text-emerald-300 font-bold">{k.opportunity_score}%</span>
+                                  <span className="font-mono text-[#32C98A] font-bold">{k.opportunity_score}%</span>
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-zinc-400">
+                              <td className="py-2.5 px-3.5 text-[#A3AEC2]">
                                 <div className="flex items-center gap-1 flex-wrap">
                                   {k.competitors_using?.map((c, ci) => (
-                                    <span key={ci} className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-zinc-300">
+                                    <span key={ci} className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#1B2233] text-[#A3AEC2]">
                                       {c}
                                     </span>
                                   ))}
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-zinc-300 font-medium">
+                              <td className="py-2.5 px-3.5 text-[#A3AEC2]">
                                 {k.recommended_structure}
                               </td>
-                              <td className="py-3 px-4 text-right">
+                              <td className="py-2.5 px-3.5 text-right">
                                 <button
                                   onClick={() => {
                                     setQuery(k.keyword);
                                     setPurpose("EDITORIAL");
                                   }}
-                                  className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600 text-purple-200 hover:text-white text-[11px] font-bold transition-colors"
+                                  className="px-2.5 py-1 rounded-lg bg-[#7857FF]/20 hover:bg-[#7857FF] text-[#A78BFA] hover:text-[#F5F7FF] text-[11px] font-medium transition-colors"
                                 >
                                   Draft Article
                                 </button>
@@ -1254,45 +1256,45 @@ function SerpDiscoveryContent() {
                         {/* High Opportunity Keywords */}
                         {(keywordFilterTab === "all" || keywordFilterTab === "high_opp") &&
                           keywordPlan.high_opportunity_keywords?.map((k, idx) => (
-                            <tr key={`opp-${idx}`} className="hover:bg-emerald-500/5 transition-colors">
-                              <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
-                                <span className="text-emerald-300">★ {k.keyword}</span>
+                            <tr key={`opp-${idx}`} className="hover:bg-[#141A29] transition-colors">
+                              <td className="py-2.5 px-3.5 font-semibold text-[#F5F7FF] flex items-center gap-2">
+                                <span className="text-[#32C98A]">★ {k.keyword}</span>
                                 <button
                                   onClick={() => copyToClipboard(k.keyword, `k-opp-${idx}`)}
-                                  className="text-zinc-500 hover:text-purple-300"
+                                  className="text-[#727E96] hover:text-[#A78BFA]"
                                 >
-                                  {copiedKey === `k-opp-${idx}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                                  {copiedKey === `k-opp-${idx}` ? <Check className="w-3 h-3 text-[#32C98A]" /> : <Copy className="w-3 h-3" />}
                                 </button>
                               </td>
-                              <td className="py-3 px-4">
-                                <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[10px] font-medium">
+                              <td className="py-2.5 px-3.5">
+                                <span className="px-2 py-0.5 rounded-md bg-[#32C98A]/15 text-[#32C98A] border border-[#32C98A]/30 text-[10px] font-medium">
                                   {k.search_intent}
                                 </span>
                               </td>
-                              <td className="py-3 px-4">
+                              <td className="py-2.5 px-3.5">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-16 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                                  <div className="w-16 h-1.5 rounded-full bg-[#1B2233] overflow-hidden">
                                     <div
-                                      className="h-full bg-emerald-400 rounded-full"
+                                      className="h-full bg-[#32C98A] rounded-full"
                                       style={{ width: `${k.opportunity_score}%` }}
                                     />
                                   </div>
-                                  <span className="font-mono text-emerald-300 font-bold">{k.opportunity_score}%</span>
+                                  <span className="font-mono text-[#32C98A] font-bold">{k.opportunity_score}%</span>
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-zinc-400 text-[11px] max-w-xs">
+                              <td className="py-2.5 px-3.5 text-[#A3AEC2] text-[11px] max-w-xs">
                                 {k.why_high_rank_chance}
                               </td>
-                              <td className="py-3 px-4 text-zinc-300 font-medium">
+                              <td className="py-2.5 px-3.5 text-[#A3AEC2]">
                                 {k.recommended_structure}
                               </td>
-                              <td className="py-3 px-4 text-right">
+                              <td className="py-2.5 px-3.5 text-right">
                                 <button
                                   onClick={() => {
                                     setQuery(k.keyword);
                                     setPurpose("EDITORIAL");
                                   }}
-                                  className="px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 hover:text-white text-[11px] font-bold transition-colors"
+                                  className="px-2.5 py-1 rounded-lg bg-[#32C98A]/20 hover:bg-[#32C98A] text-[#32C98A] hover:text-[#090B12] text-[11px] font-bold transition-colors"
                                 >
                                   Draft Article
                                 </button>
@@ -1305,22 +1307,22 @@ function SerpDiscoveryContent() {
 
                   {/* Content Strategy Plan */}
                   {keywordPlan.content_architecture_plan && (
-                    <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
-                      <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        <span>Recommended Content Architecture to Outrank Top 5:</span>
+                    <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1.5">
+                      <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-wider flex items-center gap-1.5">
+                        <TrendingUp className="w-3.5 h-3.5 text-[#22D3C5]" />
+                        <span>Recommended Content Architecture:</span>
                       </span>
-                      <p className="text-xs text-zinc-200 leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs text-[#A3AEC2] leading-relaxed whitespace-pre-wrap">
                         {keywordPlan.content_architecture_plan}
                       </p>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-center py-10 border border-dashed border-white/10 rounded-2xl space-y-2">
-                  <Target className="w-8 h-8 text-zinc-600 mx-auto" />
-                  <p className="text-xs text-zinc-300">Click <strong>"Generate Keyword Plan"</strong> to crawl the top 5 ranking sites.</p>
-                  <p className="text-[11px] text-zinc-500">Extracts shared keywords and finds low-competition, high-ranking chance keywords for your site.</p>
+                <div className="text-center py-10 border border-dashed border-[#283149] rounded-xl space-y-2">
+                  <Target className="w-7 h-7 text-[#727E96] mx-auto" />
+                  <p className="text-xs text-[#F5F7FF]">Click <strong>"Generate Keyword Plan"</strong> to analyze ranking competitors.</p>
+                  <p className="text-[11px] text-[#727E96]">Extracts shared keywords and finds low-competition, high-ranking targets for your site.</p>
                 </div>
               )}
             </div>
@@ -1328,23 +1330,23 @@ function SerpDiscoveryContent() {
 
           {/* 4. COMPETITOR: Competitor Intelligence & Market Gap Suite */}
           {purpose === "COMPETITOR" && (
-            <div className="p-6 sm:p-8 rounded-3xl glass-card border border-purple-500/30 space-y-6">
+            <div className="p-6 sm:p-7 rounded-2xl bg-[#141A29] border border-[#283149] space-y-5 shadow-lg">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-200 text-[11px] font-bold border border-purple-400/30 mb-2">
-                    <Shield className="w-3.5 h-3.5 text-purple-400" />
+                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#7857FF]/15 text-[#A78BFA] text-[11px] font-semibold border border-[#7857FF]/30 mb-2">
+                    <Shield className="w-3.5 h-3.5 text-[#22D3C5]" />
                     <span>Competitor Intelligence &amp; Market Vulnerabilities</span>
                   </div>
-                  <h3 className="text-xl font-black text-white">Ranking Competitor Breakdown &amp; Market Gaps</h3>
-                  <p className="text-xs text-zinc-400 mt-1 max-w-2xl">
-                    Analyzes actual businesses ranking on this keyword (Reddit &amp; forum posts are strictly filtered out). Discover competitor weaknesses and market gaps you can exploit to dominate.
+                  <h3 className="text-lg font-bold font-heading text-[#F5F7FF]">Ranking Competitor Breakdown &amp; Market Gaps</h3>
+                  <p className="text-xs text-[#A3AEC2] mt-1 max-w-2xl">
+                    Analyzes actual businesses ranking on this keyword (Reddit &amp; forum posts strictly filtered out). Discover competitor weaknesses and market gaps you can exploit to dominate.
                   </p>
                 </div>
 
                 <button
                   onClick={() => triggerCompetitorStrategy()}
                   disabled={loadingCompetitorStrategy}
-                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/50 flex items-center gap-2 transition-all disabled:opacity-50 shrink-0"
+                  className="px-5 py-2.5 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50 shrink-0"
                 >
                   {loadingCompetitorStrategy ? (
                     <>
@@ -1361,50 +1363,50 @@ function SerpDiscoveryContent() {
               </div>
 
               {loadingCompetitorStrategy ? (
-                <div className="py-16 text-center space-y-3">
-                  <Loader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto" />
-                  <p className="text-xs text-zinc-400">Auditing competitor offerings, business models, and service gaps...</p>
+                <div className="py-14 text-center space-y-3">
+                  <Loader2 className="w-7 h-7 text-[#7857FF] animate-spin mx-auto" />
+                  <p className="text-xs text-[#A3AEC2]">Auditing competitor offerings, business models, and service gaps...</p>
                 </div>
               ) : competitorStrategy ? (
-                <div className="space-y-6 pt-2">
+                <div className="space-y-5 pt-1">
                   {/* Top Market Gaps */}
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid sm:grid-cols-2 gap-3.5">
                     {competitorStrategy.top_market_gaps?.map((gap, gIdx) => (
-                      <div key={gIdx} className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/30 space-y-1.5">
+                      <div key={gIdx} className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-white flex items-center gap-1.5">
-                            <Flame className="w-3.5 h-3.5 text-fuchsia-400" />
+                          <span className="text-xs font-bold text-[#F5F7FF] flex items-center gap-1.5">
+                            <Flame className="w-3.5 h-3.5 text-[#F3B84C]" />
                             <span>{gap.gap_title}</span>
                           </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#32C98A]/15 text-[#32C98A] border border-[#32C98A]/30">
                             {gap.opportunity_level} Opportunity
                           </span>
                         </div>
-                        <p className="text-xs text-zinc-300 leading-relaxed">{gap.description}</p>
+                        <p className="text-xs text-[#A3AEC2] leading-relaxed">{gap.description}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Competitor Landscape Breakdown Table */}
-                  <div className="rounded-2xl border border-white/10 overflow-hidden bg-black/40">
+                  <div className="rounded-xl border border-[#283149] overflow-hidden bg-[#0E1220]">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-white/[0.03] text-zinc-400 uppercase font-bold text-[10px] border-b border-white/10">
+                      <thead className="bg-[#141A29] text-[#727E96] uppercase font-bold text-[10px] border-b border-[#283149]">
                         <tr>
-                          <th className="py-3 px-4">Competitor</th>
-                          <th className="py-3 px-4">Business Model</th>
-                          <th className="py-3 px-4">Core Strengths</th>
-                          <th className="py-3 px-4">Vulnerabilities</th>
-                          <th className="py-3 px-4">Exploitable Gap</th>
+                          <th className="py-2.5 px-3.5">Competitor</th>
+                          <th className="py-2.5 px-3.5">Business Model</th>
+                          <th className="py-2.5 px-3.5">Core Strengths</th>
+                          <th className="py-2.5 px-3.5">Vulnerabilities</th>
+                          <th className="py-2.5 px-3.5">Exploitable Gap</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5">
+                      <tbody className="divide-y divide-[#283149]">
                         {competitorStrategy.competitor_landscape?.map((c, cIdx) => (
-                          <tr key={cIdx} className="hover:bg-purple-500/5 transition-colors">
-                            <td className="py-3 px-4 font-bold text-white font-mono">{c.competitor}</td>
-                            <td className="py-3 px-4 text-purple-300">{c.business_model}</td>
-                            <td className="py-3 px-4 text-zinc-300">{c.strengths}</td>
-                            <td className="py-3 px-4 text-rose-300">{c.vulnerabilities}</td>
-                            <td className="py-3 px-4 text-emerald-300 font-semibold">{c.gap_to_exploit}</td>
+                          <tr key={cIdx} className="hover:bg-[#141A29] transition-colors">
+                            <td className="py-2.5 px-3.5 font-bold text-[#F5F7FF] font-mono">{c.competitor}</td>
+                            <td className="py-2.5 px-3.5 text-[#438BFF]">{c.business_model}</td>
+                            <td className="py-2.5 px-3.5 text-[#A3AEC2]">{c.strengths}</td>
+                            <td className="py-2.5 px-3.5 text-[#F16C7C]">{c.vulnerabilities}</td>
+                            <td className="py-2.5 px-3.5 text-[#32C98A] font-semibold">{c.gap_to_exploit}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1413,22 +1415,22 @@ function SerpDiscoveryContent() {
 
                   {/* Battle Plan Summary */}
                   {competitorStrategy.battle_plan_summary && (
-                    <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
-                      <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        <span>Actionable Battle Plan to Beat Competitors:</span>
+                    <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1.5">
+                      <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-wider flex items-center gap-1.5">
+                        <TrendingUp className="w-3.5 h-3.5 text-[#22D3C5]" />
+                        <span>Actionable Battle Plan to Outrank Competitors:</span>
                       </span>
-                      <p className="text-xs text-zinc-200 leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs text-[#A3AEC2] leading-relaxed whitespace-pre-wrap">
                         {competitorStrategy.battle_plan_summary}
                       </p>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-center py-10 border border-dashed border-white/10 rounded-2xl space-y-2">
-                  <Shield className="w-8 h-8 text-zinc-600 mx-auto" />
-                  <p className="text-xs text-zinc-300">Click <strong>"Generate Counter-Strategy Plan"</strong> to analyze these ranking businesses.</p>
-                  <p className="text-[11px] text-zinc-500">Uncovers competitor vulnerabilities, pricing models, and service gaps you can exploit.</p>
+                <div className="text-center py-10 border border-dashed border-[#283149] rounded-xl space-y-2">
+                  <Shield className="w-7 h-7 text-[#727E96] mx-auto" />
+                  <p className="text-xs text-[#F5F7FF]">Click <strong>"Generate Counter-Strategy Plan"</strong> to analyze ranking competitors.</p>
+                  <p className="text-[11px] text-[#727E96]">Uncovers competitor vulnerabilities, pricing models, and service gaps you can exploit.</p>
                 </div>
               )}
             </div>
@@ -1436,62 +1438,62 @@ function SerpDiscoveryContent() {
 
           {/* 5. MARKETING: B2B Prospecting & Growth Proposal Suite */}
           {purpose === "MARKETING" && (
-            <div className="p-6 sm:p-8 rounded-3xl glass-card border border-purple-500/30 space-y-6">
+            <div className="p-6 sm:p-7 rounded-2xl bg-[#141A29] border border-[#283149] space-y-5 shadow-lg">
               <div>
-                <h3 className="text-lg font-black text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
+                <h3 className="text-base font-bold font-heading text-[#F5F7FF] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#7857FF]" />
                   <span>B2B Client Acquisition &amp; Digital Marketing Pitch Hub</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
+                <p className="text-xs text-[#A3AEC2] mt-1">
                   Target ranking agencies, stores, and service providers. Pitch website modernizations, conversion rate optimization (CRO), and local SEO systems.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 pt-2">
-                <div className="p-5 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-3">
-                  <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">
+              <div className="grid md:grid-cols-2 gap-5 pt-1">
+                <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-2">
+                  <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-wider">
                     Pitch Proposal Angle:
                   </span>
-                  <div className="text-sm font-bold text-white">Website Redesign + Conversion Systems + Local SEO</div>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
+                  <div className="text-xs font-bold text-[#F5F7FF]">Website Redesign + Conversion Systems + Local SEO</div>
+                  <p className="text-xs text-[#A3AEC2] leading-relaxed">
                     Automatically inspects if the prospect has an outdated site, mobile layout issues, or weak lead capture, and pitches automated solutions with transparent turnaround.
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="block text-[11px] font-extrabold uppercase tracking-wider text-purple-300">
+                <div className="space-y-2.5">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#A3AEC2]">
                     Connected Mailbox
                   </label>
                   <select
                     value={selectedSenderId}
                     onChange={(e) => setSelectedSenderId(e.target.value)}
-                    className="w-full glass-input rounded-xl px-3 py-3 text-xs text-white focus:outline-none focus:border-purple-500"
+                    className="w-full bg-[#0E1220] border border-[#283149] rounded-xl px-3 py-2.5 text-xs text-[#F5F7FF] focus:outline-none focus:border-[#7857FF]"
                   >
                     {senders.map((s) => (
-                      <option key={s.id} value={s.id} className="bg-zinc-950 text-white">
+                      <option key={s.id} value={s.id} className="bg-[#0E1220] text-[#F5F7FF]">
                         {s.display_name} ({s.email}) - {s.status}
                       </option>
                     ))}
                   </select>
 
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 text-xs">
-                    <span className="text-white font-bold">2-Day Automated Nudge</span>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-[#0E1220] border border-[#283149] text-xs">
+                    <span className="text-[#F5F7FF] font-semibold">2-Day Automated Nudge</span>
                     <input
                       type="checkbox"
                       checked={followUpEnabled}
                       onChange={(e) => setFollowUpEnabled(e.target.checked)}
-                      className="w-4 h-4 accent-purple-600 rounded cursor-pointer"
+                      className="w-4 h-4 accent-[#7857FF] rounded cursor-pointer"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+              <div className="pt-4 border-t border-[#283149] flex justify-end gap-3">
                 <button
                   type="button"
                   disabled={extracting || selectedRanks.length === 0 || !selectedSenderId}
                   onClick={() => handleExtractAndOrganize(true)}
-                  className="px-7 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/50 flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50"
                 >
                   {extracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   <span>Queue {selectedRanks.length} Prospects for Marketing Proposals</span>
@@ -1503,32 +1505,32 @@ function SerpDiscoveryContent() {
       )}
 
       {/* Step 3: Incoming Replies & AI Draft Alerts Panel */}
-      <div className="p-6 sm:p-8 rounded-3xl glass-card border border-white/5 space-y-4">
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#141A29] border border-[#283149] space-y-4 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300">
+            <div className="w-9 h-9 rounded-xl bg-[#7857FF]/15 border border-[#7857FF]/30 flex items-center justify-center text-[#A78BFA]">
               <Bell className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-black text-white">Prospect Reply Alerts &amp; AI Response Drafts</h3>
-              <p className="text-xs text-zinc-400">
+              <h3 className="text-base font-bold font-heading text-[#F5F7FF]">Prospect Reply Alerts &amp; AI Response Drafts</h3>
+              <p className="text-xs text-[#A3AEC2]">
                 Monitors replies from prospects. When an answer lands, Gemini drafts an email reply for your 1-click review.
               </p>
             </div>
           </div>
           <button
             onClick={loadSendersAndReplies}
-            className="p-2 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-[#A3AEC2] hover:text-[#F5F7FF] transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
 
         {replies.length === 0 ? (
-          <div className="text-center py-10 border border-dashed border-white/10 rounded-2xl">
-            <MessageSquare className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-            <p className="text-xs text-zinc-400">No active incoming replies yet.</p>
-            <p className="text-[11px] text-zinc-500 mt-1">
+          <div className="text-center py-10 border border-dashed border-[#283149] rounded-xl">
+            <MessageSquare className="w-7 h-7 text-[#727E96] mx-auto mb-2" />
+            <p className="text-xs text-[#F5F7FF]">No active incoming replies yet.</p>
+            <p className="text-[11px] text-[#727E96] mt-1">
               Once prospects reply to your campaign, their responses and automated AI reply drafts will appear here for 1-click approval.
             </p>
           </div>
@@ -1537,25 +1539,25 @@ function SerpDiscoveryContent() {
             {replies.map((r) => (
               <div
                 key={r.id}
-                className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/30 space-y-3"
+                className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-2.5"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="text-xs font-black text-white">{r.company}</h4>
-                    <p className="text-[11px] text-zinc-400 font-mono">{r.email}</p>
+                    <h4 className="text-xs font-bold text-[#F5F7FF]">{r.company}</h4>
+                    <p className="text-[11px] text-[#A3AEC2] font-mono">{r.email}</p>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#32C98A]/15 text-[#32C98A] border border-[#32C98A]/30 font-semibold">
                     REPLY RECEIVED
                   </span>
                 </div>
 
-                <p className="text-xs text-zinc-300 bg-black/40 p-3 rounded-xl border border-white/5 italic">
+                <p className="text-xs text-[#A3AEC2] bg-[#141A29] p-3 rounded-lg border border-[#283149] italic">
                   "{r.reply_body}"
                 </p>
 
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[10px] text-purple-300 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
+                  <span className="text-[10px] text-[#A78BFA] flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-[#22D3C5]" />
                     <span>AI Draft Ready</span>
                   </span>
 
@@ -1564,7 +1566,7 @@ function SerpDiscoveryContent() {
                       setSelectedReply(r);
                       setReplyModalOpen(true);
                     }}
-                    className="text-xs px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition-colors"
+                    className="text-xs px-3 py-1.5 rounded-lg btn-primary text-[#F5F7FF] font-semibold transition-colors"
                   >
                     Review &amp; Reply
                   </button>
@@ -1579,37 +1581,37 @@ function SerpDiscoveryContent() {
       {mounted && blogModalOpen && createPortal(
         <div
           onClick={() => setBlogModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 md:p-8 bg-black/90 backdrop-blur-xl overflow-y-auto"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-[#090B12]/85 backdrop-blur-md overflow-y-auto"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 15 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-5xl max-h-[90vh] rounded-3xl glass-card border border-purple-500/40 bg-zinc-950 flex flex-col shadow-[0_0_60px_rgba(168,85,247,0.3)] overflow-hidden my-auto"
+            className="w-full max-w-5xl max-h-[90vh] rounded-2xl bg-[#141A29] border border-[#283149] flex flex-col shadow-2xl overflow-hidden my-auto text-[#F5F7FF]"
           >
             {/* Modal Header */}
-            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between gap-4 bg-gradient-to-r from-purple-950/60 via-black to-zinc-950 shrink-0">
+            <div className="p-5 sm:p-6 border-b border-[#283149] flex items-center justify-between gap-4 bg-[#0E1220] shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-purple-900/50">
-                  <Sparkles className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-[#7857FF]/15 border border-[#7857FF]/30 flex items-center justify-center text-[#A78BFA] shadow-md">
+                  <Sparkles className="w-5 h-5 text-[#22D3C5]" />
                 </div>
                 <div>
-                  <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg font-bold font-heading text-[#F5F7FF] flex items-center gap-2">
                     <span>Humanized AI Blog &amp; Schema Generator</span>
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#32C98A]/15 text-[#32C98A] border border-[#32C98A]/30 font-mono font-medium">
                       98% Human Authenticity
                     </span>
                   </h2>
-                  <p className="text-xs text-zinc-400">
-                    Trained in lifestyle publication copywriting voice • 0 AI fluff • Valid Google Rich Results Schema
+                  <p className="text-xs text-[#A3AEC2]">
+                    Trained in publication copywriting voice • 0 AI fluff • Valid Google Rich Results Schema
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={() => setBlogModalOpen(false)}
-                className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233] transition-colors"
                 title="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -1618,11 +1620,11 @@ function SerpDiscoveryContent() {
 
             {/* Modal Body / Loading State */}
             {draftingBlog ? (
-              <div className="py-28 text-center space-y-4">
-                <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto" />
+              <div className="py-24 text-center space-y-4">
+                <Loader2 className="w-10 h-10 text-[#7857FF] animate-spin mx-auto" />
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-white">AI Copywriter Crafting Humanized Post...</h3>
-                  <p className="text-xs text-zinc-400 max-w-md mx-auto">
+                  <h3 className="text-sm font-bold text-[#F5F7FF]">AI Copywriter Crafting Humanized Post...</h3>
+                  <p className="text-xs text-[#A3AEC2] max-w-md mx-auto">
                     Reverse-engineering competitor headings, targeting secondary keywords, and applying burstiness filters to eliminate generic robotic patterns.
                   </p>
                 </div>
@@ -1630,13 +1632,13 @@ function SerpDiscoveryContent() {
             ) : draftedBlog ? (
               <div className="flex-1 overflow-hidden flex flex-col min-h-0">
                 {/* Top Info Bar: Headline & Actions */}
-                <div className="p-5 border-b border-white/5 bg-black/50 space-y-3 shrink-0">
+                <div className="p-4 sm:p-5 border-b border-[#283149] bg-[#0E1220]/70 space-y-3 shrink-0">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#A78BFA]">
                         HEADLINE (H1):
                       </span>
-                      <h3 className="text-sm sm:text-base font-black text-white truncate">
+                      <h3 className="text-sm sm:text-base font-bold text-[#F5F7FF] truncate">
                         {draftedBlog.title}
                       </h3>
                     </div>
@@ -1644,15 +1646,15 @@ function SerpDiscoveryContent() {
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => copyToClipboard(draftedBlog.humanized_blog_markdown, "all_md")}
-                        className="px-3.5 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500 text-white text-xs font-bold transition-all flex items-center gap-1.5"
+                        className="px-3.5 py-1.5 rounded-xl btn-primary text-[#F5F7FF] text-xs font-semibold flex items-center gap-1.5 shadow-md"
                       >
-                        {copiedKey === "all_md" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copiedKey === "all_md" ? <Check className="w-3.5 h-3.5 text-[#32C98A]" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{copiedKey === "all_md" ? "Copied!" : "Copy Markdown"}</span>
                       </button>
 
                       <button
                         onClick={() => downloadTextFile(draftedBlog.humanized_blog_markdown, `${query.replace(/\s+/g, '_')}_blog.md`, "text/markdown")}
-                        className="p-1.5 rounded-xl border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
+                        className="p-1.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-[#A3AEC2] hover:text-[#F5F7FF] transition-colors"
                         title="Download Markdown File"
                       >
                         <Download className="w-4 h-4" />
@@ -1662,31 +1664,31 @@ function SerpDiscoveryContent() {
 
                   {/* Meta Description & Primary Keywords */}
                   <div className="grid sm:grid-cols-3 gap-3 pt-1">
-                    <div className="sm:col-span-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <div className="sm:col-span-2 p-3 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-black uppercase tracking-wider text-zinc-400">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#727E96]">
                           META DESCRIPTION (155 CHARS):
                         </span>
                         <button
                           onClick={() => copyToClipboard(draftedBlog.meta_description || "", "meta")}
-                          className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                          className="text-[10px] text-[#438BFF] hover:text-[#7857FF] flex items-center gap-1"
                         >
                           <Copy className="w-3 h-3" />
                           <span>{copiedKey === "meta" ? "Copied" : "Copy"}</span>
                         </button>
                       </div>
-                      <p className="text-xs text-zinc-300 leading-relaxed">
+                      <p className="text-xs text-[#A3AEC2] leading-relaxed">
                         {draftedBlog.meta_description}
                       </p>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                      <span className="text-[9px] font-black uppercase tracking-wider text-zinc-400">
+                    <div className="p-3 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[#727E96]">
                         FOCUS KEYWORDS:
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {draftedBlog.secondary_keywords?.slice(0, 4).map((kw, i) => (
-                          <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-200 border border-purple-500/20 font-medium">
+                          <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-[#1B2233] text-[#A78BFA] border border-[#283149] font-medium">
                             #{kw}
                           </span>
                         ))}
@@ -1695,13 +1697,13 @@ function SerpDiscoveryContent() {
                   </div>
 
                   {/* Navigation Tabs */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-white/5 overflow-x-auto">
+                  <div className="flex items-center gap-2 pt-2 border-t border-[#283149] overflow-x-auto">
                     <button
                       onClick={() => setBlogActiveTab("preview")}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                         blogActiveTab === "preview"
-                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          ? "bg-[#7857FF] text-[#F5F7FF]"
+                          : "text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233]"
                       }`}
                     >
                       <BookOpen className="w-3.5 h-3.5" />
@@ -1710,10 +1712,10 @@ function SerpDiscoveryContent() {
 
                     <button
                       onClick={() => setBlogActiveTab("markdown")}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                         blogActiveTab === "markdown"
-                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          ? "bg-[#7857FF] text-[#F5F7FF]"
+                          : "text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233]"
                       }`}
                     >
                       <FileText className="w-3.5 h-3.5" />
@@ -1722,10 +1724,10 @@ function SerpDiscoveryContent() {
 
                     <button
                       onClick={() => setBlogActiveTab("html")}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                         blogActiveTab === "html"
-                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          ? "bg-[#7857FF] text-[#F5F7FF]"
+                          : "text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233]"
                       }`}
                     >
                       <Code className="w-3.5 h-3.5" />
@@ -1734,10 +1736,10 @@ function SerpDiscoveryContent() {
 
                     <button
                       onClick={() => setBlogActiveTab("schema")}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                         blogActiveTab === "schema"
-                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          ? "bg-[#7857FF] text-[#F5F7FF]"
+                          : "text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233]"
                       }`}
                     >
                       <Layers className="w-3.5 h-3.5" />
@@ -1746,10 +1748,10 @@ function SerpDiscoveryContent() {
 
                     <button
                       onClick={() => setBlogActiveTab("seo")}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                         blogActiveTab === "seo"
-                          ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          ? "bg-[#7857FF] text-[#F5F7FF]"
+                          : "text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233]"
                       }`}
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
@@ -1762,11 +1764,11 @@ function SerpDiscoveryContent() {
                 <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
                   {blogActiveTab === "preview" && (
                     <div className="space-y-4">
-                      <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 text-xs text-purple-200">
-                        💡 <strong>Copywriter Humanization Applied:</strong> Burstiness pacing applied, sensory fabric drapes &amp; measurement details included, 0 robotic clichés. Ready for direct publication.
+                      <div className="p-3.5 rounded-xl bg-[#7857FF]/10 border border-[#7857FF]/25 text-xs text-[#A78BFA]">
+                        💡 <strong>Copywriter Humanization:</strong> Varied sentence rhythm, real-world industry examples, and zero robotic clichés. Ready for publication.
                       </div>
 
-                      <div className="p-6 rounded-2xl bg-black/60 border border-white/5">
+                      <div className="p-6 rounded-xl bg-[#0E1220] border border-[#283149]">
                         <FormattedArticleRenderer markdown={draftedBlog.humanized_blog_markdown} />
                       </div>
                     </div>
@@ -1777,13 +1779,13 @@ function SerpDiscoveryContent() {
                       <div className="flex justify-end">
                         <button
                           onClick={() => copyToClipboard(draftedBlog.humanized_blog_markdown, "raw_md")}
-                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
+                          className="px-3 py-1.5 rounded-lg btn-primary text-xs font-semibold flex items-center gap-1.5"
                         >
                           <Copy className="w-3.5 h-3.5" />
                           <span>{copiedKey === "raw_md" ? "Copied Markdown!" : "Copy Raw Markdown"}</span>
                         </button>
                       </div>
-                      <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-zinc-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                      <pre className="p-5 rounded-xl bg-[#0E1220] border border-[#283149] text-xs text-[#A3AEC2] font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
                         {draftedBlog.humanized_blog_markdown}
                       </pre>
                     </div>
@@ -1794,13 +1796,13 @@ function SerpDiscoveryContent() {
                       <div className="flex justify-end">
                         <button
                           onClick={() => copyToClipboard(draftedBlog.clean_html || "", "clean_html")}
-                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
+                          className="px-3 py-1.5 rounded-lg btn-primary text-xs font-semibold flex items-center gap-1.5"
                         >
                           <Copy className="w-3.5 h-3.5" />
                           <span>{copiedKey === "clean_html" ? "Copied HTML!" : "Copy Clean HTML"}</span>
                         </button>
                       </div>
-                      <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-purple-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                      <pre className="p-5 rounded-xl bg-[#0E1220] border border-[#283149] text-xs text-[#A78BFA] font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
                         {draftedBlog.clean_html || "<p>HTML conversion generated</p>"}
                       </pre>
                     </div>
@@ -1809,18 +1811,18 @@ function SerpDiscoveryContent() {
                   {blogActiveTab === "schema" && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="text-xs text-zinc-400">
-                          Valid <code className="text-purple-300">schema.org</code> JSON-LD script (Article + FAQPage). Paste directly into your site's <code className="text-purple-300">&lt;head&gt;</code>.
+                        <div className="text-xs text-[#A3AEC2]">
+                          Valid <code className="text-[#A78BFA]">schema.org</code> JSON-LD script (Article + FAQPage). Paste into your site's <code className="text-[#A78BFA]">&lt;head&gt;</code>.
                         </div>
                         <button
                           onClick={() => copyToClipboard(draftedBlog.schema_json_ld || "", "schema")}
-                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
+                          className="px-3 py-1.5 rounded-lg btn-primary text-xs font-semibold flex items-center gap-1.5"
                         >
                           <Copy className="w-3.5 h-3.5" />
                           <span>{copiedKey === "schema" ? "Copied Schema!" : "Copy JSON-LD"}</span>
                         </button>
                       </div>
-                      <pre className="p-5 rounded-2xl bg-black/90 border border-white/10 text-xs text-emerald-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                      <pre className="p-5 rounded-xl bg-[#0E1220] border border-[#283149] text-xs text-[#22D3C5] font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
                         {draftedBlog.schema_json_ld || '{"@context": "https://schema.org"}'}
                       </pre>
                     </div>
@@ -1828,30 +1830,30 @@ function SerpDiscoveryContent() {
 
                   {blogActiveTab === "seo" && (
                     <div className="space-y-4">
-                      <div className="grid sm:grid-cols-3 gap-4">
-                        <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
-                          <span className="text-[10px] font-bold uppercase text-purple-300">Human Authenticity:</span>
-                          <div className="text-2xl font-black text-white">98%</div>
-                          <p className="text-[10px] text-zinc-400">Evaluated against 15+ robotic AI phrase triggers.</p>
+                      <div className="grid sm:grid-cols-3 gap-3.5">
+                        <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-[#727E96]">Human Authenticity:</span>
+                          <div className="text-2xl font-bold font-heading text-[#32C98A]">98%</div>
+                          <p className="text-[10px] text-[#727E96]">Evaluated against 15+ robotic AI phrase triggers.</p>
                         </div>
 
-                        <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
-                          <span className="text-[10px] font-bold uppercase text-purple-300">Target SERP:</span>
-                          <div className="text-2xl font-black text-white truncate">{query}</div>
-                          <p className="text-[10px] text-zinc-400">Optimized for regional Google search rank.</p>
+                        <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-[#727E96]">Target SERP:</span>
+                          <div className="text-lg font-bold font-heading text-[#F5F7FF] truncate">{query}</div>
+                          <p className="text-[10px] text-[#727E96]">Optimized for regional Google search rank.</p>
                         </div>
 
-                        <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-1">
-                          <span className="text-[10px] font-bold uppercase text-purple-300">Schema Validation:</span>
-                          <div className="text-2xl font-black text-emerald-400">Valid ✓</div>
-                          <p className="text-[10px] text-zinc-400">Article &amp; FAQPage Rich Results ready.</p>
+                        <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-[#727E96]">Schema Validation:</span>
+                          <div className="text-2xl font-bold font-heading text-[#22D3C5]">Valid ✓</div>
+                          <p className="text-[10px] text-[#727E96]">Article &amp; FAQPage Rich Results ready.</p>
                         </div>
                       </div>
 
                       {draftedBlog.copywriter_insights && (
-                        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-                          <span className="text-[10px] font-bold uppercase text-purple-300">Copywriter Strategy Note:</span>
-                          <p className="text-xs text-zinc-200 leading-relaxed">
+                        <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+                          <span className="text-[10px] font-bold uppercase text-[#A78BFA]">Copywriter Strategy Note:</span>
+                          <p className="text-xs text-[#A3AEC2] leading-relaxed">
                             {draftedBlog.copywriter_insights}
                           </p>
                         </div>
@@ -1861,13 +1863,13 @@ function SerpDiscoveryContent() {
                 </div>
 
                 {/* Modal Footer */}
-                <div className="p-4 border-t border-white/10 flex items-center justify-between bg-black/60 shrink-0">
-                  <div className="text-xs text-zinc-400">
-                    Model: <span className="font-mono text-purple-300">{draftedBlog.model_used || "gemini-flash-lite-latest"}</span>
+                <div className="p-4 border-t border-[#283149] flex items-center justify-between bg-[#0E1220] shrink-0">
+                  <div className="text-xs text-[#727E96]">
+                    Model: <span className="font-mono text-[#A78BFA]">{draftedBlog.model_used || "gemini-flash-lite-latest"}</span>
                   </div>
                   <button
                     onClick={() => setBlogModalOpen(false)}
-                    className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-colors"
+                    className="px-5 py-2 rounded-xl btn-primary text-[#F5F7FF] font-semibold text-xs transition-colors"
                   >
                     Done / Close
                   </button>
@@ -1883,59 +1885,59 @@ function SerpDiscoveryContent() {
       {mounted && replyModalOpen && selectedReply && createPortal(
         <div
           onClick={() => setReplyModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#090B12]/85 backdrop-blur-md overflow-y-auto"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl rounded-3xl glass-card border border-purple-500/40 p-6 space-y-4 bg-zinc-950 my-auto shadow-2xl"
+            className="w-full max-w-2xl rounded-2xl bg-[#141A29] border border-[#283149] p-6 space-y-4 my-auto shadow-2xl text-[#F5F7FF]"
           >
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center justify-between border-b border-[#283149] pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-purple-600/30 flex items-center justify-center text-purple-300">
+                <div className="w-8 h-8 rounded-lg bg-[#7857FF]/15 border border-[#7857FF]/30 flex items-center justify-center text-[#A78BFA]">
                   <MessageSquare className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-white">Prospect Reply Review</h3>
-                  <p className="text-[11px] text-zinc-400">{selectedReply.company} ({selectedReply.email})</p>
+                  <h3 className="text-sm font-bold text-[#F5F7FF]">Prospect Reply Review</h3>
+                  <p className="text-[11px] text-[#A3AEC2] font-mono">{selectedReply.company} ({selectedReply.email})</p>
                 </div>
               </div>
               <button
                 onClick={() => setReplyModalOpen(false)}
-                className="text-zinc-400 hover:text-white text-xs px-2.5 py-1 rounded-lg border border-white/10"
+                className="text-[#A3AEC2] hover:text-[#F5F7FF] text-xs px-2.5 py-1 rounded-lg border border-[#283149] hover:bg-[#1B2233]"
               >
                 Close
               </button>
             </div>
 
             {/* Prospect Message */}
-            <div className="p-4 rounded-2xl bg-black/50 border border-white/5 space-y-1">
-              <span className="text-[10px] font-bold uppercase text-purple-300">Prospect's Incoming Message:</span>
-              <p className="text-xs text-zinc-200 whitespace-pre-wrap leading-relaxed">{selectedReply.reply_body}</p>
+            <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149] space-y-1">
+              <span className="text-[10px] font-bold uppercase text-[#727E96]">Prospect's Incoming Message:</span>
+              <p className="text-xs text-[#A3AEC2] whitespace-pre-wrap leading-relaxed">{selectedReply.reply_body}</p>
             </div>
 
             {/* AI Draft Response */}
-            <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/30 space-y-2">
+            <div className="p-3.5 rounded-xl bg-[#0E1220] border border-[#283149] space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase text-purple-300 flex items-center gap-1.5">
-                  <Bot className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold uppercase text-[#A78BFA] flex items-center gap-1.5">
+                  <Bot className="w-3.5 h-3.5 text-[#22D3C5]" />
                   <span>Gemini AI Drafted Reply:</span>
                 </span>
-                <span className="text-[10px] text-zinc-400">Review &amp; Approve</span>
+                <span className="text-[10px] text-[#727E96]">Review &amp; Approve</span>
               </div>
               <textarea
                 rows={6}
                 defaultValue={selectedReply.ai_draft_reply || ""}
-                className="w-full p-3 glass-input rounded-xl text-xs text-white font-mono leading-relaxed focus:outline-none"
+                className="w-full p-3 bg-[#141A29] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] font-mono leading-relaxed focus:outline-none focus:border-[#7857FF]"
               />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setReplyModalOpen(false)}
-                className="px-4 py-2 rounded-xl border border-white/10 text-xs text-zinc-400 hover:text-white"
+                className="px-4 py-2 rounded-xl bg-[#1B2233] border border-[#283149] text-xs text-[#A3AEC2] hover:text-[#F5F7FF]"
               >
                 Save as Draft
               </button>
@@ -1944,7 +1946,7 @@ function SerpDiscoveryContent() {
                   alert(`Reply sent to ${selectedReply.email}!`);
                   setReplyModalOpen(false);
                 }}
-                className="px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-900/50 flex items-center gap-2"
+                className="px-5 py-2 rounded-xl btn-primary text-xs font-semibold shadow-md flex items-center gap-2"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Send Reply Now</span>

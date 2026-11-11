@@ -15,7 +15,6 @@ import {
   MessageSquare,
   LogOut,
   ExternalLink,
-  Sparkles,
   Globe,
 } from "lucide-react";
 
@@ -31,46 +30,82 @@ export function Sidebar() {
 
   const navSections = [
     {
-      title: "DISCOVERY & SEO",
+      title: "DISCOVERY & INTELLIGENCE",
       items: [
-        { label: "SERP Discovery", href: "/dashboard/discovery", icon: Globe, badge: "AI" },
-        { label: "Deep Scraper", href: "/dashboard/scraper", icon: Search },
+        {
+          label: "SERP Discovery",
+          href: "/dashboard/discovery",
+          icon: Globe,
+          badge: "AI",
+          badgeColor: "bg-[#7857FF]/15 text-[#A78BFA] border-[#7857FF]/30",
+        },
+        {
+          label: "Deep Scraper",
+          href: "/dashboard/scraper",
+          icon: Search,
+        },
       ],
     },
     {
       title: "OUTREACH AUTOMATION",
       items: [
-        { label: "Campaigns", href: "/dashboard/campaigns", icon: Send },
-        { label: "Templates", href: "/dashboard/templates", icon: FileText },
-        { label: "Leads & Folders", href: "/dashboard/leads", icon: Users },
-        { label: "WhatsApp Direct", href: "/dashboard/whatsapp", icon: MessageSquare, badge: "Instant" },
+        {
+          label: "Campaigns",
+          href: "/dashboard/campaigns",
+          icon: Send,
+        },
+        {
+          label: "Templates",
+          href: "/dashboard/templates",
+          icon: FileText,
+        },
+        {
+          label: "Leads & Folders",
+          href: "/dashboard/leads",
+          icon: Users,
+        },
+        {
+          label: "WhatsApp Direct",
+          href: "/dashboard/whatsapp",
+          icon: MessageSquare,
+          badge: "Instant",
+          badgeColor: "bg-[#22D3C5]/12 text-[#22D3C5] border-[#22D3C5]/30",
+        },
       ],
     },
     {
       title: "CHANNELS & SYSTEM",
       items: [
-        { label: "Mailboxes", href: "/dashboard/mailboxes", icon: Mail },
-        { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+        {
+          label: "Mailboxes",
+          href: "/dashboard/mailboxes",
+          icon: Mail,
+        },
+        {
+          label: "Overview",
+          href: "/dashboard",
+          icon: LayoutDashboard,
+        },
       ],
     },
   ];
 
   return (
-    <aside className="w-64 border-r border-purple-500/20 bg-black/70 backdrop-blur-3xl p-6 flex flex-col justify-between shrink-0 min-h-screen relative z-10 shadow-[10px_0_40px_rgba(0,0,0,0.8)]">
-      <div>
+    <aside className="w-64 border-r border-[#283149] bg-[#0E1220] p-5 flex flex-col justify-between shrink-0 min-h-screen relative z-10 select-none">
+      <div className="space-y-6">
         {/* Brand */}
-        <div className="mb-6">
+        <div className="px-1">
           <BrandLogo size="md" />
         </div>
 
         {/* Grouped Navigation */}
-        <nav className="space-y-4">
+        <nav className="space-y-5">
           {navSections.map((sec) => (
             <div key={sec.title} className="space-y-1">
-              <span className="block text-[9px] font-black uppercase tracking-wider text-purple-400/70 px-3">
+              <span className="block text-[10px] font-mono font-semibold uppercase tracking-wider text-[#727E96] px-3 mb-1.5">
                 {sec.title}
               </span>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {sec.items.map((item) => {
                   const Icon = item.icon;
                   const isActive =
@@ -82,23 +117,27 @@ export function Sidebar() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold border transition-colors duration-150 ${
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-150 ${
                         isActive
-                          ? "bg-purple-600/25 border-purple-500/50 text-white shadow-[0_0_20px_rgba(168,85,247,0.25)]"
-                          : "border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.05]"
+                          ? "bg-[#1B2233] text-[#F5F7FF] border border-[#7857FF]/40 shadow-sm"
+                          : "border border-transparent text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#141A29]"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <Icon
-                          className={`w-4 h-4 ${
-                            isActive ? "text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]" : "text-zinc-500"
+                          className={`w-4 h-4 shrink-0 ${
+                            isActive ? "text-[#7857FF]" : "text-[#727E96]"
                           }`}
                         />
                         <span>{item.label}</span>
                       </div>
 
                       {item.badge && (
-                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                        <span
+                          className={`text-[8.5px] font-mono font-semibold px-1.5 py-0.5 rounded border leading-none ${
+                            item.badgeColor || "bg-[#7857FF]/15 text-[#A78BFA] border-[#7857FF]/30"
+                          }`}
+                        >
                           {item.badge}
                         </span>
                       )}
@@ -111,30 +150,30 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* User Footer */}
-      <div className="pt-6 border-t border-purple-500/20 space-y-3">
-        <div className="flex items-center gap-3 p-2.5 rounded-2xl glass-card border border-purple-500/20">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-700 to-fuchsia-600 flex items-center justify-center font-bold text-xs text-white uppercase shadow-md shadow-purple-800/40">
+      {/* User Profile & Actions Footer */}
+      <div className="pt-4 border-t border-[#283149] space-y-3">
+        <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#141A29] border border-[#283149]">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#7857FF] to-[#438BFF] flex items-center justify-center font-bold text-xs text-[#F5F7FF] uppercase shadow-sm">
             {(user?.name || "U").charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white truncate">{user?.name || "User"}</p>
-            <p className="text-[10px] text-purple-300/70 truncate">{user?.email || "user@domain.com"}</p>
+            <p className="text-xs font-semibold text-[#F5F7FF] truncate">{user?.name || "User"}</p>
+            <p className="text-[10px] text-[#727E96] truncate">{user?.email || "user@domain.com"}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="flex-1 py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-purple-950/40 border border-white/[0.08] hover:border-purple-500/30 text-zinc-300 hover:text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 py-1.5 px-3 rounded-lg bg-[#141A29] hover:bg-[#1B2233] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF] text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
           >
-            <ExternalLink className="w-3 h-3 text-purple-400" />
+            <ExternalLink className="w-3 h-3 text-[#7857FF]" />
             <span>Landing</span>
           </Link>
           <button
             onClick={handleLogout}
             title="Sign Out"
-            className="p-2 rounded-xl bg-white/[0.04] hover:bg-red-500/15 hover:text-red-400 text-zinc-400 text-xs transition-colors border border-white/[0.08] hover:border-red-500/30"
+            className="p-1.5 rounded-lg bg-[#141A29] hover:bg-[#F16C7C]/15 hover:text-[#F16C7C] text-[#727E96] text-xs transition-colors border border-[#283149]"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>

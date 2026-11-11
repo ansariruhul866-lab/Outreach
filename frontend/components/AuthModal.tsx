@@ -16,7 +16,8 @@ import {
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, User as UserIcon, X, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, User as UserIcon, X, CheckCircle2, AlertCircle, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -138,43 +139,43 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-8 bg-zinc-950 border border-purple-500/40 rounded-3xl shadow-[0_0_60px_rgba(168,85,247,0.35)] text-white">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#090B12]/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-7 sm:p-8 bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl text-[#F5F7FF]">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors"
+          className="absolute top-5 right-5 text-[#A3AEC2] hover:text-[#F5F7FF] transition-colors p-1 rounded-lg hover:bg-[#1B2233]"
         >
           <X className="w-5 h-5" />
         </button>
 
         {verificationSent ? (
           <div className="text-center py-4">
-            <div className="w-16 h-16 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-900/40">
-              <Mail className="w-8 h-8" />
+            <div className="w-14 h-14 rounded-2xl bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#7857FF]/20">
+              <Mail className="w-7 h-7" />
             </div>
-            <h3 className="text-2xl font-black text-white">Verify Your Email</h3>
-            <p className="text-sm text-zinc-400 mt-2">
+            <h3 className="text-xl font-bold font-heading text-[#F5F7FF]">Verify Your Email</h3>
+            <p className="text-xs text-[#A3AEC2] mt-2">
               We sent a verification link to:
-              <span className="block font-bold text-white mt-1 break-all">{targetEmail}</span>
+              <span className="block font-semibold text-[#F5F7FF] mt-1 break-all">{targetEmail}</span>
             </p>
 
-            <div className="p-4 my-6 text-left rounded-2xl bg-black/60 border border-purple-500/20 text-xs text-zinc-300 space-y-2.5">
+            <div className="p-4 my-6 text-left rounded-xl bg-[#0E1220] border border-[#283149] text-xs text-[#A3AEC2] space-y-2.5">
               <div className="flex items-start gap-2">
-                <span className="text-purple-400 font-bold">1.</span>
+                <span className="text-[#7857FF] font-bold">1.</span>
                 <span>Open your email inbox (or spam folder).</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-purple-400 font-bold">2.</span>
+                <span className="text-[#7857FF] font-bold">2.</span>
                 <span>Click the confirmation link from Firebase.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-purple-400 font-bold">3.</span>
+                <span className="text-[#7857FF] font-bold">3.</span>
                 <span>Return here and log in to open your workspace.</span>
               </div>
             </div>
 
             {notice && (
-              <div className="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-200 text-xs font-semibold">
+              <div className="mb-4 p-3 rounded-xl bg-[#7857FF]/10 border border-[#7857FF]/30 text-[#A78BFA] text-xs font-semibold">
                 {notice}
               </div>
             )}
@@ -182,7 +183,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
             <div className="space-y-3">
               <button
                 onClick={handleResend}
-                className="w-full py-3 px-4 rounded-xl glass-card hover:bg-white/[0.08] text-xs font-bold transition-all text-zinc-200"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#232B40] text-xs font-medium transition-all text-[#F5F7FF]"
               >
                 Resend Verification Email
               </button>
@@ -191,7 +192,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
                   setVerificationSent(false);
                   setMode("login");
                 }}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-xs font-bold text-white shadow-xl shadow-purple-900/40 transition-all"
+                className="w-full py-2.5 px-4 rounded-xl btn-primary text-xs font-semibold shadow-lg transition-all"
               >
                 I&apos;ve Verified My Email &rarr; Sign In
               </button>
@@ -200,31 +201,28 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
         ) : (
           <div>
             <div className="text-center mb-6">
-              <div className="relative mx-auto mb-3 w-12 h-12">
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-800 opacity-70 blur-md" />
-                <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-700 via-purple-600 to-fuchsia-500 flex items-center justify-center font-black text-2xl text-white shadow-xl shadow-purple-900/50">
-                  ⚡
-                </div>
+              <div className="flex justify-center mb-3">
+                <BrandLogo size="md" />
               </div>
-              <h2 className="text-2xl font-extrabold text-white">
-                {mode === "signup" ? "Create an Account" : "Welcome Back"}
+              <h2 className="text-xl font-bold font-heading text-[#F5F7FF]">
+                {mode === "signup" ? "Create Your Account" : "Welcome Back"}
               </h2>
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-[#A3AEC2] mt-1">
                 {mode === "signup"
-                  ? "Start cold outreach with verified email & Gmail integration"
-                  : "Sign in to access your outreach workspace"}
+                  ? "Access next-gen SERP intelligence & autonomous outreach"
+                  : "Sign in to access your OutRank AI workspace"}
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold flex items-start gap-2">
+              <div className="mb-4 p-3 rounded-xl bg-[#F16C7C]/10 border border-[#F16C7C]/25 text-[#F16C7C] text-xs font-medium flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {notice && (
-              <div className="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-200 text-xs font-semibold flex items-start gap-2">
+              <div className="mb-4 p-3 rounded-xl bg-[#32C98A]/10 border border-[#32C98A]/25 text-[#32C98A] text-xs font-medium flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
                 <span>{notice}</span>
               </div>
@@ -235,7 +233,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full py-3.5 px-4 glass-card hover:border-purple-500/50 rounded-2xl text-xs font-bold text-white flex items-center justify-center gap-3 transition-all mb-4 shadow-sm group"
+              className="w-full py-3 px-4 bg-[#0E1220] border border-[#283149] hover:bg-[#1B2233] hover:border-[#438BFF]/40 rounded-xl text-xs font-semibold text-[#F5F7FF] flex items-center justify-center gap-3 transition-all mb-4 shadow-sm group"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -259,63 +257,63 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
             </button>
 
             <div className="relative flex py-2 items-center mb-4">
-              <div className="flex-grow border-t border-purple-500/20"></div>
-              <span className="flex-shrink mx-3 text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
+              <div className="flex-grow border-t border-[#283149]"></div>
+              <span className="flex-shrink mx-3 text-[10px] uppercase tracking-wider text-[#727E96] font-bold">
                 Or with email
               </span>
-              <div className="flex-grow border-t border-purple-500/20"></div>
+              <div className="flex-grow border-t border-[#283149]"></div>
             </div>
 
             <form onSubmit={handleEmailAuth} className="space-y-4">
               {mode === "signup" && (
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-purple-300 mb-1.5">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A3AEC2] mb-1.5">
                     Full Name
                   </label>
                   <div className="relative">
-                    <UserIcon className="absolute left-3.5 top-3.5 w-4 h-4 text-purple-400" />
+                    <UserIcon className="absolute left-3.5 top-3 w-4 h-4 text-[#727E96]" />
                     <input
                       type="text"
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Rahul Sharma"
-                      className="w-full pl-10 pr-4 py-3 glass-input rounded-xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-purple-300 mb-1.5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A3AEC2] mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-purple-400" />
+                  <Mail className="absolute left-3.5 top-3 w-4 h-4 text-[#727E96]" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@company.com"
-                    className="w-full pl-10 pr-4 py-3 glass-input rounded-xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-purple-300 mb-1.5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A3AEC2] mb-1.5">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-purple-400" />
+                  <Lock className="absolute left-3.5 top-3 w-4 h-4 text-[#727E96]" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min. 6 characters"
-                    className="w-full pl-10 pr-4 py-3 glass-input rounded-xl text-xs text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -323,10 +321,10 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 text-xs font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white rounded-xl shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3 text-xs font-semibold btn-primary rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <Loader2 className="w-4 h-4 animate-spin text-[#F5F7FF]" />
                 ) : (
                   <>
                     <span>{mode === "signup" ? "Create Account & Verify Email" : "Sign In"}</span>
@@ -336,7 +334,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
               </button>
             </form>
 
-            <div className="mt-6 text-center text-xs text-zinc-500">
+            <div className="mt-6 text-center text-xs text-[#727E96]">
               <span>{mode === "signup" ? "Already have an account?" : "Don't have an account?"}</span>
               <button
                 type="button"
@@ -345,7 +343,7 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
                   setNotice(null);
                   setMode(mode === "signup" ? "login" : "signup");
                 }}
-                className="ml-1 text-purple-400 font-bold hover:underline"
+                className="ml-1 text-[#7857FF] font-semibold hover:text-[#A78BFA] transition-colors"
               >
                 {mode === "signup" ? "Sign In" : "Sign Up Free"}
               </button>

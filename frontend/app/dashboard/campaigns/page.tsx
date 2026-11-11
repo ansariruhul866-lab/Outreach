@@ -374,179 +374,165 @@ export default function CampaignsPage() {
   };
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
+    <div className="p-6 sm:p-8 space-y-6 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span>Black &amp; Purple Sequence Dispatcher</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7857FF]/10 border border-[#7857FF]/30 text-[#A78BFA] text-xs font-semibold mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#22D3C5]" />
+            <span>Multi-Channel Sequence Dispatcher</span>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-lg shadow-purple-900/40">
-              <Send className="w-6 h-6" />
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#F5F7FF] tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-[#7857FF]/15 border border-[#7857FF]/30 text-[#A78BFA]">
+              <Send className="w-5 h-5" />
             </span>
-            <span className="bg-gradient-to-r from-white via-purple-100 to-purple-400 bg-clip-text text-transparent">
-              Cold Outreach Campaigns
-            </span>
+            <span>Cold Outreach Campaigns</span>
           </h1>
-          <p className="text-xs text-zinc-400 mt-1">
+          <p className="text-xs text-[#A3AEC2] mt-1">
             Automated multi-mailbox email sequences with randomized anti-spam jitter (0-120s delay), attachments, and tracking.
           </p>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={openCreateModal}
-          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all w-fit"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>New Campaign</span>
-        </motion.button>
+        <div>
+          <button
+            onClick={openCreateModal}
+            className="px-4 py-2 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2 transition-all w-fit shadow-md"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Campaign</span>
+          </button>
+        </div>
       </div>
 
       {/* Campaigns List */}
       <div className="space-y-4">
         {loading ? (
-          <div className="p-12 text-center text-zinc-500 flex flex-col items-center gap-2">
-            <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+          <div className="p-12 text-center text-[#727E96] flex flex-col items-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin text-[#7857FF]" />
             <span className="text-xs">Loading campaigns...</span>
           </div>
         ) : campaigns.length === 0 ? (
-          <div className="p-12 text-center text-zinc-400 rounded-3xl glass-panel border border-purple-500/20">
-            <Send className="w-8 h-8 mx-auto mb-3 text-purple-400/50" />
-            <p className="font-bold text-white text-sm">No campaigns yet</p>
-            <p className="text-xs text-zinc-400 mt-1 mb-4">
+          <div className="p-12 text-center text-[#A3AEC2] rounded-2xl bg-[#141A29] border border-[#283149]">
+            <Send className="w-8 h-8 mx-auto mb-3 text-[#7857FF]/50" />
+            <p className="font-bold text-[#F5F7FF] text-sm">No campaigns yet</p>
+            <p className="text-xs text-[#727E96] mt-1 mb-4">
               Click &apos;New Campaign&apos; to set up your first personalized outreach sequence.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={openCreateModal}
-              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white text-xs font-bold shadow-lg shadow-purple-900/30"
+              className="px-4 py-2 rounded-xl btn-primary text-[#F5F7FF] text-xs font-semibold shadow-md"
             >
               Create Campaign
-            </motion.button>
+            </button>
           </div>
         ) : (
           campaigns.map((c) => (
-            <motion.div
+            <div
               key={c.id}
-              whileHover={{ y: -3 }}
-              transition={{ type: "spring", stiffness: 300, damping: 24 }}
-              className="p-6 rounded-3xl glass-panel hover:border-purple-500/50 border-purple-500/20 transition-all duration-300 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 group"
+              className="p-5 sm:p-6 rounded-2xl bg-[#141A29] border border-[#283149] hover:border-[#3B4665] transition-all duration-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 group shadow-md"
             >
               <div className="space-y-2">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <h3 className="text-base font-bold text-white">{c.name}</h3>
+                  <h3 className="text-base font-bold font-heading text-[#F5F7FF]">{c.name}</h3>
                   <span
                     className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
                       c.status === "RUNNING"
-                        ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
+                        ? "bg-[#32C98A]/15 text-[#32C98A] border-[#32C98A]/30"
                         : c.status === "PAUSED"
-                        ? "bg-zinc-800 text-zinc-400 border-zinc-700"
+                        ? "bg-[#F3B84C]/15 text-[#F3B84C] border-[#F3B84C]/30"
                         : c.status === "COMPLETED"
-                        ? "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40"
-                        : "bg-black text-zinc-400 border-zinc-800"
+                        ? "bg-[#438BFF]/15 text-[#438BFF] border-[#438BFF]/30"
+                        : "bg-[#0E1220] text-[#727E96] border-[#283149]"
                     }`}
                   >
                     {c.status}
                   </span>
-                  <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-purple-950/40 text-purple-300 border border-purple-500/20">
+                  <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-[#1B2233] text-[#A78BFA] border border-[#283149]">
                     {c.type}
                   </span>
                 </div>
 
-                <p className="text-xs text-zinc-400 flex items-center gap-4 flex-wrap">
-                  <span>Mailbox: <strong className="text-zinc-200">{c.sender_email || "None"}</strong></span>
-                  <span>Assigned Leads: <strong className="text-zinc-200">{c.leads_count}</strong> ({c.pending_count} pending)</span>
-                  <span>Anti-Spam Delay: <strong className="text-zinc-200">{c.send_delay_seconds}s + [0-120s jitter]</strong></span>
+                <p className="text-xs text-[#A3AEC2] flex items-center gap-4 flex-wrap">
+                  <span>Mailbox: <strong className="text-[#F5F7FF]">{c.sender_email || "None"}</strong></span>
+                  <span>Assigned Leads: <strong className="text-[#F5F7FF]">{c.leads_count}</strong> ({c.pending_count} pending)</span>
+                  <span>Anti-Spam Delay: <strong className="text-[#F5F7FF]">{c.send_delay_seconds}s + jitter</strong></span>
                 </p>
 
-                <div className="flex items-center gap-4 text-xs font-semibold text-zinc-300 pt-1 flex-wrap">
+                <div className="flex items-center gap-4 text-xs font-semibold text-[#A3AEC2] pt-1 flex-wrap">
                   <span>🚀 {c.total_sent} sent</span>
                   <span>👀 {c.total_opened} opened</span>
                   <span>💬 {c.total_replied} replied</span>
                   {(c.attachments_count ?? 0) > 0 && (
-                    <span className="text-purple-400 flex items-center gap-1 font-bold">
+                    <span className="text-[#A78BFA] flex items-center gap-1 font-medium">
                       <Paperclip className="w-3.5 h-3.5" />
                       {c.attachments_count} attachments
                     </span>
                   )}
-                  {c.total_skipped > 0 && <span className="text-zinc-500">🚫 {c.total_skipped} skipped (Send-Once)</span>}
+                  {c.total_skipped > 0 && <span className="text-[#727E96]">🚫 {c.total_skipped} skipped</span>}
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 shrink-0">
                 {c.status === "RUNNING" ? (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={() => handlePauseCampaign(c.id)}
-                    className="px-3.5 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-xs font-bold flex items-center gap-1.5 transition-all"
+                    className="px-3.5 py-2 rounded-xl bg-[#F3B84C]/15 hover:bg-[#F3B84C]/25 text-[#F3B84C] border border-[#F3B84C]/30 text-xs font-semibold flex items-center gap-1.5 transition-all"
                   >
                     <Pause className="w-3.5 h-3.5" />
                     <span>Pause</span>
-                  </motion.button>
+                  </button>
                 ) : (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={() => handleStartCampaign(c.id)}
-                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-purple-900/30"
+                    className="px-3.5 py-2 rounded-xl btn-primary text-[#F5F7FF] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>{c.status === "PAUSED" ? "Resume" : "Start Sending"}</span>
-                  </motion.button>
+                  </button>
                 )}
 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => openEditModal(c)}
-                  className="px-3.5 py-2 rounded-xl glass-card text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 rounded-xl bg-[#1B2233] border border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#232B40] text-xs font-semibold flex items-center gap-1.5 transition-all"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   <span>Edit</span>
-                </motion.button>
+                </button>
 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => handleDeleteCampaign(c.id)}
-                  className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs transition-colors"
+                  className="p-2 rounded-xl bg-[#F16C7C]/10 hover:bg-[#F16C7C]/20 text-[#F16C7C] border border-[#F16C7C]/25 text-xs transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
-            </motion.div>
+            </div>
           ))
         )}
       </div>
 
       {/* Campaign Create/Edit Modal - Portaled to document.body for highest z-index */}
       {mounted && modalOpen && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-xl animate-in fade-in overflow-y-auto">
-          <div className="relative w-full max-w-3xl max-h-[90vh] bg-zinc-950 border border-purple-500/40 rounded-3xl shadow-[0_0_60px_rgba(168,85,247,0.3)] flex flex-col overflow-hidden my-auto">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in overflow-y-auto">
+          <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#141A29] border border-[#283149] rounded-2xl shadow-2xl flex flex-col overflow-hidden my-auto">
             {/* Pinned Header */}
-            <div className="shrink-0 px-6 py-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-purple-950/60 via-black to-zinc-950 backdrop-blur-sm">
+            <div className="shrink-0 px-6 py-5 border-b border-[#283149] flex items-center justify-between bg-[#0E1220]">
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-bold text-[#F5F7FF] flex items-center gap-2">
                   <span>{editingId ? "Edit Campaign Sequence" : "Create Cold Outreach Campaign"}</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                    SaaS Engine
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#7857FF]/15 text-[#A78BFA] border border-[#7857FF]/30">
+                    OutRank Engine
                   </span>
                 </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-[#A3AEC2] mt-0.5">
                   Configure your pitch template, selective lead checklist, and anti-spam delay
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-2 -mr-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-2 -mr-2 rounded-xl text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -558,7 +544,7 @@ export default function CampaignsPage() {
                 {/* Name & Type */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1.5">
+                    <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1.5">
                       Campaign Name *
                     </label>
                     <input
@@ -567,24 +553,24 @@ export default function CampaignsPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Q4 SaaS Partnership Outreach"
-                      className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1.5">
+                    <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1.5">
                       Sending Mailbox *
                     </label>
                     <select
                       value={senderId}
                       onChange={(e) => setSenderId(e.target.value)}
-                      className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                     >
                       {senders.length === 0 ? (
-                        <option value="" className="bg-zinc-950 text-white">No mailboxes connected</option>
+                        <option value="" className="bg-[#0E1220] text-[#F5F7FF]">No mailboxes connected</option>
                       ) : (
                         senders.map((s) => (
-                          <option key={s.id} value={s.id} className="bg-zinc-950 text-white">
+                          <option key={s.id} value={s.id} className="bg-[#0E1220] text-[#F5F7FF]">
                             {s.display_name} ({s.email}) &bull; {s.provider}
                           </option>
                         ))
@@ -596,14 +582,14 @@ export default function CampaignsPage() {
                 {/* Templates Selector */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold uppercase text-purple-300 flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-purple-400" />
+                    <label className="text-[11px] font-bold uppercase text-[#A78BFA] flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-[#7857FF]" />
                       <span>Saved Email Templates Library</span>
                     </label>
                     <a
                       href="/dashboard/templates"
                       target="_blank"
-                      className="text-[10px] text-purple-400 hover:text-purple-300 hover:underline"
+                      className="text-[10px] text-[#438BFF] hover:underline"
                     >
                       + Manage Templates
                     </a>
@@ -611,11 +597,11 @@ export default function CampaignsPage() {
                   <select
                     value={selectedTemplateId}
                     onChange={(e) => handleTemplateSelect(e.target.value)}
-                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                   >
-                    <option value="" className="bg-zinc-950 text-white">-- Select from your saved templates or choose preset below --</option>
+                    <option value="" className="bg-[#0E1220] text-[#F5F7FF]">-- Select from your saved templates or choose preset below --</option>
                     {templates.map((tpl) => (
-                      <option key={tpl.id} value={tpl.id} className="bg-zinc-950 text-white">
+                      <option key={tpl.id} value={tpl.id} className="bg-[#0E1220] text-[#F5F7FF]">
                         [{tpl.category}] {tpl.title} &mdash; &quot;{tpl.subject}&quot;
                       </option>
                     ))}
@@ -624,7 +610,7 @@ export default function CampaignsPage() {
 
                 {/* Template Presets */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-2">
+                  <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-2">
                     Or Quick Preset
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -635,8 +621,8 @@ export default function CampaignsPage() {
                         onClick={() => handlePresetChange(key)}
                         className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
                           type === key && !selectedTemplateId
-                            ? "bg-purple-600/25 border-purple-500 text-purple-200 font-bold shadow-[0_0_15px_rgba(168,85,247,0.25)]"
-                            : "glass-card text-zinc-400 hover:text-white hover:border-purple-500/30"
+                            ? "bg-[#7857FF]/20 border-[#7857FF] text-[#F5F7FF] font-bold"
+                            : "bg-[#0E1220] border-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF] hover:border-[#7857FF]/40"
                         }`}
                       >
                         <p className="truncate">{PRESETS[key].name}</p>
@@ -647,7 +633,7 @@ export default function CampaignsPage() {
 
                 {/* Subject */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-purple-300 mb-1.5">
+                  <label className="block text-[11px] font-bold uppercase text-[#A78BFA] mb-1.5">
                     Subject Line
                   </label>
                   <input
@@ -655,48 +641,48 @@ export default function CampaignsPage() {
                     required
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    className="w-full px-4 py-2.5 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-[#0E1220] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                   />
                 </div>
 
                 {/* Body */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[11px] font-bold uppercase text-purple-300">
+                    <label className="text-[11px] font-bold uppercase text-[#A78BFA]">
                       Email Body Template (Formatted & Multiline Supported)
                     </label>
-                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#A3AEC2] flex-wrap">
                       <span>Variables:</span>
-                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{firstName}}"}</span>
-                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{company}}"}</span>
-                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{website}}"}</span>
-                      <span className="font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 rounded">{"{{senderName}}"}</span>
+                      <span className="font-mono text-[#A78BFA] bg-[#7857FF]/15 border border-[#7857FF]/30 px-1.5 py-0.5 rounded">{"{{firstName}}"}</span>
+                      <span className="font-mono text-[#A78BFA] bg-[#7857FF]/15 border border-[#7857FF]/30 px-1.5 py-0.5 rounded">{"{{company}}"}</span>
+                      <span className="font-mono text-[#A78BFA] bg-[#7857FF]/15 border border-[#7857FF]/30 px-1.5 py-0.5 rounded">{"{{website}}"}</span>
+                      <span className="font-mono text-[#A78BFA] bg-[#7857FF]/15 border border-[#7857FF]/30 px-1.5 py-0.5 rounded">{"{{senderName}}"}</span>
                     </div>
                   </div>
                   <textarea
-                    rows={12}
+                    rows={10}
                     required
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    className="w-full p-4 glass-input rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none leading-relaxed"
+                    className="w-full p-4 bg-[#0E1220] border border-[#283149] rounded-xl text-xs font-mono text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none leading-relaxed"
                   />
                 </div>
 
                 {/* Attachments / References / Photos */}
-                <div className="p-4 rounded-2xl glass-card border border-purple-500/20 space-y-3">
+                <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-white flex items-center gap-2">
-                        <Paperclip className="w-4 h-4 text-purple-400" />
+                      <span className="text-xs font-bold text-[#F5F7FF] flex items-center gap-2">
+                        <Paperclip className="w-4 h-4 text-[#7857FF]" />
                         <span>Email Attachments &amp; References ({attachments.length})</span>
                       </span>
-                      <p className="text-[10px] text-zinc-400">
+                      <p className="text-[10px] text-[#A3AEC2]">
                         Attach PDF decks, portfolio links, screenshots, proposal documents, or product photos (up to 5MB each)
                       </p>
                     </div>
 
-                    <label className="px-3 py-1.5 rounded-xl glass-card hover:border-purple-500/50 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
-                      <Plus className="w-3.5 h-3.5 text-purple-400" />
+                    <label className="px-3 py-1.5 rounded-lg bg-[#1B2233] border border-[#283149] hover:border-[#7857FF]/50 text-[#F5F7FF] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all">
+                      <Plus className="w-3.5 h-3.5 text-[#7857FF]" />
                       <span>Add File</span>
                       <input
                         type="file"
@@ -714,18 +700,18 @@ export default function CampaignsPage() {
                         return (
                           <div
                             key={idx}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl glass-card border border-purple-500/30 text-xs text-zinc-200"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#141A29] border border-[#283149] text-xs text-[#F5F7FF]"
                           >
                             {isImage ? (
-                              <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
+                              <ImageIcon className="w-3.5 h-3.5 text-[#7857FF]" />
                             ) : (
-                              <Paperclip className="w-3.5 h-3.5 text-purple-400" />
+                              <Paperclip className="w-3.5 h-3.5 text-[#7857FF]" />
                             )}
                             <span className="max-w-[180px] truncate">{att.filename}</span>
                             <button
                               type="button"
                               onClick={() => removeAttachment(idx)}
-                              className="text-zinc-500 hover:text-red-400 p-0.5 rounded transition-colors"
+                              className="text-[#727E96] hover:text-[#F16C7C] p-0.5 rounded transition-colors"
                               title="Remove attachment"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -738,25 +724,25 @@ export default function CampaignsPage() {
                 </div>
 
                 {/* Selective Leads Checklist */}
-                <div className="p-4 rounded-2xl glass-card border border-purple-500/20 space-y-3">
+                <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-3">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                      <span className="text-xs font-bold text-white flex items-center gap-2">
-                        <Users className="w-4 h-4 text-purple-400" />
+                      <span className="text-xs font-bold text-[#F5F7FF] flex items-center gap-2">
+                        <Users className="w-4 h-4 text-[#7857FF]" />
                         <span>Select Target Leads ({selectedLeadIds.length} of {displayedLeads.length} selected)</span>
                       </span>
-                      <p className="text-[10px] text-zinc-400">Choose exactly which prospects will receive this campaign</p>
+                      <p className="text-[10px] text-[#A3AEC2]">Choose exactly which prospects will receive this campaign</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {/* Filter by folder inside campaign modal */}
                       <select
                         value={selectedFolderFilter}
                         onChange={(e) => setSelectedFolderFilter(e.target.value)}
-                        className="px-2.5 py-1 rounded-xl glass-input text-[10px] font-semibold text-zinc-300 focus:outline-none"
+                        className="px-2.5 py-1 rounded-lg bg-[#1B2233] border border-[#283149] text-[10px] font-semibold text-[#F5F7FF] focus:outline-none"
                       >
-                        <option value="ALL" className="bg-zinc-950 text-white">All Folders ({availableLeads.length})</option>
+                        <option value="ALL" className="bg-[#0E1220] text-[#F5F7FF]">All Folders ({availableLeads.length})</option>
                         {folders.map((f) => (
-                          <option key={f.id} value={f.id} className="bg-zinc-950 text-white">
+                          <option key={f.id} value={f.id} className="bg-[#0E1220] text-[#F5F7FF]">
                             {f.name} ({f.leads_count})
                           </option>
                         ))}
@@ -764,25 +750,25 @@ export default function CampaignsPage() {
                       <button
                         type="button"
                         onClick={selectAllLeads}
-                        className="px-2 py-1 rounded-lg glass-card text-[10px] font-semibold text-zinc-300 hover:text-white"
+                        className="px-2.5 py-1 rounded-lg bg-[#1B2233] border border-[#283149] text-[10px] font-semibold text-[#A3AEC2] hover:text-[#F5F7FF]"
                       >
                         Select All
                       </button>
                       <button
                         type="button"
                         onClick={deselectAllLeads}
-                        className="px-2 py-1 rounded-lg glass-card text-[10px] font-semibold text-zinc-300 hover:text-white"
+                        className="px-2.5 py-1 rounded-lg bg-[#1B2233] border border-[#283149] text-[10px] font-semibold text-[#A3AEC2] hover:text-[#F5F7FF]"
                       >
                         Clear
                       </button>
                     </div>
                   </div>
 
-                  <div className="max-h-48 overflow-y-auto divide-y divide-purple-500/10 border border-purple-500/20 rounded-xl bg-black/40 p-2 space-y-1">
+                  <div className="max-h-48 overflow-y-auto divide-y divide-[#283149] border border-[#283149] rounded-xl bg-[#090B12] p-2 space-y-1">
                     {leadLoading ? (
-                      <div className="p-4 text-center text-xs text-zinc-500">Loading prospects...</div>
+                      <div className="p-4 text-center text-xs text-[#727E96]">Loading prospects...</div>
                     ) : displayedLeads.length === 0 ? (
-                      <div className="p-4 text-center text-xs text-zinc-500">
+                      <div className="p-4 text-center text-xs text-[#727E96]">
                         No available leads in this selection. Run the scraper or import CSV first.
                       </div>
                     ) : (
@@ -791,17 +777,17 @@ export default function CampaignsPage() {
                         return (
                           <label
                             key={lead.id}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.05] cursor-pointer text-xs"
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#1B2233]/40 cursor-pointer text-xs"
                           >
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => toggleLead(lead.id)}
-                              className="rounded border-purple-500/40 text-purple-600 focus:ring-0 accent-purple-600"
+                              className="rounded border-[#283149] text-[#7857FF] focus:ring-0 accent-[#7857FF]"
                             />
-                            <span className="font-mono text-zinc-200">{lead.email}</span>
-                            {lead.company && <span className="text-zinc-500">({lead.company})</span>}
-                            <span className="ml-auto text-[10px] uppercase font-bold text-zinc-500">
+                            <span className="font-mono text-[#F5F7FF]">{lead.email}</span>
+                            {lead.company && <span className="text-[#A3AEC2]">({lead.company})</span>}
+                            <span className="ml-auto text-[10px] uppercase font-bold text-[#727E96]">
                               {lead.status}
                             </span>
                           </label>
@@ -811,14 +797,14 @@ export default function CampaignsPage() {
                   </div>
                 </div>
 
-                {/* Custom Email Input — Add emails directly */}
-                <div className="p-4 rounded-2xl glass-card border border-purple-500/20 space-y-3">
+                {/* Custom Email Input */}
+                <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-3">
                   <div>
-                    <span className="text-xs font-bold text-white flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs font-bold text-[#F5F7FF] flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-[#7857FF]" />
                       <span>Add Custom Emails Directly</span>
                     </span>
-                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                    <p className="text-[10px] text-[#A3AEC2] mt-0.5">
                       Type or paste email addresses (comma, semicolon, or newline separated). They will be created as leads and auto-selected.
                     </p>
                   </div>
@@ -829,15 +815,15 @@ export default function CampaignsPage() {
                       value={customEmailInput}
                       onChange={(e) => setCustomEmailInput(e.target.value)}
                       placeholder="john@example.com, jane@startup.co&#10;ceo@company.io"
-                      className="flex-1 p-3 glass-input rounded-xl text-xs font-mono text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none resize-none"
+                      className="flex-1 p-3 bg-[#090B12] border border-[#283149] rounded-xl text-xs font-mono text-[#F5F7FF] placeholder-[#727E96] focus:border-[#7857FF] focus:outline-none resize-none"
                     />
                     <motion.button
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.96 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       type="button"
                       disabled={addingCustomEmails || !customEmailInput.trim()}
                       onClick={handleAddCustomEmails}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white text-xs font-bold shadow-lg shadow-purple-900/30 flex items-center gap-1.5 transition-all disabled:opacity-40 self-end"
+                      className="px-4 py-2 rounded-xl bg-[#7857FF] hover:bg-[#6845ee] text-white text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-40 self-end"
                     >
                       {addingCustomEmails ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -851,9 +837,9 @@ export default function CampaignsPage() {
 
                 {/* Anti-spam & Delivery Controls */}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl glass-card border border-purple-500/20 space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-white">
-                      <Clock className="w-4 h-4 text-purple-400" />
+                  <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#F5F7FF]">
+                      <Clock className="w-4 h-4 text-[#7857FF]" />
                       <span>Anti-Spam Human Delay</span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -863,29 +849,29 @@ export default function CampaignsPage() {
                         max={3600}
                         value={sendDelay}
                         onChange={(e) => setSendDelay(parseInt(e.target.value) || 45)}
-                        className="w-24 px-3 py-2 glass-input rounded-xl text-xs text-white focus:border-purple-500 focus:outline-none"
+                        className="w-24 px-3 py-2 bg-[#090B12] border border-[#283149] rounded-xl text-xs text-[#F5F7FF] focus:border-[#7857FF] focus:outline-none"
                       />
-                      <span className="text-xs text-zinc-400">sec base delay</span>
+                      <span className="text-xs text-[#A3AEC2]">sec base delay</span>
                     </div>
-                    <p className="text-[10px] text-purple-300/80 font-medium">
+                    <p className="text-[10px] text-[#A78BFA] font-medium">
                       ⚡ Auto-adds random 0–120 seconds jitter after every email to mimic human pacing.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl glass-card border border-purple-500/20 space-y-2">
+                  <div className="p-4 rounded-xl bg-[#0E1220] border border-[#283149] space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-purple-400" />
+                      <span className="text-xs font-bold text-[#F5F7FF] flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-[#7857FF]" />
                         <span>Send Only Once</span>
                       </span>
                       <input
                         type="checkbox"
                         checked={sendOnlyOnce}
                         onChange={(e) => setSendOnlyOnce(e.target.checked)}
-                        className="rounded border-purple-500/40 text-purple-600 focus:ring-0 accent-purple-600"
+                        className="rounded border-[#283149] text-[#7857FF] focus:ring-0 accent-[#7857FF]"
                       />
                     </div>
-                    <p className="text-[10px] text-zinc-400">
+                    <p className="text-[10px] text-[#A3AEC2]">
                       Guarantees prospects who have previously been sent an email or replied will be safely skipped.
                     </p>
                   </div>
@@ -893,11 +879,11 @@ export default function CampaignsPage() {
               </div>
 
               {/* Pinned Modal Actions */}
-              <div className="shrink-0 px-6 py-4 border-t border-purple-500/20 flex items-center justify-end gap-3 bg-black/90 backdrop-blur-xl">
+              <div className="shrink-0 px-6 py-4 border-t border-[#283149] flex items-center justify-end gap-3 bg-[#0E1220]">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl glass-card hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs transition-colors"
+                  className="px-5 py-2.5 rounded-xl bg-[#1B2233] border border-[#283149] hover:bg-[#283149] text-[#A3AEC2] hover:text-[#F5F7FF] font-semibold text-xs transition-colors"
                 >
                   Cancel
                 </button>
@@ -906,7 +892,7 @@ export default function CampaignsPage() {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-xl shadow-purple-900/40 transition-all flex items-center gap-2"
+                  className="btn-primary px-6 py-2.5 text-xs font-bold transition-all flex items-center gap-2"
                 >
                   {saving ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />

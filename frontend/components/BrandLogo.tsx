@@ -7,6 +7,7 @@ interface BrandLogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
   showBadge?: boolean;
+  showTagline?: boolean;
   className?: string;
   href?: string;
 }
@@ -15,81 +16,71 @@ export function BrandLogo({
   size = "md",
   showText = true,
   showBadge = true,
+  showTagline = true,
   className = "",
   href = "/",
 }: BrandLogoProps) {
   const iconSizes = {
-    sm: "w-8 h-8",
-    md: "w-10 h-10",
-    lg: "w-12 h-12",
+    sm: "w-7 h-7",
+    md: "w-9 h-9",
+    lg: "w-11 h-11",
   };
 
   const textSizes = {
-    sm: "text-base",
-    md: "text-lg",
-    lg: "text-2xl",
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-xl",
   };
 
   const logoContent = (
-    <div className={`flex items-center gap-3 group select-none ${className}`}>
-      {/* Precision Vector SVG Emblem */}
+    <div className={`flex items-center gap-2.5 group select-none ${className}`}>
+      {/* Precision Vector Emblem */}
       <div className={`relative ${iconSizes[size]} shrink-0`}>
-        {/* Ambient Hover Glow */}
-        <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-500 to-indigo-600 opacity-60 blur-md group-hover:opacity-100 transition duration-500" />
+        {/* Subtle Accent Glow */}
+        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-tr from-[#7857FF] to-[#438BFF] opacity-40 blur-sm group-hover:opacity-75 transition duration-300" />
 
-        {/* Crisp Glass Card Backing */}
-        <div className="relative w-full h-full rounded-xl bg-gradient-to-br from-zinc-900 via-black to-purple-950/80 border border-purple-500/40 flex items-center justify-center p-2 shadow-[0_0_20px_rgba(168,85,247,0.35)] overflow-hidden">
-          {/* Subtle Ambient Radial Highlight */}
-          <div className="absolute -top-3 -right-3 w-8 h-8 bg-purple-400/30 rounded-full blur-md pointer-events-none" />
-
-          {/* SVG Vector Mark: Radar Beam + Ascending Rank Chevron */}
+        {/* Surface Backing */}
+        <div className="relative w-full h-full rounded-lg bg-[#141A29] border border-[#283149] group-hover:border-[#7857FF]/60 flex items-center justify-center p-1.5 shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition duration-200">
           <svg
             viewBox="0 0 32 32"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-full text-white"
+            className="w-full h-full"
           >
             <defs>
-              <linearGradient id="outrank-grad-a" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#C084FC" />
-                <stop offset="0.5" stopColor="#A855F7" />
-                <stop offset="1" stopColor="#7E22CE" />
-              </linearGradient>
-              <linearGradient id="outrank-grad-b" x1="16" y1="4" x2="16" y2="28" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#FFFFFF" />
-                <stop offset="0.7" stopColor="#E9D5FF" />
-                <stop offset="1" stopColor="#A855F7" />
+              <linearGradient id="outrank-emblem-grad" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#7857FF" />
+                <stop offset="0.6" stopColor="#438BFF" />
+                <stop offset="1" stopColor="#22D3C5" />
               </linearGradient>
             </defs>
 
-            {/* Hexagonal Outer Frame */}
+            {/* Precision Hexagonal Shield */}
             <path
-              d="M16 2.5L28 9.5V22.5L16 29.5L4 22.5V9.5L16 2.5Z"
-              stroke="url(#outrank-grad-a)"
+              d="M16 2.5L27 8.5V23.5L16 29.5L5 23.5V8.5L16 2.5Z"
+              stroke="url(#outrank-emblem-grad)"
               strokeWidth="2"
               strokeLinejoin="round"
-              className="drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]"
             />
 
-            {/* Ascending Growth Chevron (Outrank) */}
+            {/* Ascending Rank Vector (Chevron) */}
             <path
-              d="M10 18L16 12L22 18"
-              stroke="url(#outrank-grad-b)"
-              strokeWidth="2.5"
+              d="M11 17L16 11.5L21 17"
+              stroke="#F5F7FF"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
 
-            {/* Center Signal Pulse Dot */}
-            <circle cx="16" cy="12" r="2" fill="#FFFFFF" className="animate-pulse" />
+            {/* Intelligence Focus Point */}
+            <circle cx="16" cy="11.5" r="1.5" fill="#22D3C5" />
 
-            {/* Horizontal Forward Reach Bar */}
+            {/* Search Baseline Track */}
             <path
-              d="M12 22H20"
-              stroke="#A855F7"
-              strokeWidth="2"
+              d="M11 21.5H21"
+              stroke="#7857FF"
+              strokeWidth="1.8"
               strokeLinecap="round"
-              opacity="0.8"
             />
           </svg>
         </div>
@@ -98,26 +89,24 @@ export function BrandLogo({
       {/* Brand Typography */}
       {showText && (
         <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <span
-              className={`font-black tracking-tight text-white flex items-center ${textSizes[size]}`}
-            >
-              <span>OutRank</span>
-              <span className="ml-1 bg-gradient-to-r from-purple-400 via-fuchsia-300 to-purple-200 bg-clip-text text-transparent font-black">
-                AI
-              </span>
+          <div className="flex items-center gap-1.5">
+            <span className={`font-heading font-bold tracking-tight text-[#F5F7FF] ${textSizes[size]}`}>
+              OUTRANK
+              <span className="ml-1 text-[#7857FF]">AI</span>
             </span>
 
             {showBadge && (
-              <span className="text-[9px] font-mono font-bold tracking-widest px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 uppercase">
-                Pro
+              <span className="text-[9px] font-mono font-semibold tracking-wider px-1.5 py-0.5 rounded bg-[#1B2233] text-[#A78BFA] border border-[#283149]">
+                PRO
               </span>
             )}
           </div>
 
-          <span className="text-[10px] text-zinc-400 font-mono tracking-wider uppercase -mt-0.5 hidden sm:block">
-            SERP &bull; Outreach OS
-          </span>
+          {showTagline && (
+            <span className="text-[9.5px] text-[#727E96] font-medium tracking-wide -mt-0.5 hidden sm:block">
+              SEO &amp; Marketing Intelligence
+            </span>
+          )}
         </div>
       )}
     </div>

@@ -19,7 +19,6 @@ import {
   Menu,
   X,
   Globe,
-  Sparkles,
 } from "lucide-react";
 
 export function Navbar() {
@@ -40,7 +39,7 @@ export function Navbar() {
       href: "/dashboard/discovery",
       icon: Globe,
       badge: "AI",
-      badgeColor: "bg-purple-500/25 text-purple-300 border-purple-500/40",
+      badgeColor: "bg-[#7857FF]/15 text-[#A78BFA] border-[#7857FF]/30",
     },
     {
       label: "Deep Scraper",
@@ -67,7 +66,7 @@ export function Navbar() {
       href: "/dashboard/whatsapp",
       icon: MessageSquare,
       badge: "Instant",
-      badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+      badgeColor: "bg-[#22D3C5]/12 text-[#22D3C5] border-[#22D3C5]/30",
     },
     {
       label: "Mailboxes",
@@ -87,13 +86,13 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-purple-500/20 bg-black/75 backdrop-blur-2xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 py-3 flex items-center justify-between gap-4">
-          {/* Custom Brand Logo */}
+      <header className="sticky top-0 z-50 w-full border-b border-[#283149] bg-[#090B12]/90 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          {/* Brand Logo */}
           <BrandLogo size="md" />
 
-          {/* Centered Modern Floating Capsule Dock */}
-          <nav className="hidden lg:flex items-center gap-0.5 p-1 rounded-full bg-zinc-950/80 border border-purple-500/25 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.8)] ring-1 ring-white/5">
+          {/* Centered Precision Dock */}
+          <nav className="hidden lg:flex items-center gap-1 p-1 rounded-xl bg-[#0E1220] border border-[#283149]">
             {toolsNav.map((item) => {
               const Icon = item.icon;
               const isActive = pathname?.startsWith(item.href);
@@ -103,21 +102,21 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   onClick={(e) => handleToolClick(e, item.href)}
-                  className={`h-8 px-3 rounded-full text-[11px] font-semibold tracking-wide flex items-center gap-1.5 transition-all duration-150 ${
+                  className={`h-8 px-3 rounded-lg text-xs font-medium tracking-wide flex items-center gap-1.5 transition-colors duration-150 ${
                     isActive
-                      ? "bg-gradient-to-r from-purple-600/30 to-fuchsia-600/30 border border-purple-500/60 text-white shadow-[0_0_15px_rgba(168,85,247,0.35)]"
-                      : "text-zinc-300 hover:text-white hover:bg-white/[0.08]"
+                      ? "bg-[#1B2233] text-[#F5F7FF] border border-[#7857FF]/40 shadow-sm"
+                      : "text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233]/60"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 shrink-0 ${
-                      isActive ? "text-purple-400" : "text-zinc-400"
+                      isActive ? "text-[#7857FF]" : "text-[#727E96]"
                     }`}
                   />
                   <span>{item.label}</span>
                   {item.badge && (
                     <span
-                      className={`text-[8px] font-mono font-black uppercase px-1.5 py-0.5 rounded-full border leading-none ${item.badgeColor}`}
+                      className={`text-[8.5px] font-mono font-semibold px-1.5 py-0.5 rounded border leading-none ${item.badgeColor}`}
                     >
                       {item.badge}
                     </span>
@@ -127,12 +126,12 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Right Action Area */}
+          {/* Right Action CTA */}
           <div className="flex items-center gap-3">
             {user ? (
               <Link
                 href="/dashboard"
-                className="px-4 sm:px-5 py-2 sm:py-2.5 text-xs font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white rounded-xl shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+                className="px-4 py-2 text-xs font-semibold bg-[#7857FF] hover:bg-[#6845EF] text-[#F5F7FF] rounded-lg shadow-sm shadow-[#7857FF]/30 flex items-center gap-2 transition-all"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Workspace</span>
@@ -142,24 +141,24 @@ export function Navbar() {
               <>
                 <button
                   onClick={() => openAuth("login")}
-                  className="hidden sm:block px-4 py-2 text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
+                  className="hidden sm:block px-3 py-2 text-xs font-medium text-[#A3AEC2] hover:text-[#F5F7FF] transition-colors"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => openAuth("signup")}
-                  className="px-4 sm:px-5 py-2 sm:py-2.5 text-xs font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white rounded-xl shadow-xl shadow-purple-900/40 flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+                  className="px-4 py-2 text-xs font-semibold bg-[#7857FF] hover:bg-[#6845EF] text-[#F5F7FF] rounded-lg shadow-sm shadow-[#7857FF]/30 flex items-center gap-1.5 transition-all"
                 >
-                  <span>Start Free</span>
+                  <span>Get Started</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </>
             )}
 
-            {/* Mobile Hamburger Button */}
+            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="lg:hidden p-2 rounded-lg text-[#A3AEC2] hover:text-[#F5F7FF] hover:bg-[#1B2233] transition-colors"
               aria-label="Toggle navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -167,16 +166,16 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile Dropdown */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden border-t border-purple-500/20 bg-zinc-950/95 backdrop-blur-2xl px-4 py-4 space-y-2 overflow-hidden"
+              className="lg:hidden border-t border-[#283149] bg-[#0E1220] px-4 py-4 space-y-3 overflow-hidden"
             >
-              <div className="grid grid-cols-2 gap-2 pb-3 border-b border-white/10">
+              <div className="grid grid-cols-2 gap-2">
                 {toolsNav.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -184,9 +183,9 @@ export function Navbar() {
                       key={item.href}
                       href={item.href}
                       onClick={(e) => handleToolClick(e, item.href)}
-                      className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 hover:border-purple-500/30 flex items-center gap-2 text-xs font-semibold text-zinc-200"
+                      className="p-2.5 rounded-lg bg-[#141A29] border border-[#283149] flex items-center gap-2 text-xs font-medium text-[#A3AEC2] hover:text-[#F5F7FF]"
                     >
-                      <Icon className="w-4 h-4 text-purple-400 shrink-0" />
+                      <Icon className="w-4 h-4 text-[#7857FF] shrink-0" />
                       <span className="truncate">{item.label}</span>
                     </Link>
                   );
@@ -200,7 +199,7 @@ export function Navbar() {
                       setMobileMenuOpen(false);
                       openAuth("login");
                     }}
-                    className="w-full py-2.5 rounded-xl border border-white/10 text-xs font-bold text-zinc-300"
+                    className="w-full py-2.5 rounded-lg border border-[#283149] text-xs font-medium text-[#A3AEC2] hover:text-[#F5F7FF]"
                   >
                     Sign In
                   </button>
@@ -209,7 +208,7 @@ export function Navbar() {
                       setMobileMenuOpen(false);
                       openAuth("signup");
                     }}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-xs font-black text-white shadow-lg shadow-purple-900/50"
+                    className="w-full py-2.5 rounded-lg bg-[#7857FF] text-xs font-semibold text-[#F5F7FF]"
                   >
                     Start Free &rarr;
                   </button>
