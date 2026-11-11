@@ -518,20 +518,32 @@ function SerpDiscoveryContent() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl p-8 sm:p-10 glass-card border border-purple-500/20 bg-gradient-to-br from-black via-purple-950/20 to-black">
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold">
-            <Globe className="w-3.5 h-3.5 text-purple-400" />
-            <span>SERP Discovery, SEO Intelligence &amp; Autonomous Outreach</span>
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 glass-card border border-purple-500/20 bg-gradient-to-br from-black via-purple-950/20 to-black">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="max-w-2xl space-y-2.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold">
+              <Globe className="w-3.5 h-3.5 text-purple-400" />
+              <span>OutRank AI &bull; SERP Discovery Engine</span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight break-words">
+              What are you looking for today?
+            </h1>
+
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              Select your intent below. Our engine crawls regional Google &amp; Bing SERPs, purges forum noise, and dynamically activates the exact tools you need — from Keyword Planning to Blog Drafting and Cold Outreach.
+            </p>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
-            What are you looking for today?
-          </h1>
-
-          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-            Select your intent below. Our engine crawls regional Google &amp; Bing SERPs, purges forum noise, and dynamically gives you the exact tools you need — from Keyword Planning to Blog Drafting and Cold Outreach.
-          </p>
+          <a
+            href="/OutRank_AI_Platform_Guide.pdf"
+            target="_blank"
+            rel="noreferrer"
+            className="self-start md:self-center px-4 py-2.5 rounded-xl border border-purple-500/30 hover:bg-purple-500/10 text-purple-200 text-xs font-bold flex items-center gap-2 transition-all shrink-0 shadow-lg shadow-purple-950/40"
+          >
+            <Download className="w-3.5 h-3.5 text-purple-400" />
+            <span>Platform PDF Guide</span>
+          </a>
         </div>
 
         {/* Ambient Glow */}

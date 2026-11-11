@@ -67,7 +67,7 @@ export function Navbar() {
       href: "/dashboard/whatsapp",
       icon: MessageSquare,
       badge: "Instant",
-      badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+      badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/40",
     },
     {
       label: "Mailboxes",
