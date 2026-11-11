@@ -6,13 +6,23 @@ from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 
 load_dotenv()
+# Also check parent and backend directories for .env
+env_paths = [
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"),
+    os.path.join(os.getcwd(), "backend", ".env"),
+    os.path.join(os.getcwd(), ".env")
+]
+for ep in env_paths:
+    if os.path.exists(ep):
+        load_dotenv(ep, override=False)
 
 logger = logging.getLogger("gemini_service")
 
 FALLBACK_MODELS = [
-    "gemini-3.5-flash-lite",
-    "gemini-3.1-flash-lite",
-    "gemini-3.8-flash"
+    "gemini-flash-lite-latest",
+    "gemini-flash-latest",
+    "gemini-pro-latest",
+    "gemini-2.5-flash"
 ]
 
 def get_gemini_api_key(custom_key: Optional[str] = None) -> str:
@@ -318,3 +328,109 @@ JSON SCHEMA:
             continue
 
     raise RuntimeError(f"Failed to generate reply draft with Gemini API: {last_error}")
+
+
+def generate_humanized_blog(
+    query: str,
+    competitor_insights: list[Dict[str, Any]],
+    target_tone: str = "copywriter",
+    custom_api_key: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Generates an in-depth, deeply engaging, 100% humanized blog post based on
+    SERP competitor keywords, outlines, and structures.
+    Enforces strict anti-AI fluff constraints, varied sentence burstiness,
+    authentic storytelling, and outputs complete JSON-LD schema (Article + FAQPage).
+    """
+    api_key = get_gemini_api_key(custom_api_key)
+
+    competitor_summary = ""
+    for idx, c in enumerate(competitor_insights[:5], 1):
+        site = c.get("site_name") or c.get("domain") or f"Competitor {idx}"
+        title = c.get("title", "")
+        kw = ", ".join(c.get("keywords", [])[:6])
+        outline_samples = [h.get("text", "") for h in c.get("headings_outline", []) if h.get("level") in [1, 2]][:4]
+        outline_str = " -> ".join(outline_samples) if outline_samples else "General outline"
+        competitor_summary += f"{idx}. {site} ('{title}') | Target Keywords: [{kw}] | Outline: [{outline_str}]\n"
+
+    prompt = f"""You are a master human copywriter and senior editorial columnist for elite lifestyle and commerce publications (think GQ, Esquire, and Wirecutter).
+Your goal is to write a deeply comprehensive, 100% humanized, authoritative blog post targeting the search topic: "{query}".
+
+SERP COMPETITOR INTELLIGENCE (Real ranking pages):
+{competitor_summary or "No direct competitor data provided; analyze top search intent."}
+
+STRICT HUMANIZATION & ANTI-AI CLICHE PROTOCOL:
+1. FORBIDDEN AI WORDS & CLICHES (IMMEDIATE DISQUALIFICATION IF USED):
+   - NEVER use: "In today's fast-paced world", "delve into", "testament to", "beacon of", "look no further", "navigating the world of", "dive deep", "it's important to remember", "furthermore", "moreover", "in conclusion", "buckle up", "game-changer", "a treasure trove of", "plethora".
+2. BURSTINESS & SENTENCE RHYTHM:
+   - Mix punchy 3-5 word sentences with descriptive, natural prose.
+   - Example rhythm: "Off-the-rack sizing is a gamble. One brand's 'Slim' is another's parachute. If you've ever had a shirt collar choke you while the sleeves sag past your knuckles, you know the drill."
+3. AUTHENTIC COPYWRITER PERSPECTIVES:
+   - Talk about tactile details: fabric weights (GSM), collar stances, canvas construction vs fused interlining, bespoke stitches, and tailoring nuances.
+   - Give candid advice: When is custom tailoring actually worth paying for? When is off-the-rack with simple alterations better? What hidden costs should readers watch out for?
+4. PRODUCTION-READY STRUCTURE:
+   - Punchy Hook: Address reader pains immediately.
+   - In-Depth Core Sections: Break down the best options, services, and practical buying criteria with clear H2 and H3 headings.
+   - Comparison & Checklist: Actionable buying advice or fabric cheat sheet.
+   - Realistic FAQ Section: 4-5 questions people actually ask on Google.
+5. TECHNICAL SEO SCHEMA MARKUP:
+   - Provide valid, production-ready JSON-LD schema that combines `Article` (or `BlogPosting`) and `FAQPage` schema so it is 100% Google Rich Results ready.
+
+OUTPUT FORMAT:
+Return a STRICT JSON object with these exact keys:
+{{
+  "title": "Irresistible, humanized headline with CTR curiosity (under 65 chars)",
+  "meta_title": "SEO title tag optimized for Google SERP",
+  "meta_description": "Compelling 150-160 character meta description with a clear curiosity trigger",
+  "primary_keyword": "Main primary keyword",
+  "secondary_keywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5"],
+  "reading_time_minutes": 6,
+  "outline": [
+    {{"level": 2, "heading": "Section Heading 1"}},
+    {{"level": 3, "heading": "Subheading A"}},
+    {{"level": 2, "heading": "Section Heading 2"}}
+  ],
+  "humanized_blog_markdown": "Full article markdown content with # Title, ## Headings, ### Subheadings, bold highlights, comparison tables, and FAQ section...",
+  "clean_html": "Full semantic HTML string with <h2>, <h3>, <p>, <ul>, <li>, <strong> tags for direct CMS publishing",
+  "schema_json_ld": "{{\\n  \\\"@context\\\": \\\"https://schema.org\\\",\\n  \\\"@graph\\\": [...]\\n}}",
+  "humanization_score": 98,
+  "copywriter_insights": "Brief 2-sentence note from the copywriter on why this article outranks competitor search results."
+}}
+"""
+
+    last_error = None
+    for model_name in FALLBACK_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.45,
+                "responseMimeType": "application/json"
+            }
+        }
+        try:
+            with httpx.Client(timeout=35.0) as client:
+                res = client.post(url, json=payload)
+                if res.status_code == 200:
+                    data = res.json()
+                    raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    if raw_text.startswith("```json"):
+                        raw_text = raw_text[7:]
+                    elif raw_text.startswith("```"):
+                        raw_text = raw_text[3:]
+                    if raw_text.endswith("```"):
+                        raw_text = raw_text[:-3]
+                    parsed = json.loads(raw_text.strip())
+                    parsed["model_used"] = model_name
+                    return parsed
+                elif res.status_code in [429, 503, 404]:
+                    last_error = f"Model {model_name} returned status {res.status_code}: {res.text}"
+                    continue
+                else:
+                    res.raise_for_status()
+        except Exception as e:
+            last_error = f"Exception with {model_name}: {str(e)}"
+            continue
+
+    raise RuntimeError(f"Failed to generate humanized blog with Gemini API: {last_error}")
+

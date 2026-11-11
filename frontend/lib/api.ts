@@ -567,6 +567,12 @@ export const api = {
           url: string;
           domain: string;
           snippet: string;
+          site_name?: string;
+          keywords?: string[];
+          headings_outline?: Array<{ level: number; text: string }>;
+          word_count?: number;
+          reading_time?: string;
+          schemas_detected?: string[];
         }>;
       }>("/discovery/serp", {
         method: "POST",
@@ -621,6 +627,30 @@ export const api = {
         message: string;
         ai_draft_reply: string;
       }>("/discovery/simulate-reply", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    draftBlog: (payload: {
+      query: string;
+      purpose?: string;
+      selected_blogs?: any[];
+      target_tone?: string;
+    }) =>
+      apiFetch<{
+        title: string;
+        meta_title?: string;
+        meta_description?: string;
+        primary_keyword?: string;
+        secondary_keywords?: string[];
+        reading_time_minutes?: number;
+        outline?: Array<{ level: number; heading: string }>;
+        humanized_blog_markdown: string;
+        clean_html?: string;
+        schema_json_ld?: string;
+        humanization_score?: number;
+        copywriter_insights?: string;
+        model_used?: string;
+      }>("/discovery/draft-blog", {
         method: "POST",
         body: JSON.stringify(payload),
       }),

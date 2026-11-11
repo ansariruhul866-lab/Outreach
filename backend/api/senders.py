@@ -62,6 +62,8 @@ async def connect_sender(
         test_ports.append(465)
     elif req.smtp_port == 465 and 587 not in test_ports:
         test_ports.append(587)
+    elif 587 not in test_ports and 465 not in test_ports:
+        test_ports.extend([587, 465])
 
     connected = False
     effective_port = req.smtp_port
@@ -76,7 +78,7 @@ async def connect_sender(
                 port=port_to_test,
                 use_tls=use_tls,
                 start_tls=start_tls,
-                timeout=12.0
+                timeout=18.0
             ) as smtp:
                 await smtp.login(clean_user, clean_password)
             connected = True

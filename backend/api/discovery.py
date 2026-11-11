@@ -16,7 +16,7 @@ import httpx
 from core.database import get_db, SessionLocal
 from core.models import User, Lead, LeadFolder, Campaign, SenderEmail
 from core.auth import get_current_user
-from core.gemini_service import generate_website_serp_pitch, generate_reply_draft
+from core.gemini_service import generate_website_serp_pitch, generate_reply_draft, generate_humanized_blog
 from api.campaigns import execute_send_batch, render_vars, convert_to_email_html
 
 logger = logging.getLogger("discovery")
@@ -62,6 +62,12 @@ class SerpResultItem(BaseModel):
     url: str
     domain: str
     snippet: str
+    site_name: Optional[str] = None
+    keywords: Optional[List[str]] = Field(default_factory=list)
+    headings_outline: Optional[List[dict]] = Field(default_factory=list)
+    word_count: Optional[int] = 0
+    reading_time: Optional[str] = "3 min read"
+    schemas_detected: Optional[List[str]] = Field(default_factory=list)
 
 class SerpResponse(BaseModel):
     query: str
@@ -69,6 +75,12 @@ class SerpResponse(BaseModel):
     region: str
     total: int
     results: List[SerpResultItem]
+
+class DraftBlogRequest(BaseModel):
+    query: str
+    purpose: str = "EDITORIAL"
+    selected_blogs: Optional[List[dict]] = Field(default_factory=list)
+    target_tone: str = "copywriter"
 
 class ExtractAndOrganizeRequest(BaseModel):
     query: str
@@ -265,8 +277,88 @@ async def crawl_site_for_contacts(base_url: str) -> dict:
         "phones": list(phones)
     }
 
+async def extract_blog_insights(url: str, title: str, domain: str) -> dict:
+    """
+    Inspects a blog / editorial page to extract headings outline, target keywords,
+    word count, reading time, and schema types.
+    """
+    insights = {
+        "site_name": domain.title().split('.')[0],
+        "keywords": [],
+        "headings_outline": [],
+        "word_count": 0,
+        "reading_time": "3 min read",
+        "schemas_detected": []
+    }
+    try:
+        async with httpx.AsyncClient(headers=BROWSER_HEADERS, timeout=6.0, follow_redirects=True, verify=False) as client:
+            r = await client.get(url)
+            if r.status_code == 200:
+                soup = BeautifulSoup(r.text, "html.parser")
+                
+                # Extract site name
+                og_site = soup.find("meta", property="og:site_name")
+                if og_site and og_site.get("content"):
+                    insights["site_name"] = og_site["content"].strip()
+                
+                # Extract headings outline (h1, h2, h3)
+                outline = []
+                for tag in soup.find_all(["h1", "h2", "h3"]):
+                    txt = tag.get_text(strip=True)
+                    if txt and len(txt) > 3 and not any(b in txt.lower() for b in ["cookie", "newsletter", "subscribe", "advertisement", "comments", "privacy"]):
+                        level = int(tag.name[1])
+                        outline.append({"level": level, "text": txt[:120]})
+                insights["headings_outline"] = outline[:15]
+
+                # Extract detected schema types from JSON-LD
+                schemas = []
+                for s in soup.find_all("script", type="application/ld+json"):
+                    try:
+                        if s.string:
+                            data = json.loads(s.string)
+                            if isinstance(data, dict):
+                                t = data.get("@type")
+                                if t: schemas.append(t if isinstance(t, str) else str(t))
+                                if "@graph" in data and isinstance(data["@graph"], list):
+                                    for g in data["@graph"]:
+                                        gt = g.get("@type")
+                                        if gt: schemas.append(gt if isinstance(gt, str) else str(gt))
+                            elif isinstance(data, list):
+                                for d in data:
+                                    t = d.get("@type")
+                                    if t: schemas.append(t if isinstance(t, str) else str(t))
+                    except Exception:
+                        pass
+                insights["schemas_detected"] = list(dict.fromkeys(schemas))[:5]
+
+                # Extract body text and word count
+                body_text = " ".join([p.get_text(strip=True) for p in soup.find_all(["p", "article"])])
+                words = re.findall(r'\b[a-zA-Z]{3,}\b', body_text)
+                insights["word_count"] = len(words)
+                reading_min = max(1, round(len(words) / 200))
+                insights["reading_time"] = f"{reading_min} min read"
+
+                # Extract target keywords (meta keywords, title phrases, high frequency terms)
+                meta_kw = soup.find("meta", attrs={"name": "keywords"})
+                keywords = []
+                if meta_kw and meta_kw.get("content"):
+                    keywords = [k.strip() for k in meta_kw["content"].split(",") if k.strip() and len(k.strip()) > 3][:8]
+                
+                if not keywords:
+                    from collections import Counter
+                    stopwords = {'the', 'and', 'for', 'with', 'that', 'this', 'from', 'your', 'are', 'you', 'can', 'has', 'have', 'all', 'more', 'about', 'best', 'their', 'will', 'what', 'when'}
+                    filtered = [w.lower() for w in words if w.lower() not in stopwords and len(w) > 3]
+                    counts = Counter(filtered).most_common(8)
+                    keywords = [c[0].title() for c in counts]
+                
+                insights["keywords"] = keywords[:6]
+    except Exception as e:
+        logger.debug(f"Error extracting blog insights for {url}: {e}")
+
+    return insights
+
 @router.post("/serp", response_model=SerpResponse)
-def get_serp_rankings(req: SerpRequest, current_user: User = Depends(get_current_user)):
+async def get_serp_rankings(req: SerpRequest, current_user: User = Depends(get_current_user)):
     """Extracts top 20 ranking website URLs from real-time SERP for the specified query and purpose."""
     query_clean = req.query.strip()
     if not query_clean:
@@ -274,6 +366,20 @@ def get_serp_rankings(req: SerpRequest, current_user: User = Depends(get_current
 
     reg = req.region or "in-en"
     results = search_serp_engine(query_clean, region=reg, target=req.num_results or 20)
+
+    # If Blog & Editorial purpose, automatically extract deep blog insights for top ranking pages
+    if req.purpose.upper() == "EDITORIAL" and results:
+        analysis_tasks = [extract_blog_insights(r["url"], r.get("title", ""), r.get("domain", "")) for r in results[:10]]
+        analyzed = await asyncio.gather(*analysis_tasks, return_exceptions=True)
+        for i, a_res in enumerate(analyzed):
+            if isinstance(a_res, dict):
+                results[i]["site_name"] = a_res.get("site_name")
+                results[i]["keywords"] = a_res.get("keywords", [])
+                results[i]["headings_outline"] = a_res.get("headings_outline", [])
+                results[i]["word_count"] = a_res.get("word_count", 0)
+                results[i]["reading_time"] = a_res.get("reading_time", "3 min read")
+                results[i]["schemas_detected"] = a_res.get("schemas_detected", [])
+
     return SerpResponse(
         query=query_clean,
         purpose=req.purpose.upper(),
@@ -281,6 +387,27 @@ def get_serp_rankings(req: SerpRequest, current_user: User = Depends(get_current
         total=len(results),
         results=[SerpResultItem(**r) for r in results]
     )
+
+@router.post("/draft-blog")
+def draft_humanized_blog(req: DraftBlogRequest, current_user: User = Depends(get_current_user)):
+    """
+    Uses Gemini AI Copywriter to generate an in-depth, humanized blog post
+    based on ranking competitor keywords, outlines, and structures, complete with
+    Article + FAQPage JSON-LD schema.
+    """
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+
+    try:
+        blog_data = generate_humanized_blog(
+            query=req.query.strip(),
+            competitor_insights=req.selected_blogs or [],
+            target_tone=req.target_tone or "copywriter"
+        )
+        return blog_data
+    except Exception as e:
+        logger.error(f"Error drafting humanized blog: {e}")
+        raise HTTPException(status_code=500, detail=f"AI Copywriter drafting failed: {str(e)}")
 
 @router.post("/extract-and-organize")
 async def extract_and_organize_leads(
