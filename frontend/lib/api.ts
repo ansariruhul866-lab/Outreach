@@ -555,10 +555,11 @@ export const api = {
     getHistory: () => apiFetch<WhatsAppMessageLog[]>("/whatsapp/history"),
   },
   discovery: {
-    getSerp: (payload: { query: string; purpose?: string; num_results?: number }) =>
+    getSerp: (payload: { query: string; purpose?: string; region?: string; num_results?: number }) =>
       apiFetch<{
         query: string;
         purpose: string;
+        region?: string;
         total: number;
         results: Array<{
           rank: number;
@@ -574,6 +575,7 @@ export const api = {
     extractAndOrganize: (payload: {
       query: string;
       purpose: string;
+      region?: string;
       selected_items: Array<{
         rank: number;
         title: string;

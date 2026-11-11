@@ -54,17 +54,25 @@ const PURPOSES = [
   { id: "MARKETING", label: "Digital Marketing", icon: "💼", desc: "Target B2B prospects, marketing agencies & businesses" },
 ];
 
+const REGIONS = [
+  { id: "in-en", label: "India (Local / Regional SERP)", icon: "🇮🇳" },
+  { id: "wt-wt", label: "Global / Worldwide", icon: "🌐" },
+  { id: "us-en", label: "United States", icon: "🇺🇸" },
+  { id: "uk-en", label: "United Kingdom", icon: "🇬🇧" },
+];
+
 const PRESET_QUERIES = [
+  "customised t shirt in lucknow",
   "backlink for marketing website",
   "guest post tech blogs",
-  "best SEO tools for agencies",
-  "digital marketing guest contribution",
-  "write for us marketing and business",
+  "digital marketing agency in india",
+  "best web development companies",
 ];
 
 export default function SerpDiscoveryPage() {
-  const [query, setQuery] = useState("backlink for marketing website");
+  const [query, setQuery] = useState("customised t shirt in lucknow");
   const [purpose, setPurpose] = useState("BACKLINK");
+  const [region, setRegion] = useState("in-en");
   const [searching, setSearching] = useState(false);
   const [serpResults, setSerpResults] = useState<SerpItem[]>([]);
   const [selectedRanks, setSelectedRanks] = useState<number[]>([]);
@@ -120,12 +128,13 @@ export default function SerpDiscoveryPage() {
       const res = await api.discovery.getSerp({
         query: query.trim(),
         purpose,
+        region,
         num_results: 20,
       });
 
       setSerpResults(res.results || []);
-      // Select all 20 by default
-      setSelectedRanks(res.results.map((r) => r.rank));
+      // Select all by default
+      setSelectedRanks((res.results || []).map((r) => r.rank));
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to crawl SERP");
     } finally {
@@ -161,6 +170,7 @@ export default function SerpDiscoveryPage() {
       const res = await api.discovery.extractAndOrganize({
         query: query.trim(),
         purpose,
+        region,
         selected_items: selectedItems,
         use_ai_personalization: outreachMode === "AI_PERSONALIZED",
         sender_email_id: selectedSenderId || undefined,
@@ -302,9 +312,25 @@ export default function SerpDiscoveryPage() {
 
         {/* Query Input Bar */}
         <form onSubmit={handleSearch} className="space-y-3">
-          <label className="block text-[11px] font-extrabold uppercase tracking-wider text-purple-300">
-            Search Keyword / Topic
-          </label>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-purple-300">
+              Search Keyword / Topic
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-zinc-400 font-bold uppercase">Region:</span>
+              <select
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                className="px-3 py-1 glass-input rounded-xl text-xs text-purple-200 border border-purple-500/30 focus:outline-none"
+              >
+                {REGIONS.map((r) => (
+                  <option key={r.id} value={r.id} className="bg-zinc-950 text-white">
+                    {r.icon} {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
