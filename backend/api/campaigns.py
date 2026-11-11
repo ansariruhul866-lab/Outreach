@@ -345,6 +345,86 @@ def delete_campaign(
     db.commit()
     return {"success": True, "message": "Campaign deleted and leads safely unassigned"}
 
+def convert_to_email_html(text: str) -> str:
+    if not text:
+        return ""
+    # If already full HTML with <p> or <div tags, return wrapped in font container
+    if "<p>" in text or "<p " in text or "<div" in text:
+        return text
+
+    # Process markdown bold **text**
+    formatted = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+    # Process markdown italic *text* or _text_
+    formatted = re.sub(r'\*(.+?)\*', r'<em>\1</em>', formatted)
+    formatted = re.sub(r'_(.+?)_', r'<em>\1</em>', formatted)
+
+    # Normalize carriage returns
+    formatted = formatted.replace('\r\n', '\n').replace('\r', '\n')
+
+    # Split paragraphs by 2 or more newlines
+    blocks = re.split(r'\n\s*\n', formatted.strip())
+    html_blocks = []
+
+    for block in blocks:
+        lines = [line.strip() for line in block.split('\n') if line.strip()]
+        if not lines:
+            continue
+
+        # Check if entire block is a bullet list
+        if all(line.startswith(('-', '*', '•')) for line in lines):
+            items = []
+            for line in lines:
+                item_text = re.sub(r'^[-*•]\s*', '', line)
+                items.append(f'<li style="margin-bottom: 7px;">{item_text}</li>')
+            html_blocks.append(
+                f'<ul style="margin: 8px 0 16px 22px; padding-left: 0; line-height: 1.65; color: #222222;">{"".join(items)}</ul>'
+            )
+        else:
+            # Check if there are bullet points mixed in this block
+            has_bullets = any(line.startswith(('-', '*', '•')) for line in lines)
+            if has_bullets:
+                curr_lines = []
+                in_list = False
+                list_items = []
+                for line in lines:
+                    if line.startswith(('-', '*', '•')):
+                        if not in_list:
+                            if curr_lines:
+                                html_blocks.append(
+                                    f'<p style="margin: 0 0 12px 0; line-height: 1.65; font-size: 15px; color: #222222;">{"<br>".join(curr_lines)}</p>'
+                                )
+                                curr_lines = []
+                            in_list = True
+                        item_text = re.sub(r'^[-*•]\s*', '', line)
+                        list_items.append(f'<li style="margin-bottom: 7px;">{item_text}</li>')
+                    else:
+                        if in_list:
+                            html_blocks.append(
+                                f'<ul style="margin: 8px 0 16px 22px; padding-left: 0; line-height: 1.65; color: #222222;">{"".join(list_items)}</ul>'
+                            )
+                            list_items = []
+                            in_list = False
+                        curr_lines.append(line)
+                if in_list and list_items:
+                    html_blocks.append(
+                        f'<ul style="margin: 8px 0 16px 22px; padding-left: 0; line-height: 1.65; color: #222222;">{"".join(list_items)}</ul>'
+                    )
+                if curr_lines:
+                    html_blocks.append(
+                        f'<p style="margin: 0 0 12px 0; line-height: 1.65; font-size: 15px; color: #222222;">{"<br>".join(curr_lines)}</p>'
+                    )
+            else:
+                # Regular paragraph: single newlines within paragraph become <br>
+                block_html = '<br>'.join(lines)
+                html_blocks.append(
+                    f'<p style="margin: 0 0 14px 0; line-height: 1.65; font-size: 15px; color: #222222;">{block_html}</p>'
+                )
+
+    inner_html = '\n'.join(html_blocks)
+    return f'''<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.65; color: #222222; max-width: 600px;">
+{inner_html}
+</div>'''
+
 def render_vars(template: str, vars_dict: dict) -> str:
     rendered = template
     for k, v in vars_dict.items():
@@ -440,7 +520,8 @@ async def execute_send_batch(campaign_id: str, user_id: str):
             }
 
             subject = render_vars(campaign.subject_template, vars_dict)
-            html_body = render_vars(campaign.body_template, vars_dict)
+            plain_body = render_vars(campaign.body_template, vars_dict)
+            html_body = convert_to_email_html(plain_body)
 
             # Tracking pixel + Unsubscribe link
             unsub_url = f"http://localhost:8000/api/track/unsubscribe?token={lead.unsub_token}"
@@ -470,7 +551,8 @@ async def execute_send_batch(campaign_id: str, user_id: str):
             if has_attachments:
                 msg = MIMEMultipart("mixed")
                 body_part = MIMEMultipart("alternative")
-                body_part.attach(MIMEText(full_html, "html"))
+                body_part.attach(MIMEText(plain_body, "plain", "utf-8"))
+                body_part.attach(MIMEText(full_html, "html", "utf-8"))
                 msg.attach(body_part)
 
                 for att in raw_attachments:
@@ -489,7 +571,8 @@ async def execute_send_batch(campaign_id: str, user_id: str):
                         logger.error(f"Failed to attach file {fname}: {att_err}")
             else:
                 msg = MIMEMultipart("alternative")
-                msg.attach(MIMEText(full_html, "html"))
+                msg.attach(MIMEText(plain_body, "plain", "utf-8"))
+                msg.attach(MIMEText(full_html, "html", "utf-8"))
 
             msg["Subject"] = subject
             msg["From"] = f"{sender.display_name} <{sender.email}>"

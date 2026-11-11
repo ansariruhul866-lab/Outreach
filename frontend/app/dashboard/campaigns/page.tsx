@@ -28,8 +28,24 @@ import {
 const PRESETS = {
   BACKLINK: {
     name: "Backlink & Editorial Collaboration",
-    subject: "Quick collaboration idea for {{company}}",
-    body: `<p>Hi {{firstName}},</p>\n<p>I came across your site <a href="{{website}}">{{company}}</a> and really enjoyed your recent coverage.</p>\n<p>I noticed several overlapping topics where our readers would find value. I'd love to propose a mutual backlink exchange or contribute a guest editorial piece tailored specifically for your audience.</p>\n<p>Would you be open to a quick 5-minute chat or exchanging ideas over email?</p>\n<p>Best regards,<br><strong>{{senderName}}</strong></p>`,
+    subject: "Content collaboration idea for {{company}}",
+    body: `Hi {{firstName}},
+
+I was exploring {{company}} and came across your content on topics relevant to our industry. I really appreciate the value you're providing to your readers.
+
+I believe there's an opportunity for us to collaborate and create value for both our audiences.
+
+We'd love to explore:
+- A relevant contextual backlink placement within an existing article.
+- A guest contribution featuring original, useful insights for your readers.
+- A mutually beneficial content collaboration.
+
+We can ensure any contribution is relevant, well-researched, and genuinely useful to your audience.
+
+Would you be open to exploring a collaboration?
+
+Best regards,  
+**{{senderName}}**`,
   },
   SERVICE_PITCH: {
     name: "Growth & Service Pitch",
@@ -641,7 +657,7 @@ export default function CampaignsPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[11px] font-bold uppercase text-purple-300">
-                      Email Body Template (HTML supported)
+                      Email Body Template (Formatted & Multiline Supported)
                     </label>
                     <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 flex-wrap">
                       <span>Variables:</span>
@@ -652,11 +668,11 @@ export default function CampaignsPage() {
                     </div>
                   </div>
                   <textarea
-                    rows={5}
+                    rows={12}
                     required
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    className="w-full p-4 glass-input rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full p-4 glass-input rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none leading-relaxed"
                   />
                 </div>
 

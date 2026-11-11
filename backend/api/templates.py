@@ -11,6 +11,28 @@ router = APIRouter(prefix="/templates", tags=["templates"])
 
 DEFAULT_TEMPLATES = [
     {
+        "title": "Backlink & Content Collaboration",
+        "category": "PITCH",
+        "subject": "Content collaboration idea for {{company}}",
+        "body": """Hi {{firstName}},
+
+I was exploring {{company}} and came across your content on topics relevant to our industry. I really appreciate the value you're providing to your readers.
+
+I believe there's an opportunity for us to collaborate and create value for both our audiences.
+
+We'd love to explore:
+- A relevant contextual backlink placement within an existing article.
+- A guest contribution featuring original, useful insights for your readers.
+- A mutually beneficial content collaboration.
+
+We can ensure any contribution is relevant, well-researched, and genuinely useful to your audience.
+
+Would you be open to exploring a collaboration?
+
+Best regards,  
+**{{senderName}}**""",
+    },
+    {
         "title": "Initial Pitch & Value Proposition",
         "category": "PITCH",
         "subject": "Quick partnership idea for {{company}}",

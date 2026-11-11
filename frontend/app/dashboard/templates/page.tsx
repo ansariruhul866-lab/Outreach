@@ -398,11 +398,11 @@ export default function TemplatesPage() {
                     </div>
                   </div>
                   <textarea
-                    rows={8}
+                    rows={12}
                     required
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    className="w-full p-4 glass-input rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none"
+                    className="w-full p-4 glass-input rounded-xl text-xs font-mono text-white focus:border-purple-500 focus:outline-none leading-relaxed"
                   />
                 </div>
 
