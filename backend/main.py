@@ -79,6 +79,21 @@ def startup_event():
     run_migrations()
     logger.info("Database schema initialized and verified.")
 
+    # Reset any orphaned RUNNING campaigns from previous crashes or reboots to PAUSED
+    try:
+        from core.database import SessionLocal
+        from core.models import Campaign
+        db = SessionLocal()
+        orphaned = db.query(Campaign).filter(Campaign.status == "RUNNING").all()
+        for c in orphaned:
+            c.status = "PAUSED"
+        db.commit()
+        db.close()
+        if orphaned:
+            logger.info(f"Reset {len(orphaned)} orphaned RUNNING campaign(s) to PAUSED.")
+    except Exception as e:
+        logger.warning(f"Error resetting orphaned campaigns on startup: {e}")
+
 @app.get("/api/test-smtp")
 def test_smtp_connectivity():
     import socket

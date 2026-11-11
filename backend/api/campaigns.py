@@ -3,6 +3,7 @@ import json
 import base64
 import random
 import logging
+import re
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
@@ -431,7 +432,14 @@ def render_vars(template: str, vars_dict: dict) -> str:
         rendered = rendered.replace(f"{{{{{k}}}}}", str(v))
     return rendered
 
+ACTIVE_CAMPAIGN_WORKERS: set[str] = set()
+
 async def execute_send_batch(campaign_id: str, user_id: str):
+    if campaign_id in ACTIVE_CAMPAIGN_WORKERS:
+        logger.info(f"Worker for campaign {campaign_id} already active in memory. Skipping duplicate spawn.")
+        return
+
+    ACTIVE_CAMPAIGN_WORKERS.add(campaign_id)
     db = SessionLocal()
     try:
         campaign = db.query(Campaign).filter(Campaign.id == campaign_id, Campaign.user_id == user_id).first()
@@ -645,8 +653,9 @@ async def execute_send_batch(campaign_id: str, user_id: str):
                 lead.status = "FAILED"
                 db.commit()
 
-            # Anti-spam human delay: base delay + random sec from 0 to 120 seconds
-            random_jitter = random.randint(0, 120)
+            # Natural delivery delay: base delay + small human jitter (1-10s)
+            jitter_max = min(10, max(2, campaign.send_delay_seconds // 3))
+            random_jitter = random.randint(1, jitter_max)
             actual_delay = max(5, campaign.send_delay_seconds) + random_jitter
             logger.info(f"Campaign {campaign.id}: Next email delay = {actual_delay}s (base {campaign.send_delay_seconds}s + jitter {random_jitter}s)")
 
@@ -671,7 +680,17 @@ async def execute_send_batch(campaign_id: str, user_id: str):
             else:
                 campaign.status = "PAUSED"
             db.commit()
+    except Exception as ex:
+        logger.exception(f"Fatal error in execute_send_batch for campaign {campaign_id}: {ex}")
+        try:
+            c_err = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+            if c_err:
+                c_err.status = "PAUSED"
+                db.commit()
+        except Exception:
+            pass
     finally:
+        ACTIVE_CAMPAIGN_WORKERS.discard(campaign_id)
         db.close()
 
 @router.post("/{campaign_id}/start")
@@ -690,8 +709,8 @@ def start_or_resume_campaign(
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
 
-    if campaign.status == "RUNNING":
-        raise HTTPException(status_code=400, detail="Campaign is already executing")
+    if campaign.status == "RUNNING" and campaign_id in ACTIVE_CAMPAIGN_WORKERS:
+        return {"message": "Campaign outreach is already actively executing", "status": "RUNNING"}
 
     # Check if there are any pending leads
     pending_leads = db.query(Lead).filter(
