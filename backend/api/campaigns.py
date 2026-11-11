@@ -4,7 +4,7 @@ import base64
 import random
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -746,3 +746,113 @@ def pause_campaign(
     campaign.status = "PAUSED"
     db.commit()
     return {"message": "Campaign paused successfully", "status": "PAUSED"}
+
+async def run_follow_up_sweep(user_id: str) -> int:
+    db = SessionLocal()
+    sent_count = 0
+    try:
+        campaigns = db.query(Campaign).filter(
+            Campaign.user_id == user_id,
+            Campaign.follow_up_enabled == True
+        ).all()
+
+        for camp in campaigns:
+            delay_days = camp.follow_up_delay_days or 2
+            cutoff_date = datetime.utcnow() - timedelta(days=delay_days)
+
+            leads_due = db.query(Lead).filter(
+                Lead.campaign_id == camp.id,
+                Lead.status == "SENT",
+                Lead.reply_received == False,
+                Lead.follow_up_sent == False,
+                Lead.is_unsubscribed == False,
+                Lead.sent_at <= cutoff_date
+            ).all()
+
+            sender = camp.sender
+            if not sender or not leads_due:
+                continue
+
+            follow_up_subj = camp.follow_up_subject_template or f"Following up re: collaboration with {{{{company}}}}"
+            follow_up_body = camp.follow_up_body_template or """Hi {{firstName}},
+
+I wanted to quickly follow up on my previous note regarding {{company}}.
+
+I know your inbox is busy, so I just wanted to see if you had a moment to review?
+
+Best regards,  
+**{{senderName}}**"""
+
+            for lead in leads_due:
+                clean_email = lead.email.strip().lower() if lead.email else ""
+                if not clean_email or clean_email.endswith("@outreachbot.local"):
+                    continue
+
+                vars_dict = {
+                    "firstName": lead.first_name or lead.company or "there",
+                    "company": lead.company or "your website",
+                    "website": lead.website or "",
+                    "senderName": sender.display_name or "Expansio Team",
+                    "senderEmail": sender.email
+                }
+                subject = render_vars(follow_up_subj, vars_dict)
+                plain_body = render_vars(follow_up_body, vars_dict)
+                html_body = convert_to_email_html(plain_body)
+
+                unsub_url = f"http://localhost:8000/api/track/unsubscribe?token={lead.unsub_token}"
+                tracking_pixel = f'<img src="http://localhost:8000/api/track/pixel?id={lead.tracking_id}" width="1" height="1" style="display:none;" />'
+                full_html = f"""{html_body}{tracking_pixel}<br><br><div style="font-family: sans-serif; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 10px; margin-top: 20px;">Don't want to hear from us? <a href="{unsub_url}">Unsubscribe here</a>.</div>"""
+
+                msg = MIMEMultipart("alternative")
+                msg.attach(MIMEText(plain_body, "plain", "utf-8"))
+                msg.attach(MIMEText(full_html, "html", "utf-8"))
+                msg["Subject"] = subject
+                msg["From"] = f"{sender.display_name} <{sender.email}>"
+                msg["To"] = lead.email
+
+                try:
+                    if sender.provider == "GMAIL_API":
+                        oauth_token = decrypt_password(sender.oauth_token_enc, user_id)
+                        await send_via_gmail_api(oauth_token, msg)
+                    else:
+                        smtp_pass = decrypt_password(sender.smtp_password_enc, user_id)
+                        ports_to_try = [sender.smtp_port or 587]
+                        if 465 not in ports_to_try:
+                            ports_to_try.append(465)
+                        for try_port in ports_to_try:
+                            use_tls = (try_port == 465)
+                            try:
+                                async with aiosmtplib.SMTP(
+                                    hostname=sender.smtp_host or "smtp.gmail.com",
+                                    port=try_port,
+                                    use_tls=use_tls,
+                                    start_tls=not use_tls,
+                                    timeout=20.0
+                                ) as smtp:
+                                    await smtp.login(sender.smtp_user, smtp_pass)
+                                    await smtp.send_message(msg)
+                                break
+                            except Exception:
+                                pass
+
+                    lead.follow_up_sent = True
+                    lead.follow_up_sent_at = datetime.utcnow()
+                    db.commit()
+                    sent_count += 1
+                    logger.info(f"Dispatched 2-day follow-up to {lead.email} for campaign {camp.name}")
+                except Exception as fe:
+                    logger.error(f"Failed follow-up to {lead.email}: {fe}")
+
+                await asyncio.sleep(4)
+    finally:
+        db.close()
+    return sent_count
+
+@router.post("/check-follow-ups")
+async def trigger_follow_up_checks(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Checks for leads who received an outreach email >= 2 days ago without replying, and dispatches a follow-up."""
+    dispatched = await run_follow_up_sweep(current_user.id)
+    return {"success": True, "follow_ups_sent": dispatched}

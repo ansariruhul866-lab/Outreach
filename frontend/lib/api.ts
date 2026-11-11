@@ -554,4 +554,73 @@ export const api = {
       }),
     getHistory: () => apiFetch<WhatsAppMessageLog[]>("/whatsapp/history"),
   },
+  discovery: {
+    getSerp: (payload: { query: string; purpose?: string; num_results?: number }) =>
+      apiFetch<{
+        query: string;
+        purpose: string;
+        total: number;
+        results: Array<{
+          rank: number;
+          title: string;
+          url: string;
+          domain: string;
+          snippet: string;
+        }>;
+      }>("/discovery/serp", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    extractAndOrganize: (payload: {
+      query: string;
+      purpose: string;
+      selected_items: Array<{
+        rank: number;
+        title: string;
+        url: string;
+        domain: string;
+        snippet: string;
+      }>;
+      use_ai_personalization?: boolean;
+      sender_email_id?: string;
+      custom_template_id?: string;
+      auto_create_campaign?: boolean;
+      follow_up_enabled?: boolean;
+      follow_up_delay_days?: number;
+    }) =>
+      apiFetch<{
+        folder_id: string;
+        folder_name: string;
+        total_extracted: number;
+        campaign_id?: string;
+        message: string;
+      }>("/discovery/extract-and-organize", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    getReplies: () =>
+      apiFetch<
+        Array<{
+          id: string;
+          company: string;
+          email: string;
+          website: string;
+          serp_rank?: number;
+          search_purpose?: string;
+          reply_received_at?: string;
+          reply_body?: string;
+          ai_draft_reply?: string;
+          status: string;
+        }>
+      >("/discovery/replies"),
+    simulateReply: (payload: { lead_id: string; reply_text: string }) =>
+      apiFetch<{
+        success: boolean;
+        message: string;
+        ai_draft_reply: string;
+      }>("/discovery/simulate-reply", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+  },
 };

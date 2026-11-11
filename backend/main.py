@@ -27,6 +27,7 @@ from api.stats import router as stats_router
 from api.folders import router as folders_router
 from api.templates import router as templates_router
 from api.whatsapp import router as whatsapp_router
+from api.discovery import router as discovery_router
 
 app = FastAPI(title="OutreachBot SaaS Platform", version="2.0.0")
 
@@ -54,6 +55,7 @@ app.include_router(whatsapp_router, prefix="/api")
 app.include_router(campaigns_router, prefix="/api")
 app.include_router(tracking_router, prefix="/api")
 app.include_router(stats_router, prefix="/api")
+app.include_router(discovery_router, prefix="/api")
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

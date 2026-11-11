@@ -52,6 +52,18 @@ def run_migrations():
                     cur.execute("ALTER TABLE campaigns ADD COLUMN total_skipped INTEGER DEFAULT 0")
                 if "attachments" not in cols:
                     cur.execute("ALTER TABLE campaigns ADD COLUMN attachments TEXT")
+                if "follow_up_enabled" not in cols:
+                    cur.execute("ALTER TABLE campaigns ADD COLUMN follow_up_enabled BOOLEAN DEFAULT 1")
+                if "follow_up_delay_days" not in cols:
+                    cur.execute("ALTER TABLE campaigns ADD COLUMN follow_up_delay_days INTEGER DEFAULT 2")
+                if "follow_up_subject_template" not in cols:
+                    cur.execute("ALTER TABLE campaigns ADD COLUMN follow_up_subject_template TEXT")
+                if "follow_up_body_template" not in cols:
+                    cur.execute("ALTER TABLE campaigns ADD COLUMN follow_up_body_template TEXT")
+                if "purpose" not in cols:
+                    cur.execute("ALTER TABLE campaigns ADD COLUMN purpose TEXT")
+                if "search_query" not in cols:
+                    cur.execute("ALTER TABLE campaigns ADD COLUMN search_query TEXT")
                 conn.commit()
 
             # Email Templates migrations
@@ -78,6 +90,26 @@ def run_migrations():
                     cur.execute("ALTER TABLE leads ADD COLUMN ai_pitch_strategy TEXT")
                 if "ai_pitch_generated_at" not in lead_cols:
                     cur.execute("ALTER TABLE leads ADD COLUMN ai_pitch_generated_at DATETIME")
+                if "serp_rank" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN serp_rank INTEGER")
+                if "search_query" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN search_query TEXT")
+                if "search_purpose" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN search_purpose TEXT")
+                if "snippet" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN snippet TEXT")
+                if "reply_received" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN reply_received BOOLEAN DEFAULT 0")
+                if "reply_received_at" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN reply_received_at DATETIME")
+                if "reply_body" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN reply_body TEXT")
+                if "ai_draft_reply" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN ai_draft_reply TEXT")
+                if "follow_up_sent" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN follow_up_sent BOOLEAN DEFAULT 0")
+                if "follow_up_sent_at" not in lead_cols:
+                    cur.execute("ALTER TABLE leads ADD COLUMN follow_up_sent_at DATETIME")
                 conn.commit()
 
             # Users migrations for Firebase Auth

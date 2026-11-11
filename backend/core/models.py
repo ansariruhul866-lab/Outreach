@@ -92,6 +92,19 @@ class Lead(Base):
     ai_pitch_whatsapp = Column(Text, nullable=True)
     ai_pitch_strategy = Column(String, nullable=True)
     ai_pitch_generated_at = Column(DateTime, nullable=True)
+
+    # SERP Discovery & Follow-Up Tracking
+    serp_rank = Column(Integer, nullable=True)
+    search_query = Column(String, nullable=True)
+    search_purpose = Column(String, nullable=True)  # BACKLINK | COMPETITOR | EDITORIAL | KEYWORD | MARKETING
+    snippet = Column(Text, nullable=True)
+    reply_received = Column(Boolean, default=False)
+    reply_received_at = Column(DateTime, nullable=True)
+    reply_body = Column(Text, nullable=True)
+    ai_draft_reply = Column(Text, nullable=True)
+    follow_up_sent = Column(Boolean, default=False)
+    follow_up_sent_at = Column(DateTime, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="leads")
@@ -117,6 +130,15 @@ class Campaign(Base):
     send_only_once = Column(Boolean, default=True)
     total_skipped = Column(Integer, default=0)
     attachments = Column(Text, nullable=True)  # JSON-encoded array: [{"filename": "...", "content_base64": "...", "mime_type": "..."}]
+
+    # Automated 2-Day Follow-Up & Purpose Configuration
+    follow_up_enabled = Column(Boolean, default=True)
+    follow_up_delay_days = Column(Integer, default=2)
+    follow_up_subject_template = Column(String, nullable=True)
+    follow_up_body_template = Column(Text, nullable=True)
+    purpose = Column(String, nullable=True)
+    search_query = Column(String, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="campaigns")

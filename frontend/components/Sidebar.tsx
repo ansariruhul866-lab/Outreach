@@ -15,6 +15,7 @@ import {
   LogOut,
   ExternalLink,
   Sparkles,
+  Globe,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -28,6 +29,7 @@ export function Sidebar() {
   };
 
   const navItems = [
+    { label: "SERP Discovery", href: "/dashboard/discovery", icon: Globe, badge: "AI" },
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { label: "Deep Scraper", href: "/dashboard/scraper", icon: Search },
     { label: "Leads & Folders", href: "/dashboard/leads", icon: Users },

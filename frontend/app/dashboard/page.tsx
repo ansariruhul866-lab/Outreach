@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Sparkles,
   Zap,
+  Globe,
 } from "lucide-react";
 
 const containerVariants = {
@@ -122,6 +123,59 @@ export default function DashboardOverviewPage() {
               <span>New Scrape Job</span>
             </Link>
           </motion.div>
+        </div>
+      </motion.div>
+
+      {/* "What are you looking for today?" Hero Discovery Card */}
+      <motion.div
+        variants={itemVariants}
+        className="p-7 rounded-3xl glass-card border border-purple-500/30 relative overflow-hidden bg-gradient-to-r from-purple-950/40 via-black to-zinc-950 shadow-2xl"
+      >
+        <div className="absolute top-0 right-0 w-96 h-96 ambient-glow-purple-accent opacity-25 blur-3xl pointer-events-none" />
+        <div className="relative z-10 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-300 bg-purple-500/15 border border-purple-500/30 px-3 py-1 rounded-full">
+                AI Discovery &amp; Live SERP Engine
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-white mt-2 flex items-center gap-2">
+                <span>What are you looking for today?</span>
+                <Sparkles className="w-5 h-5 text-purple-400" />
+              </h2>
+              <p className="text-xs text-zinc-300 max-w-2xl mt-1 leading-relaxed">
+                Type any search query to crawl live search engines $\rightarrow$ extract top 20 ranking sites $\rightarrow$ get verified emails in a date/purpose folder $\rightarrow$ automate AI personalized outreach with 2-day reply monitoring.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/discovery"
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-xl shadow-purple-900/50 flex items-center gap-2 self-start sm:self-auto shrink-0 transition-all group"
+            >
+              <Globe className="w-4 h-4" />
+              <span>Launch SERP Discovery</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+
+          {/* Quick Search Chips */}
+          <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-white/5">
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Try Now:</span>
+            {[
+              "backlink for marketing website",
+              "guest post tech blogs",
+              "competitor analysis tools",
+              "digital marketing agency clients",
+            ].map((chip) => (
+              <Link
+                key={chip}
+                href="/dashboard/discovery"
+                className="text-xs px-3 py-1.5 rounded-xl bg-white/[0.03] hover:bg-purple-500/15 border border-white/5 hover:border-purple-500/40 text-zinc-300 hover:text-white transition-all flex items-center gap-1.5"
+              >
+                <span>{chip}</span>
+                <ArrowRight className="w-3 h-3 text-purple-400 opacity-60" />
+              </Link>
+            ))}
+          </div>
         </div>
       </motion.div>
 
