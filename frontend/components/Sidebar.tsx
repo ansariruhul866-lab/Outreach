@@ -28,22 +28,37 @@ export function Sidebar() {
     router.push("/");
   };
 
-  const navItems = [
-    { label: "SERP Discovery", href: "/dashboard/discovery", icon: Globe, badge: "AI" },
-    { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Deep Scraper", href: "/dashboard/scraper", icon: Search },
-    { label: "Leads & Folders", href: "/dashboard/leads", icon: Users },
-    { label: "Templates", href: "/dashboard/templates", icon: FileText },
-    { label: "Campaigns", href: "/dashboard/campaigns", icon: Send },
-    { label: "WhatsApp Direct", href: "/dashboard/whatsapp", icon: MessageSquare, badge: "Instant" },
-    { label: "Mailboxes", href: "/dashboard/mailboxes", icon: Mail },
+  const navSections = [
+    {
+      title: "DISCOVERY & SEO",
+      items: [
+        { label: "SERP Discovery", href: "/dashboard/discovery", icon: Globe, badge: "AI" },
+        { label: "Deep Scraper", href: "/dashboard/scraper", icon: Search },
+      ],
+    },
+    {
+      title: "OUTREACH AUTOMATION",
+      items: [
+        { label: "Campaigns", href: "/dashboard/campaigns", icon: Send },
+        { label: "Templates", href: "/dashboard/templates", icon: FileText },
+        { label: "Leads & Folders", href: "/dashboard/leads", icon: Users },
+        { label: "WhatsApp Direct", href: "/dashboard/whatsapp", icon: MessageSquare, badge: "Instant" },
+      ],
+    },
+    {
+      title: "CHANNELS & SYSTEM",
+      items: [
+        { label: "Mailboxes", href: "/dashboard/mailboxes", icon: Mail },
+        { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+      ],
+    },
   ];
 
   return (
-    <aside className="w-64 border-r border-purple-500/20 bg-black/70 backdrop-blur-3xl p-6 flex flex-col justify-between shrink-0 min-h-screen relative z-20 shadow-[10px_0_40px_rgba(0,0,0,0.8)]">
+    <aside className="w-64 border-r border-purple-500/20 bg-black/70 backdrop-blur-3xl p-6 flex flex-col justify-between shrink-0 min-h-screen relative z-10 shadow-[10px_0_40px_rgba(0,0,0,0.8)]">
       <div>
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-3 mb-8 group block">
+        <Link href="/" className="flex items-center gap-3 mb-6 group block">
           <div className="relative">
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-800 opacity-70 blur-md group-hover:opacity-100 transition duration-300" />
             <div className="relative h-10 w-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-600 to-fuchsia-500 flex items-center justify-center font-black text-lg text-white shadow-xl shadow-purple-900/50">
@@ -61,42 +76,51 @@ export function Sidebar() {
           </div>
         </Link>
 
-        {/* Navigation */}
-        <nav className="space-y-1.5">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive =
-              item.href === "/dashboard"
-                ? pathname === "/dashboard"
-                : pathname?.startsWith(item.href);
+        {/* Grouped Navigation */}
+        <nav className="space-y-4">
+          {navSections.map((sec) => (
+            <div key={sec.title} className="space-y-1">
+              <span className="block text-[9px] font-black uppercase tracking-wider text-purple-400/70 px-3">
+                {sec.title}
+              </span>
+              <div className="space-y-1">
+                {sec.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive =
+                    item.href === "/dashboard"
+                      ? pathname === "/dashboard"
+                      : pathname?.startsWith(item.href);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-colors duration-150 ${
-                  isActive
-                    ? "bg-purple-600/25 border-purple-500/50 text-white shadow-[0_0_20px_rgba(168,85,247,0.25)]"
-                    : "border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.05]"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon
-                    className={`w-4 h-4 ${
-                      isActive ? "text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]" : "text-zinc-500"
-                    }`}
-                  />
-                  <span>{item.label}</span>
-                </div>
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold border transition-colors duration-150 ${
+                        isActive
+                          ? "bg-purple-600/25 border-purple-500/50 text-white shadow-[0_0_20px_rgba(168,85,247,0.25)]"
+                          : "border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon
+                          className={`w-4 h-4 ${
+                            isActive ? "text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]" : "text-zinc-500"
+                          }`}
+                        />
+                        <span>{item.label}</span>
+                      </div>
 
-                {item.badge && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+                      {item.badge && (
+                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </div>
 

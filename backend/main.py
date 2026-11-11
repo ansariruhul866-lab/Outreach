@@ -115,6 +115,7 @@ def test_smtp_connectivity():
     return results
 
 @app.get("/health")
+@app.get("/api/health")
 def health():
     return {"status": "ok", "platform": "OutreachBot Standalone SaaS"}
 

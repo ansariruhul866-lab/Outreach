@@ -16,7 +16,13 @@ import httpx
 from core.database import get_db, SessionLocal
 from core.models import User, Lead, LeadFolder, Campaign, SenderEmail
 from core.auth import get_current_user
-from core.gemini_service import generate_website_serp_pitch, generate_reply_draft, generate_humanized_blog
+from core.gemini_service import (
+    generate_website_serp_pitch,
+    generate_reply_draft,
+    generate_humanized_blog,
+    generate_keyword_plan,
+    generate_competitor_counter_strategy
+)
 from api.campaigns import execute_send_batch, render_vars, convert_to_email_html
 
 logger = logging.getLogger("discovery")
@@ -82,6 +88,16 @@ class DraftBlogRequest(BaseModel):
     selected_blogs: Optional[List[dict]] = Field(default_factory=list)
     target_tone: str = "copywriter"
 
+class KeywordPlanRequest(BaseModel):
+    query: str
+    region: str = "in-en"
+    top_sites: Optional[List[dict]] = Field(default_factory=list)
+
+class CompetitorStrategyRequest(BaseModel):
+    query: str
+    region: str = "in-en"
+    selected_competitors: Optional[List[dict]] = Field(default_factory=list)
+
 class ExtractAndOrganizeRequest(BaseModel):
     query: str
     purpose: str = "BACKLINK"
@@ -106,10 +122,20 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
     seen_domains = set()
 
     UGC_NOISE = {
-        "reddit.com", "quora.com", "facebook.com", "instagram.com",
-        "youtube.com", "pinterest.com", "wikipedia.org", "tiktok.com",
-        "twitter.com", "x.com"
+        "reddit.", "quora.", "pinterest.", "facebook.", "instagram.",
+        "youtube.", "wikipedia.", "tiktok.", "twitter.", "x.com",
+        "medium.", "linkedin.", "tumblr.", "tripadvisor.", "yelp.",
+        "amazon.", "flipkart.", "etsy.com", "ebay.com"
     }
+
+    def is_noise(domain: str, href: str) -> bool:
+        d = domain.lower()
+        h = href.lower()
+        if any(noise in d for noise in UGC_NOISE):
+            return True
+        if any(bad in h for bad in ["/r/", "reddit.", "quora.", "pinterest.", "/pin/", "facebook.", "instagram.", "youtube."]):
+            return True
+        return False
 
     def add_result(title: str, href: str, snippet: str):
         if not href or not href.startswith("http"):
@@ -117,7 +143,7 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
         if any(bad in href.lower() for bad in ["duckduckgo.com", "bing.com", "yahoo.com", "microsoft.com", "google.com"]):
             return
         domain = urllib.parse.urlparse(href).netloc.replace("www.", "").lower()
-        if domain in UGC_NOISE:
+        if is_noise(domain, href):
             return
         if domain not in seen_domains:
             seen_domains.add(domain)
@@ -367,8 +393,8 @@ async def get_serp_rankings(req: SerpRequest, current_user: User = Depends(get_c
     reg = req.region or "in-en"
     results = search_serp_engine(query_clean, region=reg, target=req.num_results or 20)
 
-    # If Blog & Editorial purpose, automatically extract deep blog insights for top ranking pages
-    if req.purpose.upper() == "EDITORIAL" and results:
+    # If Editorial, Keyword, or Competitor purpose, automatically extract deep insights for top ranking pages
+    if req.purpose.upper() in ["EDITORIAL", "KEYWORD", "COMPETITOR"] and results:
         analysis_tasks = [extract_blog_insights(r["url"], r.get("title", ""), r.get("domain", "")) for r in results[:10]]
         analyzed = await asyncio.gather(*analysis_tasks, return_exceptions=True)
         for i, a_res in enumerate(analyzed):
@@ -408,6 +434,56 @@ def draft_humanized_blog(req: DraftBlogRequest, current_user: User = Depends(get
     except Exception as e:
         logger.error(f"Error drafting humanized blog: {e}")
         raise HTTPException(status_code=500, detail=f"AI Copywriter drafting failed: {str(e)}")
+
+@router.post("/keyword-plan")
+def get_keyword_plan(req: KeywordPlanRequest, current_user: User = Depends(get_current_user)):
+    """
+    Crawls and reverse-engineers top 5 competitor ranking sites to discover:
+    1. Core overlapping common keywords
+    2. High-opportunity long-tail keywords with high rankability & low competition
+    3. Search intent, difficulty, and content architecture plan.
+    """
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+
+    try:
+        sites = req.top_sites
+        if not sites:
+            serp_res = search_serp_engine(req.query.strip(), region=req.region or "in-en", target=6)
+            sites = serp_res[:5]
+
+        plan = generate_keyword_plan(
+            query=req.query.strip(),
+            competitor_sites=sites
+        )
+        return plan
+    except Exception as e:
+        logger.error(f"Error generating keyword plan: {e}")
+        raise HTTPException(status_code=500, detail=f"Keyword Planner failed: {str(e)}")
+
+@router.post("/competitor-strategy")
+def get_competitor_strategy(req: CompetitorStrategyRequest, current_user: User = Depends(get_current_user)):
+    """
+    Analyzes top ranking competitors in the niche, identifies business models,
+    vulnerabilities, market gaps, and delivers an aggressive battle plan.
+    """
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+
+    try:
+        comps = req.selected_competitors
+        if not comps:
+            serp_res = search_serp_engine(req.query.strip(), region=req.region or "in-en", target=8)
+            comps = serp_res[:6]
+
+        strategy = generate_competitor_counter_strategy(
+            query=req.query.strip(),
+            competitors=comps
+        )
+        return strategy
+    except Exception as e:
+        logger.error(f"Error generating competitor strategy: {e}")
+        raise HTTPException(status_code=500, detail=f"Competitor strategy analysis failed: {str(e)}")
 
 @router.post("/extract-and-organize")
 async def extract_and_organize_leads(

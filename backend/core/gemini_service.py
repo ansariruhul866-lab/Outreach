@@ -434,3 +434,190 @@ Return a STRICT JSON object with these exact keys:
 
     raise RuntimeError(f"Failed to generate humanized blog with Gemini API: {last_error}")
 
+
+def generate_keyword_plan(
+    query: str,
+    competitor_sites: list[Dict[str, Any]],
+    custom_api_key: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Crawls and reverse-engineers top competitor ranking keywords to discover:
+    1. Core common keywords overlapping across top 5 sites
+    2. High-opportunity keywords with high ranking chance & low competition
+    3. Search intent, difficulty, and recommended content architecture.
+    """
+    api_key = get_gemini_api_key(custom_api_key)
+
+    sites_summary = ""
+    for idx, site in enumerate(competitor_sites[:5], 1):
+        d = site.get("domain") or site.get("url") or f"Site {idx}"
+        t = site.get("title", "")
+        snip = site.get("snippet", "")
+        kw = ", ".join(site.get("keywords", [])[:5])
+        sites_summary += f"{idx}. {d} ('{t}') - {snip} | Keywords: [{kw}]\n"
+
+    prompt = f"""You are a veteran technical SEO analyst and keyword research strategist.
+Search Query: "{query}"
+Top Ranking Competitors Analyzed:
+{sites_summary or "Top ranking industry sites for this query."}
+
+TASK:
+1. Identify the CORE COMMON KEYWORDS that 2 or more of these top ranking competitors rely on for their search traffic.
+2. Uncover HIGH-OPPORTUNITY LONG-TAIL KEYWORDS that have high commercial/transactional intent but weaker competitor coverage, giving a user a realistic high chance to rank quickly.
+3. Classify search intent (Commercial, Transactional, Informational, Local).
+4. Provide the exact recommended content structure (Pillar Guide, Product Landing Page, Comparison Listicle, Local Hub) for each keyword.
+
+OUTPUT STRICT JSON:
+{{
+  "total_analyzed_sites": {len(competitor_sites[:5]) or 5},
+  "core_common_keywords": [
+    {{
+      "keyword": "exact keyword phrase",
+      "search_intent": "Commercial",
+      "difficulty": "Medium",
+      "opportunity_score": 92,
+      "competitors_using": ["domain1.com", "domain2.com"],
+      "recommended_structure": "Pillar Comparison Guide"
+    }}
+  ],
+  "high_opportunity_keywords": [
+    {{
+      "keyword": "long tail high ranking chance keyword",
+      "search_intent": "Transactional",
+      "difficulty": "Low",
+      "opportunity_score": 96,
+      "why_high_rank_chance": "Specific reason why this keyword can be ranked easily (e.g. low competition, high local intent).",
+      "recommended_structure": "Product / Service Landing Page"
+    }}
+  ],
+  "lsi_semantic_keywords": ["keyword a", "keyword b", "keyword c", "keyword d"],
+  "content_architecture_plan": "Strategic 3-step action plan on how to build pages targeting these keywords to outrank the top 5 competitors."
+}}
+"""
+
+    last_error = None
+    for model_name in FALLBACK_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.25,
+                "responseMimeType": "application/json"
+            }
+        }
+        try:
+            with httpx.Client(timeout=30.0) as client:
+                res = client.post(url, json=payload)
+                if res.status_code == 200:
+                    data = res.json()
+                    raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    if raw_text.startswith("```json"):
+                        raw_text = raw_text[7:]
+                    elif raw_text.startswith("```"):
+                        raw_text = raw_text[3:]
+                    if raw_text.endswith("```"):
+                        raw_text = raw_text[:-3]
+                    parsed = json.loads(raw_text.strip())
+                    parsed["model_used"] = model_name
+                    return parsed
+                elif res.status_code in [429, 503, 404]:
+                    last_error = f"Model {model_name} status {res.status_code}: {res.text}"
+                    continue
+                else:
+                    res.raise_for_status()
+        except Exception as e:
+            last_error = f"Exception with {model_name}: {str(e)}"
+            continue
+
+    raise RuntimeError(f"Failed to generate keyword plan with Gemini API: {last_error}")
+
+
+def generate_competitor_counter_strategy(
+    query: str,
+    competitors: list[Dict[str, Any]],
+    custom_api_key: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Analyzes actual competing businesses in a niche, identifies their business models,
+    strengths, vulnerabilities, and delivers an aggressive counter-strategy plan.
+    """
+    api_key = get_gemini_api_key(custom_api_key)
+
+    comp_summary = ""
+    for idx, c in enumerate(competitors[:6], 1):
+        d = c.get("domain") or c.get("url") or f"Competitor {idx}"
+        t = c.get("title", "")
+        snip = c.get("snippet", "")
+        comp_summary += f"{idx}. {d} ('{t}') - {snip}\n"
+
+    prompt = f"""You are an elite competitive intelligence consultant and market strategist.
+Niche / Search Query: "{query}"
+Ranking Competitors:
+{comp_summary or "Top ranking market competitors."}
+
+Analyze these businesses to identify:
+1. Business Model & Core Offering of each competitor
+2. Major operational or content weaknesses
+3. Exploitable Market Gaps where a modern entrant can easily take market share and outrank them.
+
+OUTPUT STRICT JSON:
+{{
+  "niche_overview": "Summary of competitive landscape in this niche",
+  "competitor_landscape": [
+    {{
+      "competitor": "domain.com",
+      "business_model": "DTC Store / Bespoke Atelier / Market Aggregator",
+      "core_offering": "What they sell or provide",
+      "strengths": "What they do well",
+      "vulnerabilities": "Where they are weak (e.g. slow delivery, poor mobile experience, generic copy)",
+      "gap_to_exploit": "Actionable way to outposition this competitor"
+    }}
+  ],
+  "top_market_gaps": [
+    {{
+      "gap_title": "Market Gap Name",
+      "description": "Specific flaw or missing service in the market that customers are looking for",
+      "opportunity_level": "High / Critical"
+    }}
+  ],
+  "battle_plan_summary": "3-phase action plan to dominate this search niche and win customers."
+}}
+"""
+
+    last_error = None
+    for model_name in FALLBACK_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.3,
+                "responseMimeType": "application/json"
+            }
+        }
+        try:
+            with httpx.Client(timeout=30.0) as client:
+                res = client.post(url, json=payload)
+                if res.status_code == 200:
+                    data = res.json()
+                    raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    if raw_text.startswith("```json"):
+                        raw_text = raw_text[7:]
+                    elif raw_text.startswith("```"):
+                        raw_text = raw_text[3:]
+                    if raw_text.endswith("```"):
+                        raw_text = raw_text[:-3]
+                    parsed = json.loads(raw_text.strip())
+                    parsed["model_used"] = model_name
+                    return parsed
+                elif res.status_code in [429, 503, 404]:
+                    last_error = f"Model {model_name} status {res.status_code}: {res.text}"
+                    continue
+                else:
+                    res.raise_for_status()
+        except Exception as e:
+            last_error = f"Exception with {model_name}: {str(e)}"
+            continue
+
+    raise RuntimeError(f"Failed to generate competitor strategy with Gemini API: {last_error}")
+
+

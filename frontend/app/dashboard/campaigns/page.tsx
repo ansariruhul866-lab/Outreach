@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { api, Campaign, Sender, EmailTemplate, LeadFolder, AttachmentItem } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -70,6 +71,7 @@ export default function CampaignsPage() {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [folders, setFolders] = useState<LeadFolder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -123,6 +125,7 @@ export default function CampaignsPage() {
   };
 
   useEffect(() => {
+    setMounted(true);
     loadData();
   }, []);
 
@@ -523,24 +526,27 @@ export default function CampaignsPage() {
         )}
       </div>
 
-      {/* Campaign Create/Edit Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      {/* Campaign Create/Edit Modal - Portaled to document.body for highest z-index */}
+      {mounted && modalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-xl animate-in fade-in overflow-y-auto">
+          <div className="relative w-full max-w-3xl max-h-[90vh] bg-zinc-950 border border-purple-500/40 rounded-3xl shadow-[0_0_60px_rgba(168,85,247,0.3)] flex flex-col overflow-hidden my-auto">
             {/* Pinned Header */}
-            <div className="shrink-0 px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/95 backdrop-blur-sm">
+            <div className="shrink-0 px-6 py-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-purple-950/60 via-black to-zinc-950 backdrop-blur-sm">
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-white">
-                  {editingId ? "Edit Campaign Sequence" : "Create Cold Outreach Campaign"}
+                <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                  <span>{editingId ? "Edit Campaign Sequence" : "Create Cold Outreach Campaign"}</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                    SaaS Engine
+                  </span>
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-zinc-400 mt-0.5">
                   Configure your pitch template, selective lead checklist, and anti-spam delay
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-2 -mr-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-2 -mr-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -911,7 +917,8 @@ export default function CampaignsPage() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

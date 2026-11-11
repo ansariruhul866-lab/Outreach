@@ -18,6 +18,7 @@ import {
   Sparkles,
   Menu,
   X,
+  Globe,
 } from "lucide-react";
 
 export function Navbar() {
@@ -33,6 +34,12 @@ export function Navbar() {
   };
 
   const toolsNav = [
+    {
+      label: "SERP Discovery",
+      href: "/dashboard/discovery",
+      icon: Globe,
+      badge: "AI",
+    },
     { label: "Deep Scraper", href: "/dashboard/scraper", icon: Search },
     { label: "Leads", href: "/dashboard/leads", icon: Users },
     { label: "Templates", href: "/dashboard/templates", icon: FileText },

@@ -654,5 +654,53 @@ export const api = {
         method: "POST",
         body: JSON.stringify(payload),
       }),
+    getKeywordPlan: (payload: { query: string; region?: string; top_sites?: any[] }) =>
+      apiFetch<{
+        total_analyzed_sites: number;
+        core_common_keywords: Array<{
+          keyword: string;
+          search_intent: string;
+          difficulty: string;
+          opportunity_score: number;
+          competitors_using: string[];
+          recommended_structure: string;
+        }>;
+        high_opportunity_keywords: Array<{
+          keyword: string;
+          search_intent: string;
+          difficulty: string;
+          opportunity_score: number;
+          why_high_rank_chance: string;
+          recommended_structure: string;
+        }>;
+        lsi_semantic_keywords: string[];
+        content_architecture_plan: string;
+        model_used?: string;
+      }>("/discovery/keyword-plan", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    getCompetitorStrategy: (payload: { query: string; region?: string; selected_competitors?: any[] }) =>
+      apiFetch<{
+        niche_overview: string;
+        competitor_landscape: Array<{
+          competitor: string;
+          business_model: string;
+          core_offering: string;
+          strengths: string;
+          vulnerabilities: string;
+          gap_to_exploit: string;
+        }>;
+        top_market_gaps: Array<{
+          gap_title: string;
+          description: string;
+          opportunity_level: string;
+        }>;
+        battle_plan_summary: string;
+        model_used?: string;
+      }>("/discovery/competitor-strategy", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
   },
 };
