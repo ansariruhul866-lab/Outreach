@@ -146,8 +146,13 @@ export interface ScrapeJob {
 }
 
 export function getApiBase(): string {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, "");
+  let url = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (url) {
+    url = url.replace(/\/+$/, "");
+    if (!url.endsWith("/api")) {
+      url = `${url}/api`;
+    }
+    return url;
   }
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;

@@ -46,6 +46,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api")
+app.include_router(auth_router, include_in_schema=False)
 app.include_router(senders_router, prefix="/api")
 app.include_router(scraper_router, prefix="/api")
 app.include_router(leads_router, prefix="/api")
