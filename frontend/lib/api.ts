@@ -145,18 +145,21 @@ export interface ScrapeJob {
   emails: string[];
 }
 
-function getApiBase(): string {
+export function getApiBase(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, "");
+  }
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
     const protocol = window.location.protocol;
     if (hostname === "127.0.0.1") {
       return `${protocol}//127.0.0.1:8000/api`;
     }
-    if (hostname !== "localhost" && process.env.NEXT_PUBLIC_API_URL?.includes("localhost")) {
-      return `${protocol}//${hostname}:8000/api`;
+    if (hostname === "localhost") {
+      return `${protocol}//localhost:8000/api`;
     }
   }
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+  return "http://localhost:8000/api";
 }
 
 function getToken(): string | null {

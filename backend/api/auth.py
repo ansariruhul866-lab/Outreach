@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
@@ -181,18 +181,35 @@ def get_profile(current_user: User = Depends(get_current_user)):
         is_email_verified=bool(getattr(current_user, 'is_email_verified', True))
     )
 
+def get_google_redirect_uri(request: Request) -> str:
+    """
+    Determine Google OAuth redirect URI dynamically:
+    1. If GOOGLE_REDIRECT_URI is explicitly set (e.g. on Render), use it.
+    2. Otherwise, infer from incoming request host & proto (supports proxy headers).
+    """
+    configured = os.getenv("GOOGLE_REDIRECT_URI", "").strip()
+    if configured:
+        return configured
+    
+    proto = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("x-forwarded-host", request.headers.get("host", request.url.netloc))
+    if host and not host.startswith("localhost") and not host.startswith("127.0.0.1"):
+        return f"{proto}://{host}/api/auth/google/callback"
+    
+    return "http://localhost:8000/api/auth/google/callback"
+
 @router.get("/google/login")
-def google_login(return_url: Optional[str] = None):
+def google_login(request: Request, return_url: Optional[str] = None):
     """
     Direct Server-Side Google OAuth 2.0.
     Requests offline access and prompt=consent to ensure a permanent Refresh Token is granted
     with permissions to send emails via Gmail REST API.
     """
     client_id = os.getenv("GOOGLE_CLIENT_ID", "")
-    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/api/auth/google/callback")
+    redirect_uri = get_google_redirect_uri(request)
 
     if not client_id:
-        raise HTTPException(status_code=500, detail="GOOGLE_CLIENT_ID is not configured in backend/.env")
+        raise HTTPException(status_code=500, detail="GOOGLE_CLIENT_ID is not configured in backend environment")
 
     scopes = [
         "openid",
@@ -217,6 +234,7 @@ def google_login(return_url: Optional[str] = None):
 
 @router.get("/google/callback")
 async def google_callback(
+    request: Request,
     code: Optional[str] = Query(None),
     error: Optional[str] = Query(None),
     state: Optional[str] = Query(None),
@@ -228,19 +246,36 @@ async def google_callback(
     2. Fetches user identity from Google
     3. Auto-provisions User account and authenticates them
     4. Auto-connects and VERIFIES their Gmail mailbox for cold outreach
-    5. Redirects back to OutreachBot frontend dashboard
+    5. Redirects back to OutRank AI frontend dashboard (supports dynamic deployed frontend origin)
     """
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    # Resolve frontend destination:
+    # If state contains full URL (e.g. "https://your-frontend.vercel.app/dashboard"), redirect directly to it
+    if state and (state.startswith("http://") or state.startswith("https://")):
+        target_destination = state
+    else:
+        frontend_url = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
+        if not frontend_url:
+            referer = request.headers.get("referer", "")
+            if referer and "localhost" not in referer:
+                parsed = urllib.parse.urlparse(referer)
+                frontend_url = f"{parsed.scheme}://{parsed.netloc}"
+            else:
+                frontend_url = "http://localhost:3000"
+        target_path = state if state and state.startswith("/") else "/dashboard"
+        target_destination = f"{frontend_url}{target_path}"
+
+    sep = "&" if "?" in target_destination else "?"
+
     if error:
         logger.error(f"Google OAuth returned error: {error}")
-        return RedirectResponse(url=f"{frontend_url}/?error={urllib.parse.quote(error)}")
+        return RedirectResponse(url=f"{target_destination}{sep}error={urllib.parse.quote(error)}")
 
     if not code:
         raise HTTPException(status_code=400, detail="Missing authorization code from Google")
 
     client_id = os.getenv("GOOGLE_CLIENT_ID", "")
     client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
-    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/api/auth/google/callback")
+    redirect_uri = get_google_redirect_uri(request)
 
     # 1. Exchange authorization code for tokens
     token_url = "https://oauth2.googleapis.com/token"
@@ -256,7 +291,7 @@ async def google_callback(
         token_resp = await client.post(token_url, data=token_payload)
         if token_resp.status_code != 200:
             logger.error(f"Google token exchange failed: {token_resp.text}")
-            return RedirectResponse(url=f"{frontend_url}/?error=google_token_exchange_failed")
+            return RedirectResponse(url=f"{target_destination}{sep}error=google_token_exchange_failed")
         tokens = token_resp.json()
 
     access_token = tokens.get("access_token")
@@ -270,7 +305,7 @@ async def google_callback(
         )
         if userinfo_resp.status_code != 200:
             logger.error(f"Google userinfo lookup failed: {userinfo_resp.text}")
-            return RedirectResponse(url=f"{frontend_url}/?error=google_userinfo_failed")
+            return RedirectResponse(url=f"{target_destination}{sep}error=google_userinfo_failed")
         user_info = userinfo_resp.json()
 
     email = user_info["email"].lower().strip()
@@ -339,9 +374,13 @@ async def google_callback(
 
     db.commit()
 
-    # 5. Generate OutreachBot JWT access token and redirect to dashboard
+    # 5. Generate OutreachBot JWT access token and redirect to destination
     token = create_access_token(user.id, user.email)
     
-    target_path = state if state and state.startswith("/dashboard") else "/dashboard"
-    redirect_destination = f"{frontend_url}{target_path}?token={token}&email={urllib.parse.quote(user.email)}&name={urllib.parse.quote(user.name)}&connected=gmail"
+    redirect_destination = (
+        f"{target_destination}{sep}token={token}"
+        f"&email={urllib.parse.quote(user.email)}"
+        f"&name={urllib.parse.quote(user.name)}"
+        f"&connected=gmail"
+    )
     return RedirectResponse(url=redirect_destination)

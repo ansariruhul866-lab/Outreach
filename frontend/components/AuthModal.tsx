@@ -13,7 +13,7 @@ import {
   GoogleAuthProvider,
   User as FirebaseUser,
 } from "firebase/auth";
-import { api } from "@/lib/api";
+import { api, getApiBase } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, User as UserIcon, X, CheckCircle2, AlertCircle, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
@@ -51,8 +51,9 @@ export function AuthModal({ isOpen, initialMode = "signup", onClose }: AuthModal
     setError(null);
     setLoading(true);
     // Direct Server-Side Google OAuth 2.0 with permanent Gmail sending permissions & refresh token
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
-    window.location.href = `${apiUrl}/auth/google/login?return_url=/dashboard`;
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const apiUrl = getApiBase();
+    window.location.href = `${apiUrl}/auth/google/login?return_url=${encodeURIComponent(origin + "/dashboard")}`;
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api, Sender } from "@/lib/api";
+import { api, getApiBase, Sender } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -65,8 +65,9 @@ export default function MailboxesPage() {
 
   const handleGoogleConnect = () => {
     // Direct Server-Side Google OAuth 2.0 with permanent Gmail sending permissions
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
-    window.location.href = `${apiUrl}/auth/google/login?return_url=/dashboard/mailboxes`;
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const apiUrl = getApiBase();
+    window.location.href = `${apiUrl}/auth/google/login?return_url=${encodeURIComponent(origin + "/dashboard/mailboxes")}`;
   };
 
   const handleConnectSmtp = async (e: React.FormEvent) => {
