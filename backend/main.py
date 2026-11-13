@@ -140,9 +140,8 @@ def debug_status():
     }
 
 @app.get("/api/debug-serp")
-def debug_serp(q: str = "best custom clothing store", region: str = "in-en"):
-    from api.discovery import HAS_CURL_CFFI
-    import traceback, urllib.parse
+def debug_serp(q: str = "custom clothing store"):
+    import traceback, urllib.parse, json
     from bs4 import BeautifulSoup
     try:
         from curl_cffi import requests as cffi_requests
@@ -152,25 +151,45 @@ def debug_serp(q: str = "best custom clothing store", region: str = "in-en"):
 
     diag = {}
     
-    # 1. Test in.search.yahoo.com
+    # 1. Test Google with curl_cffi
     try:
-        url = f"https://in.search.yahoo.com/search?p={urllib.parse.quote_plus(q)}"
-        r = session.get(url, timeout=6) if session else None
-        soup = BeautifulSoup(r.text, "html.parser") if r else None
-        h3s = [h.get_text(strip=True)[:60] for h in soup.find_all("h3")] if soup else []
-        diag["yahoo_in"] = {"status": r.status_code if r else None, "len": len(r.text) if r else 0, "h3s": h3s[:6]}
+        url = f"https://www.google.com/search?q={urllib.parse.quote_plus(q)}&hl=en"
+        r = session.get(url, timeout=6)
+        soup = BeautifulSoup(r.text, "html.parser")
+        titles = [a.get_text(strip=True)[:60] for a in soup.find_all("h3")]
+        diag["google"] = {"status": r.status_code, "len": len(r.text), "titles": titles[:6]}
     except Exception as e:
-        diag["yahoo_in"] = {"error": str(e)}
+        diag["google"] = {"error": str(e)}
 
-    # 2. Test search.yahoo.com
+    # 2. Test Bing with curl_cffi
     try:
-        url = f"https://search.yahoo.com/search?p={urllib.parse.quote_plus(q)}"
-        r = session.get(url, timeout=6) if session else None
-        soup = BeautifulSoup(r.text, "html.parser") if r else None
-        h3s = [h.get_text(strip=True)[:60] for h in soup.find_all("h3")] if soup else []
-        diag["yahoo_global"] = {"status": r.status_code if r else None, "len": len(r.text) if r else 0, "h3s": h3s[:6]}
+        url = f"https://www.bing.com/search?q={urllib.parse.quote_plus(q)}"
+        r = session.get(url, timeout=6)
+        soup = BeautifulSoup(r.text, "html.parser")
+        titles = [a.get_text(strip=True)[:60] for a in soup.select("li.b_algo h2")]
+        diag["bing"] = {"status": r.status_code, "len": len(r.text), "titles": titles[:6]}
     except Exception as e:
-        diag["yahoo_global"] = {"error": str(e)}
+        diag["bing"] = {"error": str(e)}
+
+    # 3. Test DDG HTML
+    try:
+        url = "https://html.duckduckgo.com/html/"
+        r = session.post(url, data={"q": q}, headers={"Referer": "https://html.duckduckgo.com/"}, timeout=6)
+        soup = BeautifulSoup(r.text, "html.parser")
+        titles = [a.get_text(strip=True)[:60] for a in soup.select(".result__title a")]
+        diag["ddg_html"] = {"status": r.status_code, "len": len(r.text), "titles": titles[:6]}
+    except Exception as e:
+        diag["ddg_html"] = {"error": str(e)}
+
+    # 4. Test DDG Lite
+    try:
+        url = "https://lite.duckduckgo.com/lite/"
+        r = session.post(url, data={"q": q}, headers={"Referer": "https://lite.duckduckgo.com/"}, timeout=6)
+        soup = BeautifulSoup(r.text, "html.parser")
+        titles = [a.get_text(strip=True)[:60] for a in soup.select("a.result-link")]
+        diag["ddg_lite"] = {"status": r.status_code, "len": len(r.text), "titles": titles[:6]}
+    except Exception as e:
+        diag["ddg_lite"] = {"error": str(e)}
 
     return diag
 
