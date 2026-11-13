@@ -141,13 +141,38 @@ def debug_status():
 
 @app.get("/api/debug-serp")
 def debug_serp(q: str = "best custom clothing store", region: str = "in-en"):
-    from api.discovery import search_serp_engine, HAS_CURL_CFFI
-    import traceback
+    from api.discovery import HAS_CURL_CFFI
+    import traceback, urllib.parse
+    from bs4 import BeautifulSoup
     try:
-        results = search_serp_engine(q, region=region, target=10)
-        return {"has_curl_cffi": HAS_CURL_CFFI, "count": len(results), "results": results}
+        from curl_cffi import requests as cffi_requests
+        session = cffi_requests.Session(impersonate="chrome120")
+    except Exception:
+        session = None
+
+    diag = {}
+    
+    # 1. Test in.search.yahoo.com
+    try:
+        url = f"https://in.search.yahoo.com/search?p={urllib.parse.quote_plus(q)}"
+        r = session.get(url, timeout=6) if session else None
+        soup = BeautifulSoup(r.text, "html.parser") if r else None
+        h3s = [h.get_text(strip=True)[:60] for h in soup.find_all("h3")] if soup else []
+        diag["yahoo_in"] = {"status": r.status_code if r else None, "len": len(r.text) if r else 0, "h3s": h3s[:6]}
     except Exception as e:
-        return {"error": str(e), "traceback": traceback.format_exc()}
+        diag["yahoo_in"] = {"error": str(e)}
+
+    # 2. Test search.yahoo.com
+    try:
+        url = f"https://search.yahoo.com/search?p={urllib.parse.quote_plus(q)}"
+        r = session.get(url, timeout=6) if session else None
+        soup = BeautifulSoup(r.text, "html.parser") if r else None
+        h3s = [h.get_text(strip=True)[:60] for h in soup.find_all("h3")] if soup else []
+        diag["yahoo_global"] = {"status": r.status_code if r else None, "len": len(r.text) if r else 0, "h3s": h3s[:6]}
+    except Exception as e:
+        diag["yahoo_global"] = {"error": str(e)}
+
+    return diag
 
 # Mount static frontend
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
