@@ -141,55 +141,40 @@ def debug_status():
 
 @app.get("/api/debug-serp")
 def debug_serp(q: str = "custom clothing store"):
-    import traceback, urllib.parse, json
-    from bs4 import BeautifulSoup
-    try:
-        from curl_cffi import requests as cffi_requests
-        session = cffi_requests.Session(impersonate="chrome120")
-    except Exception:
-        session = None
+    import urllib.request, urllib.parse, json
 
     diag = {}
-    
-    # 1. Test Google with curl_cffi
-    try:
-        url = f"https://www.google.com/search?q={urllib.parse.quote_plus(q)}&hl=en"
-        r = session.get(url, timeout=6)
-        soup = BeautifulSoup(r.text, "html.parser")
-        titles = [a.get_text(strip=True)[:60] for a in soup.find_all("h3")]
-        diag["google"] = {"status": r.status_code, "len": len(r.text), "titles": titles[:6]}
-    except Exception as e:
-        diag["google"] = {"error": str(e)}
 
-    # 2. Test Bing with curl_cffi
+    # 1. Google Autocomplete / Suggest
     try:
-        url = f"https://www.bing.com/search?q={urllib.parse.quote_plus(q)}"
-        r = session.get(url, timeout=6)
-        soup = BeautifulSoup(r.text, "html.parser")
-        titles = [a.get_text(strip=True)[:60] for a in soup.select("li.b_algo h2")]
-        diag["bing"] = {"status": r.status_code, "len": len(r.text), "titles": titles[:6]}
+        url = f"https://suggestqueries.google.com/complete/search?client=firefox&q={urllib.parse.quote_plus(q)}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as r:
+            diag["google_suggest"] = json.loads(r.read().decode())
     except Exception as e:
-        diag["bing"] = {"error": str(e)}
+        diag["google_suggest"] = str(e)
 
-    # 3. Test DDG HTML
+    # 2. Wikipedia Opensearch
     try:
-        url = "https://html.duckduckgo.com/html/"
-        r = session.post(url, data={"q": q}, headers={"Referer": "https://html.duckduckgo.com/"}, timeout=6)
-        soup = BeautifulSoup(r.text, "html.parser")
-        titles = [a.get_text(strip=True)[:60] for a in soup.select(".result__title a")]
-        diag["ddg_html"] = {"status": r.status_code, "len": len(r.text), "titles": titles[:6]}
+        url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={urllib.parse.quote_plus(q)}&limit=5&namespace=0&format=json"
+        req = urllib.request.Request(url, headers={"User-Agent": "OutRankBot/1.0"})
+        with urllib.request.urlopen(req, timeout=5) as r:
+            diag["wikipedia"] = json.loads(r.read().decode())
     except Exception as e:
-        diag["ddg_html"] = {"error": str(e)}
+        diag["wikipedia"] = str(e)
 
-    # 4. Test DDG Lite
+    # 3. Mojeek or other open engines
     try:
-        url = "https://lite.duckduckgo.com/lite/"
-        r = session.post(url, data={"q": q}, headers={"Referer": "https://lite.duckduckgo.com/"}, timeout=6)
-        soup = BeautifulSoup(r.text, "html.parser")
-        titles = [a.get_text(strip=True)[:60] for a in soup.select("a.result-link")]
-        diag["ddg_lite"] = {"status": r.status_code, "len": len(r.text), "titles": titles[:6]}
+        url = f"https://www.mojeek.com/search?q={urllib.parse.quote_plus(q)}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as r:
+            content = r.read().decode("utf-8", errors="ignore")
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(content, "html.parser")
+            titles = [a.get_text(strip=True)[:60] for a in soup.select("a.title")]
+            diag["mojeek"] = {"status": r.status, "len": len(content), "titles": titles[:6]}
     except Exception as e:
-        diag["ddg_lite"] = {"error": str(e)}
+        diag["mojeek"] = str(e)
 
     return diag
 
