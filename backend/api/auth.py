@@ -242,7 +242,7 @@ def google_login(request: Request, return_url: Optional[str] = None):
         "response_type": "code",
         "scope": " ".join(scopes),
         "access_type": "offline",
-        "prompt": "consent",
+        "prompt": "select_account consent",
         "include_granted_scopes": "true",
         "state": state
     }
