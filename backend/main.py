@@ -1,4 +1,5 @@
 import os
+import sys
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -6,15 +7,18 @@ from fastapi.responses import RedirectResponse, JSONResponse
 import logging
 from dotenv import load_dotenv
 
+# Ensure backend directory is in sys.path regardless of where uvicorn is launched from
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+if CURRENT_DIR not in sys.path:
+    sys.path.insert(0, CURRENT_DIR)
+
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("outreachbot")
 
-# Init DB models
+# Init DB models & imports
 from core.database import engine, Base, run_migrations
 import core.models  # Ensure all SQLAlchemy models are registered
-Base.metadata.create_all(bind=engine)
-run_migrations()
 
 # Routers
 from api.auth import router as auth_router
@@ -77,10 +81,13 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 @app.on_event("startup")
 def startup_event():
-    import core.models
-    Base.metadata.create_all(bind=engine)
-    run_migrations()
-    logger.info("Database schema initialized and verified.")
+    try:
+        import core.models
+        Base.metadata.create_all(bind=engine)
+        run_migrations()
+        logger.info("Database schema initialized and verified.")
+    except Exception as e:
+        logger.error(f"Error during database schema startup: {e}")
 
     # Reset any orphaned RUNNING campaigns from previous crashes or reboots to PAUSED
     try:

@@ -26,7 +26,11 @@ else:
     DB_PATH = os.path.join(DB_DIR, "outreachbot.db")
     DATABASE_URL = f"sqlite:///{DB_PATH}"
 
-engine_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+if "sqlite" in DATABASE_URL:
+    engine_args = {"check_same_thread": False}
+else:
+    engine_args = {"connect_timeout": 5}
+
 engine = create_engine(
     DATABASE_URL,
     connect_args=engine_args,
