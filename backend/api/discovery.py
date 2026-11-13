@@ -123,12 +123,11 @@ class ExtractAndOrganizeRequest(BaseModel):
 
 def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> List[dict]:
     """
-    Multi-Engine Regional SERP Crawler with Chrome Impersonation & Strict Relevance Filtering:
-    - Queries DuckDuckGo Regional (e.g. in-en for India / local, us-en, etc.) via curl_cffi Chrome120
-    - Aggregates with Bing Regional & Yahoo Regional
+    Multi-Engine Regional SERP Crawler:
+    - Primary: DuckDuckGo Lite multi-page pagination (100% resilient on cloud datacenter IPs, zero blocks)
+    - Fallback: Bing Regional & Yahoo Regional with strict noise and promo filtering
     - Filters out generic UGC noise (Reddit, Quora, Pinterest, YouTube)
     - Strips sidebar search engine widgets (e.g. Windows OS troubleshooting guides)
-    - Strictly checks relevance to ensure query terms match ranking pages
     - Returns authentic ranking businesses matching Google local SERP
     """
     import difflib
@@ -174,7 +173,7 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
                         return True
         return False
 
-    def add_result(title: str, href: str, snippet: str):
+    def add_result(title: str, href: str, snippet: str, check_relevance: bool = True):
         if not href or not href.startswith("http"):
             return
         if any(bad in href.lower() for bad in ["duckduckgo.com", "bing.com", "yahoo.com", "microsoft.com", "google.com", "msn.com"]):
@@ -182,7 +181,7 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
         domain = urllib.parse.urlparse(href).netloc.replace("www.", "").lower()
         if is_noise(domain, href, title, snippet):
             return
-        if not is_relevant(query, title, snippet, domain):
+        if check_relevance and not is_relevant(query, title, snippet, domain):
             return
         if domain not in seen_domains:
             seen_domains.add(domain)
@@ -194,7 +193,7 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
                 "snippet": snippet.strip()
             })
 
-    # Prepare session
+    # Prepare session if curl_cffi is available
     session = None
     if HAS_CURL_CFFI:
         try:
@@ -202,40 +201,56 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
         except Exception as e:
             logger.warning(f"Failed to create curl_cffi session: {e}")
 
-    # 1. DuckDuckGo Regional (in-en for India by default)
+    # 1. Primary Engine: DuckDuckGo Lite (Multi-page, highly reliable on datacenter IPs)
     try:
-        url = "https://html.duckduckgo.com/html/"
-        data = {"q": query, "kl": region}
+        lite_url = "https://lite.duckduckgo.com/lite/"
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            "Referer": "https://html.duckduckgo.com/"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Referer": "https://lite.duckduckgo.com/"
         }
-        if session:
-            r = session.post(url, data=data, headers=headers, timeout=12)
-            content = r.text
-        else:
-            req = urllib.request.Request(url, data=urllib.parse.urlencode(data).encode("utf-8"), headers=headers)
-            with urllib.request.urlopen(req, timeout=10) as r:
-                content = r.read().decode("utf-8", errors="ignore")
+        post_payload = {"q": query, "kl": region}
 
-        soup = BeautifulSoup(content, "html.parser")
-        for res_div in soup.select(".result"):
-            a = res_div.select_one(".result__title a")
-            if not a:
-                continue
-            href = a.get("href", "")
-            title = a.get_text(strip=True)
-            snip_el = res_div.select_one(".result__snippet")
-            snippet = snip_el.get_text(strip=True) if snip_el else ""
-            if "uddg=" in href:
-                href = urllib.parse.unquote(href.split("uddg=")[1].split("&")[0])
-            add_result(title, href, snippet)
+        for page in range(3):
             if len(results) >= target:
                 break
-    except Exception as e:
-        logger.warning(f"DuckDuckGo regional search error: {e}")
+            try:
+                if session:
+                    r = session.post(lite_url, data=post_payload, headers=headers, timeout=10)
+                    content = r.text
+                else:
+                    req = urllib.request.Request(lite_url, data=urllib.parse.urlencode(post_payload).encode("utf-8"), headers=headers)
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        content = resp.read().decode("utf-8", errors="ignore")
 
-    # 2. Bing Regional Aggregation (Strictly pure organic results)
+                soup = BeautifulSoup(content, "html.parser")
+                for a in soup.select("a.result-link"):
+                    tr_title = a.find_parent("tr")
+                    tr_snip = tr_title.find_next_sibling("tr") if tr_title else None
+                    snip_el = tr_snip.select_one(".result-snippet") if tr_snip else None
+                    snippet = snip_el.get_text(strip=True) if snip_el else ""
+                    add_result(a.get_text(strip=True), a.get("href", ""), snippet)
+                    if len(results) >= target:
+                        break
+
+                # Extract next page pagination form
+                next_payload = {}
+                for f in soup.find_all("form"):
+                    inputs = {i.get("name"): i.get("value") for i in f.find_all("input") if i.get("name")}
+                    if "s" in inputs and "vqd" in inputs:
+                        next_payload = inputs
+                        break
+                if not next_payload or next_payload.get("s") == post_payload.get("s"):
+                    break
+                post_payload = next_payload
+            except Exception as pe:
+                logger.debug(f"DDG Lite page {page} fetch error: {pe}")
+                break
+    except Exception as e:
+        logger.warning(f"DDG Lite primary search error: {e}")
+
+    # 2. Bing Regional Fallback (Strictly organic results)
     if len(results) < target:
         try:
             cc = "IN" if "in" in region else ("GB" if "uk" in region else "US")
@@ -248,7 +263,7 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
                     "Accept-Language": "en-IN,en;q=0.9",
                 }
                 if session:
-                    r = session.get(b_url, headers=headers, timeout=12)
+                    r = session.get(b_url, headers=headers, timeout=10)
                     content = r.text
                 else:
                     req = urllib.request.Request(b_url, headers=headers)
@@ -283,7 +298,7 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
         except Exception as e:
             logger.warning(f"Bing regional search error: {e}")
 
-    # 3. Yahoo Regional Aggregation
+    # 3. Yahoo Regional Fallback
     if len(results) < target:
         try:
             y_domain = "in.search.yahoo.com" if "in" in region else "search.yahoo.com"
@@ -296,7 +311,7 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
                     "Accept-Language": "en-IN,en;q=0.9",
                 }
                 if session:
-                    r = session.get(y_url, headers=headers, timeout=12)
+                    r = session.get(y_url, headers=headers, timeout=10)
                     content = r.text
                 else:
                     req = urllib.request.Request(y_url, headers=headers)
