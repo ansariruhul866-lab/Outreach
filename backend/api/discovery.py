@@ -124,12 +124,11 @@ class ExtractAndOrganizeRequest(BaseModel):
 def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> List[dict]:
     """
     Production-Grade Multi-Engine Regional SERP Crawler:
-    - Primary: Regional Yahoo with modern parent/child H3 parsing & query variation synthesis (100% reliable on cloud datacenter IPs)
-    - Fallback: Bing RSS Feed with strict term relevance filtering (clean XML, no bot blocks, no ads)
-    - Fallback: DuckDuckGo Lite multi-page pagination
-    - Filters out generic UGC noise (Reddit, Quora, Pinterest, YouTube, Wikipedia)
-    - Explicitly eliminates non-competitor noise (dictionary sites, megastores like BestBuy/Amazon/Walmart, Windows OS guides)
-    - Returns authentic ranking regional businesses and competitors matching real-world search intent
+    - Tier 0: Direct Google Search API (Serper.dev / ValueSERP) if configured in environment
+    - Tier 1: Regional Yahoo with modern parent/child H3 parsing
+    - Tier 2: Bing RSS Feed with strict term relevance filtering
+    - Tier 3: DuckDuckGo Lite multi-page pagination
+    - Filters out generic UGC noise, cloud honeypots (bestundertaking, baidu, dictionaries, megastores)
     """
     import xml.etree.ElementTree as ET
     results = []
@@ -145,7 +144,9 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
         "support.microsoft.com", "support.google.com", "apple.com",
         "merriam-webster.com", "dictionary.cambridge.org", "thefreedictionary.com",
         "shabdkosh.com", "wiktionary.org", "collinsdictionary.com", "vocabulary.com",
-        "dictionary.com", "thesaurus.com", "pixabay.com", "adobe.com", "supercoloring.com"
+        "dictionary.com", "thesaurus.com", "pixabay.com", "adobe.com", "supercoloring.com",
+        "bestundertaking.net", "bestundertaking.com", "baike.baidu.com", "iciba.com",
+        "dict.cn", "custom.biz"
     }
 
     def add_result(title: str, href: str, snippet: str = ""):
@@ -165,6 +166,47 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
                 "domain": domain,
                 "snippet": snippet.strip()
             })
+
+    # 0. Cloud Production Engine: Serper API (Free 2,500 real Google searches, zero IP blocks)
+    serper_api_key = os.getenv("SERPER_API_KEY", "").strip()
+    if serper_api_key:
+        try:
+            gl_code = "in" if "in" in region.lower() else ("us" if "us" in region.lower() else "uk")
+            with httpx.Client(timeout=10) as client:
+                resp = client.post(
+                    "https://google.serper.dev/search",
+                    headers={"X-API-KEY": serper_api_key, "Content-Type": "application/json"},
+                    json={"q": query, "gl": gl_code, "hl": "en", "num": target}
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    for item in data.get("organic", []):
+                        add_result(item.get("title", ""), item.get("link", ""), item.get("snippet", ""))
+                        if len(results) >= target:
+                            break
+                    if results:
+                        return results[:target]
+        except Exception as e:
+            logger.warning(f"Serper API crawl error: {e}")
+
+    # 0.1 Official Google Custom Search JSON API
+    google_api_key = os.getenv("GOOGLE_SEARCH_API_KEY", "").strip()
+    google_cx = os.getenv("GOOGLE_SEARCH_ENGINE_ID", "").strip()
+    if google_api_key and google_cx:
+        try:
+            gl_code = "in" if "in" in region.lower() else ("us" if "us" in region.lower() else "")
+            with httpx.Client(timeout=10) as client:
+                resp = client.get(
+                    "https://www.googleapis.com/customsearch/v1",
+                    params={"key": google_api_key, "cx": google_cx, "q": query, "gl": gl_code, "num": min(10, target)}
+                )
+                if resp.status_code == 200:
+                    for item in resp.json().get("items", []):
+                        add_result(item.get("title", ""), item.get("link", ""), item.get("snippet", ""))
+                    if results:
+                        return results[:target]
+        except Exception as e:
+            logger.warning(f"Google Custom Search API error: {e}")
 
     session = None
     if HAS_CURL_CFFI:

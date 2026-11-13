@@ -139,46 +139,6 @@ def debug_status():
         "cwd": os.getcwd()
     }
 
-@app.get("/api/debug-serp")
-def debug_serp(q: str = "best custom clothing store", region: str = "in-en"):
-    import urllib.parse, base64
-    from bs4 import BeautifulSoup
-    from curl_cffi import requests as cffi_requests
-
-    session = cffi_requests.Session(impersonate="chrome120")
-    
-    # Force English US marketplace cookie on Bing to stop Chinese dictionary defaults
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Cookie": "SRCHHPGUSR=SRCHLANG=en&PRVCY=0; _EDGE_S=mkt=en-us; MUID=3874B20C6E126E2F0A30A1956F746FC2"
-    }
-
-    url = f"https://www.bing.com/search?q={urllib.parse.quote_plus(q)}&setlang=en-us&setmkt=en-us"
-    r = session.get(url, headers=headers, timeout=10)
-    soup = BeautifulSoup(r.text, "html.parser")
-    
-    results = []
-    for li in soup.select("li.b_algo"):
-        if "b_ans" in li.get("class", []) or li.select_one(".b_slideexp, .b_prompts, .ans"):
-            continue
-        h2 = li.select_one("h2 a")
-        if not h2:
-            continue
-        href = h2.get("href", "")
-        title = h2.get_text(strip=True)
-        snip_el = li.select_one(".b_caption p, .b_snippet")
-        snippet = snip_el.get_text(strip=True) if snip_el else ""
-        if "bing.com/ck/a" in href and "u=a1" in href:
-            try:
-                b64 = href.split("u=a1")[1].split("&")[0] + "==="
-                href = base64.b64decode(b64[:len(b64) - len(b64)%4]).decode("utf-8", errors="ignore")
-            except Exception:
-                pass
-        results.append({"title": title, "url": href, "snippet": snippet[:100]})
-
-    return {"status": r.status_code, "count": len(results), "results": results}
-
 # Mount static frontend
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 os.makedirs(STATIC_DIR, exist_ok=True)
