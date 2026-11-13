@@ -140,43 +140,36 @@ def debug_status():
     }
 
 @app.get("/api/debug-serp")
-def debug_serp(q: str = "custom clothing store"):
-    import urllib.request, urllib.parse, json
+def debug_serp(q: str = "custom clothing store in india"):
+    import urllib.parse
+    from bs4 import BeautifulSoup
+    from curl_cffi import requests as cffi_requests
+    import base64
 
-    diag = {}
+    session = cffi_requests.Session(impersonate="chrome120")
+    url = f"https://www.bing.com/search?q={urllib.parse.quote_plus(q)}&cc=IN&setlang=en-US"
+    r = session.get(url, timeout=8)
+    soup = BeautifulSoup(r.text, "html.parser")
+    results = []
+    for li in soup.select("li.b_algo"):
+        if "b_ans" in li.get("class", []) or li.select_one(".b_slideexp, .b_prompts, .ans"):
+            continue
+        h2 = li.select_one("h2 a")
+        if not h2:
+            continue
+        href = h2.get("href", "")
+        title = h2.get_text(strip=True)
+        snip_el = li.select_one(".b_caption p, .b_snippet")
+        snippet = snip_el.get_text(strip=True) if snip_el else ""
+        if "bing.com/ck/a" in href and "u=a1" in href:
+            try:
+                b64 = href.split("u=a1")[1].split("&")[0] + "==="
+                href = base64.b64decode(b64[:len(b64) - len(b64)%4]).decode("utf-8", errors="ignore")
+            except Exception:
+                pass
+        results.append({"title": title, "url": href, "snippet": snippet[:80]})
 
-    # 1. Google Autocomplete / Suggest
-    try:
-        url = f"https://suggestqueries.google.com/complete/search?client=firefox&q={urllib.parse.quote_plus(q)}"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=5) as r:
-            diag["google_suggest"] = json.loads(r.read().decode())
-    except Exception as e:
-        diag["google_suggest"] = str(e)
-
-    # 2. Wikipedia Opensearch
-    try:
-        url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={urllib.parse.quote_plus(q)}&limit=5&namespace=0&format=json"
-        req = urllib.request.Request(url, headers={"User-Agent": "OutRankBot/1.0"})
-        with urllib.request.urlopen(req, timeout=5) as r:
-            diag["wikipedia"] = json.loads(r.read().decode())
-    except Exception as e:
-        diag["wikipedia"] = str(e)
-
-    # 3. Mojeek or other open engines
-    try:
-        url = f"https://www.mojeek.com/search?q={urllib.parse.quote_plus(q)}"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=5) as r:
-            content = r.read().decode("utf-8", errors="ignore")
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(content, "html.parser")
-            titles = [a.get_text(strip=True)[:60] for a in soup.select("a.title")]
-            diag["mojeek"] = {"status": r.status, "len": len(content), "titles": titles[:6]}
-    except Exception as e:
-        diag["mojeek"] = str(e)
-
-    return diag
+    return {"status": r.status_code, "count": len(results), "results": results}
 
 # Mount static frontend
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
