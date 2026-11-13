@@ -191,8 +191,8 @@ def get_google_redirect_uri(request: Request) -> str:
     if configured:
         return configured
     
-    proto = request.headers.get("x-forwarded-proto", request.url.scheme)
-    host = request.headers.get("x-forwarded-host", request.headers.get("host", request.url.netloc))
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme or "https"
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc
     if host and not host.startswith("localhost") and not host.startswith("127.0.0.1"):
         return f"{proto}://{host}/api/auth/google/callback"
     
