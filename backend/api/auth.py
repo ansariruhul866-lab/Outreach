@@ -236,6 +236,7 @@ def google_login(request: Request, return_url: Optional[str] = None):
     ]
 
     state = return_url or "/dashboard"
+    logger.info(f"Google OAuth login initiated: redirect_uri={redirect_uri}, state={state}")
     params = {
         "client_id": client_id,
         "redirect_uri": redirect_uri,
@@ -282,6 +283,8 @@ async def google_callback(
                 frontend_url = "http://localhost:3000"
         target_path = state if state and state.startswith("/") else "/dashboard"
         target_destination = f"{frontend_url}{target_path}"
+
+    logger.info(f"Google OAuth callback received: code={bool(code)}, error={error}, target_destination={target_destination}")
 
     sep = "&" if "?" in target_destination else "?"
 
