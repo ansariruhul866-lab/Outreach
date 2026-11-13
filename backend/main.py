@@ -139,6 +139,16 @@ def debug_status():
         "cwd": os.getcwd()
     }
 
+@app.get("/api/debug-serp")
+def debug_serp(q: str = "best custom clothing store", region: str = "in-en"):
+    from api.discovery import search_serp_engine, HAS_CURL_CFFI
+    import traceback
+    try:
+        results = search_serp_engine(q, region=region, target=10)
+        return {"has_curl_cffi": HAS_CURL_CFFI, "count": len(results), "results": results}
+    except Exception as e:
+        return {"error": str(e), "traceback": traceback.format_exc()}
+
 # Mount static frontend
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 os.makedirs(STATIC_DIR, exist_ok=True)
