@@ -184,19 +184,36 @@ def get_profile(current_user: User = Depends(get_current_user)):
 def get_google_redirect_uri(request: Request) -> str:
     """
     Determine Google OAuth redirect URI dynamically:
-    1. If GOOGLE_REDIRECT_URI is explicitly set (e.g. on Render), use it.
-    2. Otherwise, infer from incoming request host & proto (supports proxy headers).
+    1. If GOOGLE_REDIRECT_URI is explicitly set AND does not contain localhost, use it.
+    2. Check Render automatic platform environment variables (RENDER_EXTERNAL_URL / RENDER_EXTERNAL_HOSTNAME).
+    3. Infer from incoming request proxy headers (x-forwarded-host / host).
+    4. If deployed on Render or cloud, default to live domain https://outreach-b4u6.onrender.com/api/auth/google/callback.
+    5. Local fallback for local development.
     """
     configured = os.getenv("GOOGLE_REDIRECT_URI", "").strip()
-    if configured:
+    if configured and "localhost" not in configured and "127.0.0.1" not in configured:
         return configured
     
+    # 2. Check Render platform environment variables
+    render_url = os.getenv("RENDER_EXTERNAL_URL", "").strip().rstrip("/")
+    if render_url and "localhost" not in render_url:
+        return f"{render_url}/api/auth/google/callback"
+    
+    render_host = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+    if render_host and "localhost" not in render_host:
+        return f"https://{render_host}/api/auth/google/callback"
+    
+    # 3. Infer from incoming reverse-proxy request headers
     proto = request.headers.get("x-forwarded-proto") or request.url.scheme or "https"
     host = request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc
-    if host and not host.startswith("localhost") and not host.startswith("127.0.0.1"):
+    if host and not host.startswith("localhost") and not host.startswith("127.0.0.1") and not host.startswith("0.0.0.0"):
         return f"{proto}://{host}/api/auth/google/callback"
     
-    return "http://localhost:8000/api/auth/google/callback"
+    # 4. If running in Render container or production cloud environment
+    if os.getenv("RENDER") or os.getenv("PORT") or os.getenv("RENDER_INSTANCE_ID"):
+        return "https://outreach-b4u6.onrender.com/api/auth/google/callback"
+    
+    return configured or "http://localhost:8000/api/auth/google/callback"
 
 @router.get("/google/login")
 def google_login(request: Request, return_url: Optional[str] = None):
@@ -254,11 +271,13 @@ async def google_callback(
         target_destination = state
     else:
         frontend_url = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
-        if not frontend_url:
+        if not frontend_url or "localhost" in frontend_url:
             referer = request.headers.get("referer", "")
             if referer and "localhost" not in referer:
                 parsed = urllib.parse.urlparse(referer)
                 frontend_url = f"{parsed.scheme}://{parsed.netloc}"
+            elif os.getenv("RENDER"):
+                frontend_url = "https://outreach-kohl-three.vercel.app"
             else:
                 frontend_url = "http://localhost:3000"
         target_path = state if state and state.startswith("/") else "/dashboard"
