@@ -12,6 +12,11 @@ from pydantic import BaseModel, Field
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 import httpx
+try:
+    from curl_cffi import requests as cffi_requests
+    HAS_CURL_CFFI = True
+except ImportError:
+    HAS_CURL_CFFI = False
 
 from core.database import get_db, SessionLocal
 from core.models import User, Lead, LeadFolder, Campaign, SenderEmail
@@ -118,12 +123,15 @@ class ExtractAndOrganizeRequest(BaseModel):
 
 def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> List[dict]:
     """
-    Multi-Engine Regional SERP Crawler:
-    - Queries DuckDuckGo Regional (e.g. in-en for India / local, us-en, etc.)
+    Multi-Engine Regional SERP Crawler with Chrome Impersonation & Strict Relevance Filtering:
+    - Queries DuckDuckGo Regional (e.g. in-en for India / local, us-en, etc.) via curl_cffi Chrome120
     - Aggregates with Bing Regional & Yahoo Regional
     - Filters out generic UGC noise (Reddit, Quora, Pinterest, YouTube)
+    - Strips sidebar search engine widgets (e.g. Windows OS troubleshooting guides)
+    - Strictly checks relevance to ensure query terms match ranking pages
     - Returns authentic ranking businesses matching Google local SERP
     """
+    import difflib
     results = []
     seen_domains = set()
 
@@ -131,25 +139,50 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
         "reddit.", "quora.", "pinterest.", "facebook.", "instagram.",
         "youtube.", "wikipedia.", "tiktok.", "twitter.", "x.com",
         "medium.", "linkedin.", "tumblr.", "tripadvisor.", "yelp.",
-        "amazon.", "flipkart.", "etsy.com", "ebay.com"
+        "amazon.", "flipkart.", "etsy.com", "ebay.com",
+        "windowscentral.com", "howtogeek.com", "windowsreport.com",
+        "chatgpt.com", "openai.com", "whatsapp.com", "support.microsoft.com",
+        "support.google.com", "apple.com"
     }
 
-    def is_noise(domain: str, href: str) -> bool:
+    def is_noise(domain: str, href: str, title: str, snippet: str) -> bool:
         d = domain.lower()
         h = href.lower()
+        t = title.lower()
+        s = snippet.lower()
         if any(noise in d for noise in UGC_NOISE):
             return True
         if any(bad in h for bad in ["/r/", "reddit.", "quora.", "pinterest.", "/pin/", "facebook.", "instagram.", "youtube."]):
             return True
+        combined = f"{t} {s} {d}"
+        if any(win in combined for win in ["file explorer", "windows 10", "windows 11", "how to open file"]) and not any(q_term in query.lower() for q_term in ["file", "windows", "explorer"]):
+            return True
+        return False
+
+    def is_relevant(q: str, title: str, snippet: str, domain: str) -> bool:
+        text = f"{title} {snippet} {domain}".lower()
+        terms = [w.lower() for w in re.findall(r'\b[a-zA-Z]{3,}\b', q) if w.lower() not in {"best", "top", "near", "the", "for", "in", "and", "services", "find", "online"}]
+        if not terms:
+            return True
+        for t in terms:
+            if t in text:
+                return True
+            for w in text.split():
+                clean_w = "".join(c for c in w if c.isalnum())
+                if len(clean_w) >= 4 and len(t) >= 4:
+                    if t[:4] == clean_w[:4] or difflib.SequenceMatcher(None, t, clean_w).ratio() > 0.65:
+                        return True
         return False
 
     def add_result(title: str, href: str, snippet: str):
         if not href or not href.startswith("http"):
             return
-        if any(bad in href.lower() for bad in ["duckduckgo.com", "bing.com", "yahoo.com", "microsoft.com", "google.com"]):
+        if any(bad in href.lower() for bad in ["duckduckgo.com", "bing.com", "yahoo.com", "microsoft.com", "google.com", "msn.com"]):
             return
         domain = urllib.parse.urlparse(href).netloc.replace("www.", "").lower()
-        if is_noise(domain, href):
+        if is_noise(domain, href, title, snippet):
+            return
+        if not is_relevant(query, title, snippet, domain):
             return
         if domain not in seen_domains:
             seen_domains.add(domain)
@@ -161,34 +194,48 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
                 "snippet": snippet.strip()
             })
 
+    # Prepare session
+    session = None
+    if HAS_CURL_CFFI:
+        try:
+            session = cffi_requests.Session(impersonate="chrome120")
+        except Exception as e:
+            logger.warning(f"Failed to create curl_cffi session: {e}")
+
     # 1. DuckDuckGo Regional (in-en for India by default)
     try:
         url = "https://html.duckduckgo.com/html/"
-        data = urllib.parse.urlencode({"q": query, "kl": region}).encode("utf-8")
+        data = {"q": query, "kl": region}
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
             "Referer": "https://html.duckduckgo.com/"
         }
-        req = urllib.request.Request(url, data=data, headers=headers)
-        with urllib.request.urlopen(req, timeout=10) as r:
-            soup = BeautifulSoup(r.read().decode("utf-8", errors="ignore"), "html.parser")
-            for res_div in soup.select(".result"):
-                a = res_div.select_one(".result__title a")
-                if not a:
-                    continue
-                href = a.get("href", "")
-                title = a.get_text(strip=True)
-                snip_el = res_div.select_one(".result__snippet")
-                snippet = snip_el.get_text(strip=True) if snip_el else ""
-                if "uddg=" in href:
-                    href = urllib.parse.unquote(href.split("uddg=")[1].split("&")[0])
-                add_result(title, href, snippet)
-                if len(results) >= target:
-                    break
+        if session:
+            r = session.post(url, data=data, headers=headers, timeout=12)
+            content = r.text
+        else:
+            req = urllib.request.Request(url, data=urllib.parse.urlencode(data).encode("utf-8"), headers=headers)
+            with urllib.request.urlopen(req, timeout=10) as r:
+                content = r.read().decode("utf-8", errors="ignore")
+
+        soup = BeautifulSoup(content, "html.parser")
+        for res_div in soup.select(".result"):
+            a = res_div.select_one(".result__title a")
+            if not a:
+                continue
+            href = a.get("href", "")
+            title = a.get_text(strip=True)
+            snip_el = res_div.select_one(".result__snippet")
+            snippet = snip_el.get_text(strip=True) if snip_el else ""
+            if "uddg=" in href:
+                href = urllib.parse.unquote(href.split("uddg=")[1].split("&")[0])
+            add_result(title, href, snippet)
+            if len(results) >= target:
+                break
     except Exception as e:
         logger.warning(f"DuckDuckGo regional search error: {e}")
 
-    # 2. Bing Regional Aggregation
+    # 2. Bing Regional Aggregation (Strictly pure organic results)
     if len(results) < target:
         try:
             cc = "IN" if "in" in region else ("GB" if "uk" in region else "US")
@@ -200,31 +247,39 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
                     "Accept-Language": "en-IN,en;q=0.9",
                 }
-                req = urllib.request.Request(b_url, headers=headers)
-                with urllib.request.urlopen(req, timeout=10) as r:
-                    soup = BeautifulSoup(r.read().decode("utf-8", errors="ignore"), "html.parser")
-                    for li in soup.select("li.b_algo"):
-                        h2 = li.select_one("h2 a")
-                        if not h2:
-                            continue
-                        href = h2.get("href", "")
-                        title = h2.get_text(strip=True)
-                        snip_el = li.select_one(".b_caption p, .b_snippet")
-                        snippet = snip_el.get_text(strip=True) if snip_el else ""
+                if session:
+                    r = session.get(b_url, headers=headers, timeout=12)
+                    content = r.text
+                else:
+                    req = urllib.request.Request(b_url, headers=headers)
+                    with urllib.request.urlopen(req, timeout=10) as r:
+                        content = r.read().decode("utf-8", errors="ignore")
 
-                        if "bing.com/ck/a" in href and "u=a1" in href:
-                            try:
-                                b64 = href.split("u=a1")[1].split("&")[0]
-                                b64 += "=" * ((4 - len(b64) % 4) % 4)
-                                real_url = base64.b64decode(b64).decode("utf-8", errors="ignore")
-                                if real_url.startswith("http"):
-                                    href = real_url
-                            except Exception:
-                                pass
+                soup = BeautifulSoup(content, "html.parser")
+                for li in soup.select("li.b_algo"):
+                    if "b_ans" in li.get("class", []) or li.select_one(".b_slideexp, .b_prompts, .ans"):
+                        continue
+                    h2 = li.select_one("h2 a")
+                    if not h2:
+                        continue
+                    href = h2.get("href", "")
+                    title = h2.get_text(strip=True)
+                    snip_el = li.select_one(".b_caption p, .b_snippet")
+                    snippet = snip_el.get_text(strip=True) if snip_el else ""
 
-                        add_result(title, href, snippet)
-                        if len(results) >= target:
-                            break
+                    if "bing.com/ck/a" in href and "u=a1" in href:
+                        try:
+                            b64 = href.split("u=a1")[1].split("&")[0]
+                            b64 += "=" * ((4 - len(b64) % 4) % 4)
+                            real_url = base64.b64decode(b64).decode("utf-8", errors="ignore")
+                            if real_url.startswith("http"):
+                                href = real_url
+                        except Exception:
+                            pass
+
+                    add_result(title, href, snippet)
+                    if len(results) >= target:
+                        break
         except Exception as e:
             logger.warning(f"Bing regional search error: {e}")
 
@@ -240,24 +295,30 @@ def search_serp_engine(query: str, region: str = "in-en", target: int = 20) -> L
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
                     "Accept-Language": "en-IN,en;q=0.9",
                 }
-                req = urllib.request.Request(y_url, headers=headers)
-                with urllib.request.urlopen(req, timeout=10) as r:
-                    soup = BeautifulSoup(r.read().decode("utf-8", errors="ignore"), "html.parser")
-                    for div in soup.select("div.algo"):
-                        a = div.select_one("h3.title a")
-                        snip_el = div.select_one("div.compText")
-                        if a:
-                            href = a.get("href", "")
-                            title = a.get_text(strip=True)
-                            snippet = snip_el.get_text(strip=True) if snip_el else ""
-                            if "/RU=" in href:
-                                try:
-                                    href = urllib.parse.unquote(href.split("/RU=")[1].split("/RK=")[0])
-                                except Exception:
-                                    pass
-                            add_result(title, href, snippet)
-                            if len(results) >= target:
-                                break
+                if session:
+                    r = session.get(y_url, headers=headers, timeout=12)
+                    content = r.text
+                else:
+                    req = urllib.request.Request(y_url, headers=headers)
+                    with urllib.request.urlopen(req, timeout=10) as r:
+                        content = r.read().decode("utf-8", errors="ignore")
+
+                soup = BeautifulSoup(content, "html.parser")
+                for div in soup.select("div.algo"):
+                    a = div.select_one("h3.title a")
+                    snip_el = div.select_one("div.compText")
+                    if a:
+                        href = a.get("href", "")
+                        title = a.get_text(strip=True)
+                        snippet = snip_el.get_text(strip=True) if snip_el else ""
+                        if "/RU=" in href:
+                            try:
+                                href = urllib.parse.unquote(href.split("/RU=")[1].split("/RK=")[0])
+                            except Exception:
+                                pass
+                        add_result(title, href, snippet)
+                        if len(results) >= target:
+                            break
         except Exception as e:
             logger.warning(f"Yahoo regional search error: {e}")
 
