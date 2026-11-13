@@ -140,16 +140,31 @@ def debug_status():
     }
 
 @app.get("/api/debug-serp")
-def debug_serp(q: str = "custom clothing store in india"):
-    import urllib.parse
+def debug_serp(q: str = "best custom clothing store", region: str = "in-en"):
+    import urllib.parse, base64, re
     from bs4 import BeautifulSoup
     from curl_cffi import requests as cffi_requests
-    import base64
 
     session = cffi_requests.Session(impersonate="chrome120")
-    url = f"https://www.bing.com/search?q={urllib.parse.quote_plus(q)}&cc=IN&setlang=en-US"
-    r = session.get(url, timeout=8)
+    
+    # Clean query: strip leading "best", "top", "find" to avoid Bing dictionary cards
+    words = q.strip().split()
+    search_terms = words[:]
+    if len(words) > 1 and words[0].lower() in ["best", "top", "find", "the"]:
+        search_terms = words[1:]
+    
+    clean_q = " ".join(search_terms)
+    
+    # If region is India and not already in query, append India for localization
+    if "in" in region.lower() and not any(loc in clean_q.lower() for loc in ["india", "lucknow", "delhi", "mumbai", "bangalore"]):
+        localized_q = f"{clean_q} India"
+    else:
+        localized_q = clean_q
+
+    url = f"https://www.bing.com/search?q={urllib.parse.quote_plus(localized_q)}"
+    r = session.get(url, timeout=10)
     soup = BeautifulSoup(r.text, "html.parser")
+    
     results = []
     for li in soup.select("li.b_algo"):
         if "b_ans" in li.get("class", []) or li.select_one(".b_slideexp, .b_prompts, .ans"):
@@ -167,9 +182,9 @@ def debug_serp(q: str = "custom clothing store in india"):
                 href = base64.b64decode(b64[:len(b64) - len(b64)%4]).decode("utf-8", errors="ignore")
             except Exception:
                 pass
-        results.append({"title": title, "url": href, "snippet": snippet[:80]})
+        results.append({"title": title, "url": href, "snippet": snippet[:100]})
 
-    return {"status": r.status_code, "count": len(results), "results": results}
+    return {"status": r.status_code, "query_used": localized_q, "count": len(results), "results": results}
 
 # Mount static frontend
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
