@@ -9,6 +9,12 @@ from sqlalchemy.orm import Session
 from core.database import get_db
 from core.models import User, Lead, ScrapeJob, LeadFolder
 from core.auth import get_current_user
+from core.email_validator import (
+    is_clean_email_format,
+    is_deliverable_email,
+    check_domain_has_mx,
+    DUMMY_DOMAINS
+)
 from api.filter import validate_emails, FilterRequest
 
 # Try importing curl_cffi for Chrome TLS fingerprint impersonation (bypasses Cloudflare 403s)
@@ -216,29 +222,15 @@ def extract_emails_from_html(raw_html: str) -> set[str]:
     clean_text = re.sub(r'\s*(\[dot\]|\(dot\)|\{dot\})\s*', '.', clean_text, flags=re.IGNORECASE)
 
     for match in EMAIL_RE.findall(clean_text):
-        emails.add(clean_extracted_email(match))
+        cleaned = clean_extracted_email(match)
+        if is_clean_email_format(cleaned):
+            emails.add(cleaned)
 
-    # Filter out static file extensions and invalid formats
+    # Filter through comprehensive email validator
     filtered = set()
     for e in emails:
-        if len(e) < 5 or len(e) > 85:
-            continue
-        if any(e.endswith(ext) for ext in EXCLUDED_EXTENSIONS):
-            continue
-        parts = e.split("@")
-        if len(parts) != 2:
-            continue
-        local_part, domain_part = parts[0], parts[1]
-        if domain_part in DUMMY_DOMAINS:
-            continue
-        if local_part in {"test", "sample", "yourname", "username", "demo"}:
-            continue
-        # Filter Sentry/telemetry crash hashes (32 hex characters)
-        if HEX_HASH_RE.match(local_part):
-            continue
-        if any(sub in domain_part for sub in ['errors.', 'sentry.', 'telemetry.', 'bugs.', 'monitoring.']):
-            continue
-        filtered.add(e)
+        if is_clean_email_format(e):
+            filtered.add(e)
 
     return filtered
 

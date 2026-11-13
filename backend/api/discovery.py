@@ -16,6 +16,12 @@ import httpx
 from core.database import get_db, SessionLocal
 from core.models import User, Lead, LeadFolder, Campaign, SenderEmail
 from core.auth import get_current_user
+from core.email_validator import (
+    is_clean_email_format,
+    is_deliverable_email,
+    check_domain_has_mx,
+    DUMMY_DOMAINS
+)
 from core.gemini_service import (
     generate_website_serp_pitch,
     generate_reply_draft,
@@ -271,19 +277,18 @@ async def crawl_site_for_contacts(base_url: str) -> dict:
                 resp = await client.get(target)
                 if resp.status_code == 200:
                     text = resp.text
-                    # Extract mailto links
+                    # Extract mailto links with clean format checking
                     soup = BeautifulSoup(text, 'html.parser')
                     for mailto in soup.select('a[href^="mailto:"]'):
-                        raw_m = mailto.get('href', '').replace('mailto:', '').split('?')[0].strip()
-                        if '@' in raw_m:
-                            emails.add(raw_m.lower())
+                        raw_m = mailto.get('href', '').replace('mailto:', '').split('?')[0].strip().lower()
+                        if is_clean_email_format(raw_m):
+                            emails.add(raw_m)
 
                     # Regex extraction
                     found_emails = EMAIL_RE.findall(text)
                     for em in found_emails:
                         em_clean = em.lower().strip().rstrip('.')
-                        em_domain = em_clean.split('@')[-1]
-                        if em_domain not in DUMMY_DOMAINS and not em_clean.endswith(('png', 'jpg', 'svg', 'gif', 'webp', 'js', 'css')):
+                        if is_clean_email_format(em_clean):
                             emails.add(em_clean)
 
                     found_phones = PHONE_RE.findall(text)
@@ -298,8 +303,11 @@ async def crawl_site_for_contacts(base_url: str) -> dict:
             except Exception:
                 continue
 
+    # Filter out any non-deliverable / no-MX emails
+    verified_emails = [e for e in emails if is_deliverable_email(e, check_mx=True)]
+
     return {
-        "emails": list(emails),
+        "emails": verified_emails,
         "phones": list(phones)
     }
 
@@ -537,8 +545,13 @@ async def extract_and_organize_leads(
 
         # Infer company name from domain or title
         company = item.domain.split('.')[0].capitalize()
-        first_email = emails[0] if emails else f"editor@{item.domain}"
+        first_email = emails[0] if emails else None
+        # Only fallback to contact@{domain} if the domain has verified live MX records
+        if not first_email and check_domain_has_mx(item.domain):
+            first_email = f"contact@{item.domain}"
         first_phone = phones[0] if phones else None
+
+        is_verified = bool(first_email and is_deliverable_email(first_email, check_mx=True))
 
         lead = Lead(
             user_id=current_user.id,
@@ -554,7 +567,7 @@ async def extract_and_organize_leads(
             search_purpose=req.purpose,
             snippet=item.snippet,
             status="PENDING",
-            is_verified=bool(emails)
+            is_verified=is_verified
         )
 
         # AI Hyper-Personalization per website

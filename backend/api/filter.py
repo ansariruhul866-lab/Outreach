@@ -4,6 +4,7 @@ from email_validator import validate_email, EmailNotValidError
 import dns.resolver
 import asyncio
 import logging
+from core.email_validator import is_clean_email_format, check_domain_has_mx
 
 logger = logging.getLogger(__name__)
 
@@ -59,25 +60,8 @@ def check_role_based(local: str) -> bool:
     return local.lower() in ROLE_PREFIXES
 
 async def check_mx(domain: str) -> bool:
-    try:
-        loop = asyncio.get_event_loop()
-        def _resolve():
-            resolver = dns.resolver.Resolver()
-            resolver.nameservers = ['8.8.8.8', '1.1.1.1', '8.8.4.4']
-            resolver.timeout = 2.5
-            resolver.lifetime = 2.5
-            try:
-                records = resolver.resolve(domain, 'MX')
-                return len(records) > 0
-            except Exception:
-                try:
-                    records_a = resolver.resolve(domain, 'A')
-                    return len(records_a) > 0
-                except Exception:
-                    return False
-        return await loop.run_in_executor(None, _resolve)
-    except Exception:
-        return False
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, check_domain_has_mx, domain)
 
 @router.post("/validate", response_model=FilterResponse)
 async def validate_emails(req: FilterRequest):
@@ -122,8 +106,8 @@ async def validate_emails(req: FilterRequest):
         if is_role: score += 0.1
         score = min(score, 1.0)
         
-        # Include if valid syntax and not disposable domain
-        should_include = is_valid and not is_disposable and score < 0.85
+        # Must have valid format, not be disposable/dummy, and must have live MX records
+        should_include = is_valid and not is_disposable and has_mx and is_clean_email_format(email) and score < 0.85
         
         results.append(FilteredEmail(
             email=email,

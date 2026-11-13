@@ -18,6 +18,7 @@ from core.models import User, Campaign, SenderEmail, Lead
 from core.auth import get_current_user
 from core.encryption import decrypt_password, encrypt_password
 from core.gmail_api import send_via_gmail_api, refresh_google_access_token
+from core.email_validator import is_deliverable_email
 import os
 
 logger = logging.getLogger("outreachbot")
@@ -497,12 +498,13 @@ async def execute_send_batch(campaign_id: str, user_id: str):
                 logger.info(f"Campaign {campaign.id} paused/stopped by user. Halting send loop.")
                 break
 
-            if not lead.email or not lead.email.strip() or lead.email.endswith("@outreachbot.local"):
+            clean_email = (lead.email or "").lower().strip()
+            if not clean_email or clean_email.endswith("@outreachbot.local") or not is_deliverable_email(clean_email, check_mx=True):
                 lead.status = "SKIPPED"
+                campaign.total_skipped = (campaign.total_skipped or 0) + 1
                 db.commit()
+                logger.warning(f"Campaign {campaign.id}: Skipped undeliverable / placeholder email '{lead.email}'")
                 continue
-
-            clean_email = lead.email.lower().strip()
 
             # Strict Send-Only-Once deduplication
             if campaign.send_only_once:
